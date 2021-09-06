@@ -16,15 +16,20 @@ var db *sql.DB
 // tmpls is the gloabl for the parsed HTML templates
 var tmpls *template.Template
 
+// config is the global for the config values
+var config Config
+
 // main function
 func main() {
+	var err error
+
 	// use custom log writer
 	log.SetFlags(0)
 	log.SetOutput(new(LogWriter))
 
 	// read config file
 	configFileName := "config.json"
-	config, err := readConfig(configFileName)
+	config, err = readConfig(configFileName)
 	if err != nil {
 		log.Printf("Unable to read config file %q", configFileName)
 		log.Panic(err)
@@ -34,6 +39,9 @@ func main() {
 	logPanicIsEmpty(config.SQLDriverName, "Missing SQLDriverName in config file")
 	logPanicIsEmpty(config.SQLDataSourceName, "Missing SQLDataSourceName in config file")
 	logPanicIsEmpty(config.ParseGlobPattern, "Missing ParseGlobPattern in config file")
+	if config.SessionExpiresHours == 0 {
+		config.SessionExpiresHours = 24
+	}
 
 	// init database connection
 	db, err = initDB(config.SQLDriverName, config.SQLDataSourceName)

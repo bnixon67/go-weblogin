@@ -132,7 +132,7 @@ func loginUser(userName, password string) (string, time.Time, error) {
 	sessionToken = uuid.NewString()
 
 	// store the sessionToken
-	sessionExpires = time.Now().Add(120 * time.Second)
+	sessionExpires = time.Now().Add(time.Duration(config.SessionExpiresHours) * time.Hour)
 
 	_, err = db.Query("UPDATE users SET sessionToken = ?, sessionExpires = ? WHERE username = ?", sessionToken, sessionExpires, userName)
 	if err != nil {

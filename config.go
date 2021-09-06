@@ -16,6 +16,9 @@ type Config struct {
 
 	// ParseGlobPattern is the pattern to use with template.ParseGlob
 	ParseGlobPattern string
+
+	// SessionExpiresHours is the number of hours after a session expires
+	SessionExpiresHours int
 }
 
 // readConfig return the Config from the given fileName
