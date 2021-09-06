@@ -115,17 +115,17 @@ func loginUser(userName, password string) (string, time.Time, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("Username %q does not exist", userName)
-			return sessionToken, sessionExpires, errors.New("Login failed")
+			return sessionToken, sessionExpires, errors.New("login failed")
 		}
 		log.Println("Login failed", err)
-		return sessionToken, sessionExpires, errors.New("Login failed")
+		return sessionToken, sessionExpires, errors.New("login failed")
 	}
 
 	// compared hashed password with given password
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
 		log.Printf("Invalid password for %q", userName)
-		return sessionToken, sessionExpires, errors.New("Login failed")
+		return sessionToken, sessionExpires, errors.New("login failed")
 	}
 
 	// create a new random sessions token
@@ -138,7 +138,7 @@ func loginUser(userName, password string) (string, time.Time, error) {
 	if err != nil {
 		log.Printf("Unable to store sessionToken for %q", userName)
 		log.Print(err)
-		return sessionToken, sessionExpires, errors.New("Login failed")
+		return sessionToken, sessionExpires, errors.New("login failed")
 	}
 
 	return sessionToken, sessionExpires, nil

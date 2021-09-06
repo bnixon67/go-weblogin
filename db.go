@@ -54,10 +54,10 @@ func GetUserForSessionToken(sessionToken string) (User, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No result for sessionToken %q", sessionToken)
-			return user, errors.New("Invalid sessionToken")
+			return user, errors.New("invalid sessionToken")
 		}
 		log.Println("Query for sessionToken failed", err)
-		return user, errors.New("Query failed")
+		return user, errors.New("query failed")
 	}
 
 	return user, err
