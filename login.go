@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// LoginPageData record
 type LoginPageData struct {
 	Message     string
 	CurrentUser User

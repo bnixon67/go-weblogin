@@ -32,6 +32,7 @@ func initDB(driverName, dataSourceName string) (*sql.DB, error) {
 	return db, err
 }
 
+// User record
 type User struct {
 	UserName       string
 	SessionToken   string

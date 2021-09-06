@@ -16,9 +16,9 @@ func funcName() string {
 
 	if fn == nil {
 		return "runtime.FuncForPC nil"
-	} else {
-		return fn.Name()
 	}
+
+	return fn.Name()
 }
 
 // logPanicIsEmpty calls log.Panic with the given message if str is empty

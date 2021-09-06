@@ -27,12 +27,12 @@ func main() {
 	}
 
 	// ensure required config values have been provided
-	logPanicIsEmpty(config.SqlDriverName, "Missing SqlDriverName in config file")
-	logPanicIsEmpty(config.SqlDataSourceName, "Missing SqlDataSourceName in config file")
+	logPanicIsEmpty(config.SQLDriverName, "Missing SQLDriverName in config file")
+	logPanicIsEmpty(config.SQLDataSourceName, "Missing SQLDataSourceName in config file")
 	logPanicIsEmpty(config.ParseGlobPattern, "Missing ParseGlobPattern in config file")
 
 	// init database connection
-	db, err = initDB(config.SqlDriverName, config.SqlDataSourceName)
+	db, err = initDB(config.SQLDriverName, config.SQLDataSourceName)
 	if err != nil {
 		log.Panic(err)
 	}

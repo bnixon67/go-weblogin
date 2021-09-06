@@ -8,11 +8,11 @@ import (
 
 // Config defines the configuration values
 type Config struct {
-	// SqlDriverName is the driverName to use with sql.Open
-	SqlDriverName string
+	// SQLDriverName is the driverName to use with sql.Open
+	SQLDriverName string
 
-	// SqlDataSourceName is the dataSourceName to use with sql.Open
-	SqlDataSourceName string
+	// SQLDataSourceName is the dataSourceName to use with sql.Open
+	SQLDataSourceName string
 
 	// ParseGlobPattern is the pattern to use with template.ParseGlob
 	ParseGlobPattern string
