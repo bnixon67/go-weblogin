@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<title>Register</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<form method="post">
+<div class="container">
+
+<h1>Register</h1>
+<p>Please provide the following information to register.</p>
+<hr>
+
+<label for="userName"><b>User Name<b></label>
+<input type="text" placeholder="Enter your desired User Name" id="userName" name="userName" maxlength="30" required>
+
+<label for="firstName"><b>First Name</b></label>
+<input type="text" placeholder="Enter your First Name" id="firstName" name="firstName" maxlength="50" required>
+
+<label for="lastName"><b>Last Name</b></label>
+<input type="text" placeholder="Enter your Last Name" id="lastName" name="lastName" maxlength="50" required>
+
+<label for="email"><b>Email Address</b></label>
+<input type="email" placeholder="Enter your Email Address" id="email" name="email" maxlength="256" required>
+
+<label for="password1"><b>Password</b></label>
+<input type="password" placeholder="Enter your desired password" id="password1" name="password1" required>
+
+<label for="password"><b>Repeat Password</b></label>
+<input type="password" placeholder="Repeat your desired password" id="password2" name="password2">
+
+<div class="errmsg">{{.}}</div>
+<hr>
+
+<button type="submit" class="submitbtn">Register</button>
+</div>
+
+<div class="container signin">
+<p>If you already have an account, <a href="/login">Login</a>.</p>
+<div>
+
+</form>
+
+</body>
+</html>

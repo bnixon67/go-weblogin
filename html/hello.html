@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<title>Hello</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+{{ if .CurrentUser.UserName }}
+<p>Hello {{ .CurrentUser.FirstName }} {{ .CurrentUser.LastName }}</p>
+<p><a href="/logout">Logout</a>
+{{ else }}
+<div class="errmsg">You must <a href="/login">login</a></div>
+{{ end }}
+</div>
+
+</body>
+</html>

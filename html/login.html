@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<form method="post">
+<div class="container">
+
+<h1>Login</h1>
+<p>Please provide the following information to login.</p>
+<hr>
+
+<label for="username"><b>Username</b></label>
+<input type="text" placeholder="Enter your User Name" id="username" name="username" maxlength="30" required><td>
+
+<label for="password"><b>Password<b></label>
+<input type="password" placeholder="Enter your Password" id="password" name="password" required>
+
+<div class="errmsg">{{.}}</div>
+<hr>
+
+<button type="submit" class="submitbtn">Login</button>
+</div>
+
+<div class="container signin">
+<p>If you do not have an account, <a href="/register">Register</a>.</p>
+<div>
+
+</form>
+
+</body>
+</html>
