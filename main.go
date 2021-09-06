@@ -18,6 +18,10 @@ var tmpls *template.Template
 
 // main function
 func main() {
+	// use custom log writer
+	log.SetFlags(0)
+	log.SetOutput(new(LogWriter))
+
 	// read config file
 	configFileName := "config.json"
 	config, err := readConfig(configFileName)

@@ -9,7 +9,7 @@ import (
 
 // initDB initializes a connection to the database
 func initDB(driverName, dataSourceName string) (*sql.DB, error) {
-	log.Print("Initialize database connection")
+	log.Println("Initialize database connection")
 
 	// open connection to database
 	db, err := sql.Open(driverName, dataSourceName)
@@ -32,7 +32,7 @@ func initDB(driverName, dataSourceName string) (*sql.DB, error) {
 	return db, err
 }
 
-// User record
+// User represents a user stored in the database
 type User struct {
 	UserName       string
 	SessionToken   string
@@ -46,17 +46,16 @@ type User struct {
 func GetUserForSessionToken(sessionToken string) (User, error) {
 	user := User{}
 
-	result := db.QueryRow(
-		"SELECT userName, sessionToken, firstName, lastName, email, sessionExpires FROM users WHERE sessionToken=?",
-		sessionToken)
-	err := result.Scan(
-		&user.UserName, &user.SessionToken, &user.FirstName, &user.LastName, &user.Email, &user.SessionExpires)
+	qry := "SELECT userName, sessionToken, firstName, lastName, email, sessionExpires FROM users WHERE sessionToken=?"
+	result := db.QueryRow(qry, sessionToken)
+	err := result.Scan(&user.UserName, &user.SessionToken, &user.FirstName, &user.LastName, &user.Email, &user.SessionExpires)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No result for sessionToken %q", sessionToken)
 			return user, errors.New("invalid sessionToken")
 		}
-		log.Println("Query for sessionToken failed", err)
+		log.Printf("Query for sessionToken %q failed", sessionToken)
+		log.Print(err)
 		return user, errors.New("query failed")
 	}
 
@@ -65,15 +64,16 @@ func GetUserForSessionToken(sessionToken string) (User, error) {
 
 // CheckForUserName returns true if the given userName already exists
 func CheckForUserName(userName string) (bool, error) {
-	var name string
+	var num int
 
-	result := db.QueryRow("SELECT userName FROM users WHERE userName=?", userName)
-	err := result.Scan(&name)
+	row := db.QueryRow("SELECT 1 FROM users WHERE userName=?", userName)
+	err := row.Scan(&num)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
-		log.Println("Query for userName failed", err)
+		log.Printf("Query for userName %q failed", userName)
+		log.Print(err)
 		return false, err
 	}
 

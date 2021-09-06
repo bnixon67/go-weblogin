@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-// Config defines the configuration values
+// Config represents the configuration values
 type Config struct {
 	// SQLDriverName is the driverName to use with sql.Open
 	SQLDriverName string
@@ -20,7 +20,7 @@ type Config struct {
 
 // readConfig return the Config from the given fileName
 func readConfig(fileName string) (Config, error) {
-	log.Print("Reading config file")
+	log.Print("reading config file")
 
 	configFile, err := os.Open(fileName)
 	if err != nil {
@@ -36,7 +36,7 @@ func readConfig(fileName string) (Config, error) {
 
 // closeConfig closes the Config file
 func closeConfig(f *os.File) {
-	log.Println("Closing config file")
+	log.Println("closing config file")
 
 	err := f.Close()
 	if err != nil {

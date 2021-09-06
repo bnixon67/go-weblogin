@@ -7,7 +7,7 @@ import (
 
 // HelloHandler prints a simple hello message
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("HelloHandler", r.Method)
+	log.Print(r.Method)
 
 	// only GET method is allowed
 	if r.Method != "GET" {
@@ -16,7 +16,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// try and get sessionToken
+	// get sessionToken from cookie, if it exists
 	var sessionToken string
 	c, err := r.Cookie("sessionToken")
 	if err != nil {

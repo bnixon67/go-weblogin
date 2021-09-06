@@ -57,7 +57,7 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 	exists, _ := CheckForUserName(userName)
 	if exists {
 		log.Printf("UserName exists for %q", userName)
-		err := tmpls.ExecuteTemplate(w, "register.html", "Sorry, your desired User Name already exists.")
+		err := tmpls.ExecuteTemplate(w, "register.html", "Sorry, your desired User Name already exists. Please try a different User Name")
 		if err != nil {
 			log.Println("Error in executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
