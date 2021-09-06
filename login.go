@@ -32,11 +32,15 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("sessionToken")
 		if err == nil {
 			sessionToken = c.Value
-			currentUser, err = GetUserForSessionToken(sessionToken)
+			currentUser, _ = GetUserForSessionToken(sessionToken)
 			log.Printf("%+v", currentUser)
 		}
 
-		tmpls.ExecuteTemplate(w, "login.html", nil)
+		err = tmpls.ExecuteTemplate(w, "login.html", nil)
+		if err != nil {
+			log.Println("Error in executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 
 	case "POST":
 		loginPut(w, r)
@@ -66,14 +70,22 @@ func loginPut(w http.ResponseWriter, r *http.Request) {
 	}
 	if msg != "" {
 		log.Println(msg)
-		tmpls.ExecuteTemplate(w, "login.html", msg)
+		err := tmpls.ExecuteTemplate(w, "login.html", msg)
+		if err != nil {
+			log.Println("Error in executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
 	// attempt to login the given userName with the given password
 	sessionToken, sessionExpires, err := loginUser(userName, password)
 	if err != nil {
-		tmpls.ExecuteTemplate(w, "login.html", err)
+		err := tmpls.ExecuteTemplate(w, "login.html", err)
+		if err != nil {
+			log.Println("Error in executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 

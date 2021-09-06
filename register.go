@@ -14,7 +14,11 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 
 	case "GET":
-		tmpls.ExecuteTemplate(w, "register.html", nil)
+		err := tmpls.ExecuteTemplate(w, "register.html", nil)
+		if err != nil {
+			log.Println("Error in executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 
 	case "POST":
 		registerPut(w, r)
@@ -41,15 +45,23 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 	if userName == "" || password1 == "" || password2 == "" || firstName == "" || lastName == "" || email == "" {
 		msg := "Missing values"
 		log.Println(msg, "for", userName)
-		tmpls.ExecuteTemplate(w, "register.html", msg)
+		err := tmpls.ExecuteTemplate(w, "register.html", msg)
+		if err != nil {
+			log.Println("Error in executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
 	// check that userName doesn't already exist
-	exists, err := CheckForUserName(userName)
+	exists, _ := CheckForUserName(userName)
 	if exists {
 		log.Printf("UserName exists for %q", userName)
-		tmpls.ExecuteTemplate(w, "register.html", "Sorry, your desired User Name already exists.")
+		err := tmpls.ExecuteTemplate(w, "register.html", "Sorry, your desired User Name already exists.")
+		if err != nil {
+			log.Println("Error in executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -58,7 +70,11 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 	if password1 != password2 {
 		msg := "Passwords do not match"
 		log.Println(msg, "for", userName)
-		tmpls.ExecuteTemplate(w, "register.html", msg)
+		err := tmpls.ExecuteTemplate(w, "register.html", msg)
+		if err != nil {
+			log.Println("Error in executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -67,7 +83,11 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := "Cannot hash password"
 		log.Println(msg, "for", userName)
-		tmpls.ExecuteTemplate(w, "register.html", msg)
+		err := tmpls.ExecuteTemplate(w, "register.html", msg)
+		if err != nil {
+			log.Println("Error in executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -77,7 +97,11 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg := "Unable to register user"
 		log.Println(msg, "for", userName, err)
-		tmpls.ExecuteTemplate(w, "register.html", msg)
+		err := tmpls.ExecuteTemplate(w, "register.html", msg)
+		if err != nil {
+			log.Println("Error in executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 		return
 	}
 
