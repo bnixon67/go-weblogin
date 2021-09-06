@@ -12,7 +12,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 
 	// only GET method is allowed
 	if r.Method != "GET" {
-		log.Println("Invalid method", r.Method)
+		log.Println("invalid method", r.Method)
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -52,7 +52,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	// display page
 	err = tmpls.ExecuteTemplate(w, "hello.html", LoginPageData{"", currentUser})
 	if err != nil {
-		log.Println("Error in executing template", err)
+		log.Println("error executing template", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

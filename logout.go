@@ -28,7 +28,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// display page
 	err := tmpls.ExecuteTemplate(w, "logout.html", nil)
 	if err != nil {
-		log.Println("Error in executing template", err)
+		log.Println("error executing template", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -16,7 +16,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		err := tmpls.ExecuteTemplate(w, "register.html", nil)
 		if err != nil {
-			log.Println("Error in executing template", err)
+			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
@@ -47,7 +47,7 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 		log.Println(msg, "for", userName)
 		err := tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
-			log.Println("Error in executing template", err)
+			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -59,7 +59,7 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 		log.Printf("UserName exists for %q", userName)
 		err := tmpls.ExecuteTemplate(w, "register.html", "Sorry, your desired User Name already exists. Please try a different User Name")
 		if err != nil {
-			log.Println("Error in executing template", err)
+			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -72,7 +72,7 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 		log.Println(msg, "for", userName)
 		err := tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
-			log.Println("Error in executing template", err)
+			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -85,7 +85,7 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 		log.Println(msg, "for", userName)
 		err := tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
-			log.Println("Error in executing template", err)
+			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -99,7 +99,7 @@ func registerPut(w http.ResponseWriter, r *http.Request) {
 		log.Println(msg, "for", userName, err)
 		err := tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
-			log.Println("Error in executing template", err)
+			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return

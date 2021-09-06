@@ -9,7 +9,7 @@ import (
 
 // initDB initializes a connection to the database
 func initDB(driverName, dataSourceName string) (*sql.DB, error) {
-	log.Println("Initialize database connection")
+	log.Println("initialize database connection")
 
 	// open connection to database
 	db, err := sql.Open(driverName, dataSourceName)
@@ -51,10 +51,10 @@ func GetUserForSessionToken(sessionToken string) (User, error) {
 	err := result.Scan(&user.UserName, &user.SessionToken, &user.FirstName, &user.LastName, &user.Email, &user.SessionExpires)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("No result for sessionToken %q", sessionToken)
+			log.Printf("no result for sessionToken %q", sessionToken)
 			return user, errors.New("invalid sessionToken")
 		}
-		log.Printf("Query for sessionToken %q failed", sessionToken)
+		log.Printf("query for sessionToken %q failed", sessionToken)
 		log.Print(err)
 		return user, errors.New("query failed")
 	}
@@ -72,7 +72,7 @@ func CheckForUserName(userName string) (bool, error) {
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
-		log.Printf("Query for userName %q failed", userName)
+		log.Printf("query for userName %q failed", userName)
 		log.Print(err)
 		return false, err
 	}

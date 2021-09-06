@@ -38,7 +38,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		err = tmpls.ExecuteTemplate(w, "login.html", nil)
 		if err != nil {
-			log.Println("Error in executing template", err)
+			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
@@ -72,7 +72,7 @@ func loginPut(w http.ResponseWriter, r *http.Request) {
 		log.Println(msg)
 		err := tmpls.ExecuteTemplate(w, "login.html", msg)
 		if err != nil {
-			log.Println("Error in executing template", err)
+			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
@@ -83,7 +83,7 @@ func loginPut(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err := tmpls.ExecuteTemplate(w, "login.html", err)
 		if err != nil {
-			log.Println("Error in executing template", err)
+			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 		return
