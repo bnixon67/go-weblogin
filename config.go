@@ -19,11 +19,16 @@ type Config struct {
 
 	// SessionExpiresHours is the number of hours after a session expires
 	SessionExpiresHours int
+
+	SmtpHost     string
+	SmtpPort     string
+	SmtpUser     string
+	SmtpPassword string
 }
 
 // readConfig return the Config from the given fileName
 func readConfig(fileName string) (Config, error) {
-	log.Print("reading config file")
+	log.Printf("reading %q", fileName)
 
 	configFile, err := os.Open(fileName)
 	if err != nil {
@@ -39,7 +44,7 @@ func readConfig(fileName string) (Config, error) {
 
 // closeConfig closes the Config file
 func closeConfig(f *os.File) {
-	log.Println("closing config file")
+	log.Printf("closing %q", f.Name())
 
 	err := f.Close()
 	if err != nil {

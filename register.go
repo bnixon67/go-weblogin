@@ -9,7 +9,7 @@ import (
 
 // RegisterHandler handles /register requests
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("RegisterHandler", r.Method)
+	log.Print(r.Method)
 
 	switch r.Method {
 

@@ -1,7 +1,0 @@
-{
-	"SqlDriverName": "mysql",
-	"SqlDataSourceName": "user:password@/gologin?parseTime=true",
-	"ParseGlobPattern": "html/*.html",
-
-	"SessionExpiresHours": 48
-}

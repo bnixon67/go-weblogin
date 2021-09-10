@@ -79,3 +79,55 @@ func CheckForUserName(userName string) (bool, error) {
 
 	return true, err
 }
+
+var ErrNoUserName = errors.New("no username for email")
+
+// GetUserNameForEmail returns the userName for a given email
+func GetUserNameForEmail(email string) (string, error) {
+	var userName string
+
+	row := db.QueryRow("SELECT username FROM users WHERE email=?", email)
+	err := row.Scan(&userName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No username for %q", email)
+			return "", ErrNoUserName
+		}
+		log.Printf("query for email %q failed", email)
+		log.Print(err)
+		return "", err
+	}
+
+	return userName, err
+}
+
+// GetUserNameForResetToken returns the userName for a given reset token
+func GetUserNameForResetToken(resetToken string) (string, error) {
+	var userName string
+
+	row := db.QueryRow("SELECT username FROM users WHERE resetToken=?", resetToken)
+	err := row.Scan(&userName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No username for %q", resetToken)
+			return "", ErrNoUserName
+		}
+		log.Printf("query for resetToken %q failed", resetToken)
+		log.Print(err)
+		return "", err
+	}
+
+	return userName, err
+}
+
+func SaveResetTokenForUser(userName string, resetToken string) error {
+	_, err := db.Query("UPDATE users SET resetToken  = ? WHERE username = ?", resetToken, userName)
+	if err != nil {
+		log.Printf("Unable to store resetToken for %q", userName)
+		log.Print(err)
+		return err
+	}
+
+	log.Printf("Saved resetToken %q for %q", resetToken, userName)
+	return err
+}

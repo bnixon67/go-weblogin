@@ -2,9 +2,11 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -27,8 +29,17 @@ func main() {
 	log.SetFlags(0)
 	log.SetOutput(new(LogWriter))
 
+	if len(os.Args) != 2 {
+		fmt.Printf("%s [CONFIG FILE]\n", os.Args[0])
+		return
+	}
+
 	// read config file
-	configFileName := "config.json"
+	configFileName := os.Args[1]
+	if configFileName == "" {
+		fmt.Printf("%s [CONFIG FILE]\n", os.Args[0])
+		return
+	}
 	config, err = readConfig(configFileName)
 	if err != nil {
 		log.Printf("Unable to read config file %q", configFileName)
@@ -70,6 +81,8 @@ func main() {
 	http.HandleFunc("/register", RegisterHandler)
 	http.HandleFunc("/hello", HelloHandler)
 	http.HandleFunc("/logout", LogoutHandler)
+	http.HandleFunc("/forgot", ForgotHandler)
+	http.HandleFunc("/reset", ResetHandler)
 	http.Handle("/style.css", http.FileServer(http.Dir("html")))
 
 	// run server

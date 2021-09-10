@@ -8,7 +8,6 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,7 +19,7 @@ type LoginPageData struct {
 
 // LoginHandler handles /login requests
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("LoginHandler", r.Method)
+	log.Print(r.Method)
 
 	switch r.Method {
 
@@ -129,7 +128,12 @@ func loginUser(userName, password string) (string, time.Time, error) {
 	}
 
 	// create a new random sessions token
-	sessionToken = uuid.NewString()
+	sessionToken, err = GenerateRandomString(32)
+	if err != nil {
+		log.Print("Could not generate sessionToken")
+		log.Print(err)
+		return sessionToken, sessionExpires, errors.New("login failed")
+	}
 
 	// store the sessionToken
 	sessionExpires = time.Now().Add(time.Duration(config.SessionExpiresHours) * time.Hour)
