@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<title>Forgot User or Password</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<form method="post">
+<div class="container">
+
+<h1>Forgot User or Password</h1>
+<p>Please provide yoru email below to retrieve your User Name and a link to reset your password.</p>
+<hr>
+
+<label for="email"><b>Email</b></label>
+<input type="email" placeholder="Enter your Email" id="email" name="email" maxlength="256" required>
+
+<div class="errmsg">{{.}}</div>
+<hr>
+
+<button type="submit" class="submitbtn">Forgot</button>
+</div>
+
+<div class="container signin">
+<p>If you do not have an account, <a href="/register">Register</a>.</p>
+<div>
+
+</form>
+
+</body>
+</html>

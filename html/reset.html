@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<title>Reset Forgotten Password</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<form method="post">
+<div class="container">
+
+<h1>Reset Forgotten Password</h1>
+<p>Please provide the reset token and new password below.</p>
+<hr>
+
+<label for="rtoken"><b>Reset Token</b></label>
+<input type="text" placeholder="Enter your Reset Token" id="rtoken" name="rtoken" maxlength="44" required value="{{.ResetToken}}">
+
+<label for="password1"><b>Password</b></label>
+<input type="password" placeholder="Enter your desired password" id="password1" name="password1" required>
+
+<label for="password"><b>Repeat Password</b></label>
+<input type="password" placeholder="Repeat your desired password" id="password2" name="password2">
+
+<div class="errmsg">{{.Msg}}</div>
+<hr>
+
+<button type="submit" class="submitbtn">Reset Password</button>
+</div>
+
+<div class="container signin">
+<p>If you do not have an account, <a href="/register">Register</a>.</p>
+<div>
+
+</form>
+
+</body>
+</html>

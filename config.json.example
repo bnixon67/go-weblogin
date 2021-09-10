@@ -1,0 +1,12 @@
+{
+	"SqlDriverName": "mysql",
+	"SqlDataSourceName": "user:password@/gologin?parseTime=true",
+	"ParseGlobPattern": "html/*.html",
+
+	"SessionExpiresHours": 48,
+
+	"SmtpHost": "smtp.gmail.com",
+	"SmtpPort": "587",
+	"SmtpUser": "user@gmail.com",
+	"SmtpPassword": "password"
+}
