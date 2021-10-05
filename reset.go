@@ -14,7 +14,7 @@ type ResetData struct {
 
 // ResetHandler handles /rest requests
 func ResetHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.Method)
+	log.Println(r.Method, "from", r.RemoteAddr)
 
 	switch r.Method {
 

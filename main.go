@@ -67,24 +67,36 @@ func main() {
 	}
 
 	// define HTTP server
-	// TODO: move values to config file
 	s := &http.Server{
-		Addr:           ":8000",
-		Handler:        nil,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
+		Addr:              ":8443",
+		Handler:           &logRequestHandler{http.DefaultServeMux},
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       30 * time.Second,
+		ReadHeaderTimeout: 30 * time.Second,
+		MaxHeaderBytes:    1 << 20,
 	}
 
 	// register handlers
 	http.HandleFunc("/login", LoginHandler)
 	http.HandleFunc("/register", RegisterHandler)
-	http.HandleFunc("/hello", HelloHandler)
 	http.HandleFunc("/logout", LogoutHandler)
 	http.HandleFunc("/forgot", ForgotHandler)
 	http.HandleFunc("/reset", ResetHandler)
+	http.HandleFunc("/hello", HelloHandler)
 	http.Handle("/style.css", http.FileServer(http.Dir("html")))
+	http.Handle("/", http.RedirectHandler("/hello", http.StatusMovedPermanently))
 
 	// run server
-	log.Panic(s.ListenAndServe())
+	// TODO: move certs to config file
+	log.Panic(s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem"))
+}
+
+type logRequestHandler struct {
+	next http.Handler
+}
+
+func (l *logRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.RemoteAddr, r.Method, r.RequestURI, r.Header)
+	l.next.ServeHTTP(w, r)
 }

@@ -9,7 +9,7 @@ import (
 
 // LogoutHandler handles /logout requests
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("LogoutHandler", r.Method)
+	log.Println(r.Method, "from", r.RemoteAddr)
 
 	// only GET method is allowed
 	if r.Method != "GET" {

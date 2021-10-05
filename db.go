@@ -20,8 +20,8 @@ func initDB(driverName, dataSourceName string) (*sql.DB, error) {
 	// set desire connection parameters
 	// TODO: move values to config file
 	db.SetConnMaxLifetime(time.Minute * 3)
-	db.SetMaxOpenConns(10)
-	db.SetMaxIdleConns(10)
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
 
 	// Ping to confirm connection
 	err = db.Ping()
@@ -121,12 +121,25 @@ func GetUserNameForResetToken(resetToken string) (string, error) {
 }
 
 func SaveResetTokenForUser(userName string, resetToken string) error {
-	_, err := db.Query("UPDATE users SET resetToken  = ? WHERE username = ?", resetToken, userName)
+	result, err := db.Exec("UPDATE users SET resetToken  = ? WHERE username = ?", resetToken, userName)
 	if err != nil {
 		log.Printf("Unable to store resetToken for %q", userName)
 		log.Print(err)
 		return err
 	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Print("RowsAffected() is not nil")
+		log.Print(err)
+		return err
+	}
+	if rowsAffected != 1 {
+		log.Printf("expected to affect 1 row, affected %d", rowsAffected)
+		log.Print(err)
+		return err
+	}
+
 
 	log.Printf("Saved resetToken %q for %q", resetToken, userName)
 	return err

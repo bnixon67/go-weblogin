@@ -12,5 +12,3 @@ CREATE TABLE `users` (
   `resetExpires` datetime DEFAULT NULL,
   PRIMARY KEY (`userName`)
 );
-
-GRANT SELECT, INSERT, UPDATE, DELETE ON `users` TO `user`@`%`;
