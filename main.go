@@ -29,21 +29,18 @@ func main() {
 	log.SetFlags(0)
 	log.SetOutput(new(LogWriter))
 
-	if len(os.Args) != 2 {
+	// config file must be passed as argument and not empty
+	if len(os.Args) != 2 || os.Args[1] == "" {
 		fmt.Printf("%s [CONFIG FILE]\n", os.Args[0])
 		return
 	}
+	configFileName := os.Args[1]
 
 	// read config file
-	configFileName := os.Args[1]
-	if configFileName == "" {
-		fmt.Printf("%s [CONFIG FILE]\n", os.Args[0])
-		return
-	}
 	config, err = readConfig(configFileName)
 	if err != nil {
-		log.Printf("Unable to read config file %q", configFileName)
-		log.Panic(err)
+		log.Printf("unable to read config file %q, %v", configFileName, err)
+		return
 	}
 
 	// ensure required config values have been provided

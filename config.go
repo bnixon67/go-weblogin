@@ -30,13 +30,14 @@ type Config struct {
 func readConfig(fileName string) (Config, error) {
 	log.Printf("reading %q", fileName)
 
+	config := Config{}
+
 	configFile, err := os.Open(fileName)
 	if err != nil {
-		log.Panic(err)
+		return config, err
 	}
 	defer closeConfig(configFile)
 
-	config := Config{}
 	err = json.NewDecoder(configFile).Decode(&config)
 
 	return config, err
