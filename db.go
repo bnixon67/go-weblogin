@@ -140,7 +140,6 @@ func SaveResetTokenForUser(userName string, resetToken string) error {
 		return err
 	}
 
-
 	log.Printf("Saved resetToken %q for %q", resetToken, userName)
 	return err
 }

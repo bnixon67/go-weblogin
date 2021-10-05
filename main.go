@@ -47,9 +47,9 @@ func main() {
 	}
 
 	// ensure required config values have been provided
-	logPanicIsEmpty(config.SQLDriverName, "Missing SQLDriverName in config file")
-	logPanicIsEmpty(config.SQLDataSourceName, "Missing SQLDataSourceName in config file")
-	logPanicIsEmpty(config.ParseGlobPattern, "Missing ParseGlobPattern in config file")
+	logPanicIfEmpty(config.SQLDriverName, "Missing SQLDriverName in config file")
+	logPanicIfEmpty(config.SQLDataSourceName, "Missing SQLDataSourceName in config file")
+	logPanicIfEmpty(config.ParseGlobPattern, "Missing ParseGlobPattern in config file")
 	if config.SessionExpiresHours == 0 {
 		config.SessionExpiresHours = 24
 	}
