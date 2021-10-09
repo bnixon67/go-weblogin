@@ -26,8 +26,8 @@ type Config struct {
 	SmtpPassword string
 }
 
-// readConfig return the Config from the given fileName
-func readConfig(fileName string) (Config, error) {
+// NewConfigFromFile returns a Config from the given fileName
+func NewConfigFromFile(fileName string) (Config, error) {
 	log.Printf("reading %q", fileName)
 
 	config := Config{}
@@ -51,4 +51,16 @@ func closeConfig(f *os.File) {
 	if err != nil {
 		log.Panic(err)
 	}
+}
+
+// IsValid returns true if the config is valid
+func (c Config) IsValid() bool {
+	// ensure required config values have been provided
+	// test conditions on separate lines to avoid short circuit evaluation
+	isEmpty := false
+	isEmpty = logIfEmpty(c.SQLDriverName, "missing or empty SQLDriverName in config file") || isEmpty
+	isEmpty = logIfEmpty(c.SQLDataSourceName, "missing or empty SQLDataSourceName in config file") || isEmpty
+	isEmpty = logIfEmpty(c.ParseGlobPattern, "missing or empty ParseGlobPattern in config file") || isEmpty
+
+	return !isEmpty
 }

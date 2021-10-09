@@ -1,0 +1,5 @@
+{
+	"SQLDriverName": "testSQLDriverName",
+	"SQLDataSourceName": "testSQLDataSourceName",
+	"ParseGlobPattern": "testParseGlobPattern"
+}

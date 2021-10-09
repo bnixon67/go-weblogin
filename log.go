@@ -39,3 +39,12 @@ func logPanicIfEmpty(str, message string) {
 		log.Panic(message)
 	}
 }
+
+func logIfEmpty(str, message string) bool {
+	if str == "" {
+		log.Printf(message)
+		return true
+	}
+
+	return false
+}

@@ -37,16 +37,19 @@ func main() {
 	configFileName := os.Args[1]
 
 	// read config file
-	config, err = readConfig(configFileName)
+	config, err = NewConfigFromFile(configFileName)
 	if err != nil {
 		log.Printf("unable to read config file %q, %v", configFileName, err)
 		return
 	}
 
 	// ensure required config values have been provided
-	logPanicIfEmpty(config.SQLDriverName, "Missing SQLDriverName in config file")
-	logPanicIfEmpty(config.SQLDataSourceName, "Missing SQLDataSourceName in config file")
-	logPanicIfEmpty(config.ParseGlobPattern, "Missing ParseGlobPattern in config file")
+	if !config.IsValid() {
+		log.Printf("config is not valid")
+		return
+	}
+
+	// TODO: handle this default value
 	if config.SessionExpiresHours == 0 {
 		config.SessionExpiresHours = 24
 	}
