@@ -57,13 +57,15 @@ func main() {
 	// init database connection
 	db, err = initDB(config.SQLDriverName, config.SQLDataSourceName)
 	if err != nil {
-		log.Panic(err)
+		log.Printf("initDB failed: %v", err)
+		return
 	}
 
 	// init HTML templates
 	tmpls, err = initTemplates(config.ParseGlobPattern)
 	if err != nil {
-		log.Panic(err)
+		log.Printf("initTemplates failed: %v", err)
+		return
 	}
 
 	// define HTTP server
@@ -89,14 +91,19 @@ func main() {
 
 	// run server
 	// TODO: move certs to config file
-	log.Panic(s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem"))
+	err = s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
+	if err != nil {
+		log.Printf("ListandServeTLS failed: %v", err)
+	}
 }
 
+// logRequestHandler is middleware that logs all HTTP requests and then calls the next HTTP handler specified
 type logRequestHandler struct {
 	next http.Handler
 }
 
+// ServerHTTP for logRequestHandler log the HTTP request and then calls the next HTTP handler specified
 func (l *logRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RemoteAddr, r.Method, r.RequestURI, r.Header)
+	log.Println(r.RemoteAddr, r.Method, r.RequestURI)
 	l.next.ServeHTTP(w, r)
 }
