@@ -21,32 +21,24 @@ var tmpls *template.Template
 // config is the global for the config values
 var config Config
 
-// main function
-func main() {
+func InitApp(configFileName string) error {
 	var err error
 
 	// use custom log writer
 	log.SetFlags(0)
 	log.SetOutput(new(LogWriter))
 
-	// config file must be passed as argument and not empty
-	if len(os.Args) != 2 || os.Args[1] == "" {
-		fmt.Printf("%s [CONFIG FILE]\n", os.Args[0])
-		return
-	}
-	configFileName := os.Args[1]
-
 	// read config file
 	config, err = NewConfigFromFile(configFileName)
 	if err != nil {
 		log.Printf("unable to read config file %q, %v", configFileName, err)
-		return
+		return err
 	}
 
 	// ensure required config values have been provided
 	if !config.IsValid() {
 		log.Printf("config is not valid")
-		return
+		return err
 	}
 
 	// TODO: handle this default value
@@ -58,13 +50,30 @@ func main() {
 	db, err = initDB(config.SQLDriverName, config.SQLDataSourceName)
 	if err != nil {
 		log.Printf("initDB failed: %v", err)
-		return
+		return err
 	}
 
 	// init HTML templates
 	tmpls, err = initTemplates(config.ParseGlobPattern)
 	if err != nil {
 		log.Printf("initTemplates failed: %v", err)
+		return err
+	}
+
+	return err
+}
+
+// main function
+func main() {
+
+	// config file must be passed as argument and not empty
+	if len(os.Args) != 2 || os.Args[1] == "" {
+		fmt.Printf("%s [CONFIG FILE]\n", os.Args[0])
+		return
+	}
+
+	if InitApp(os.Args[1]) != nil {
+		log.Printf("init failed")
 		return
 	}
 
@@ -91,7 +100,7 @@ func main() {
 
 	// run server
 	// TODO: move certs to config file
-	err = s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
+	err := s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
 	if err != nil {
 		log.Printf("ListandServeTLS failed: %v", err)
 	}

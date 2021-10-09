@@ -9,8 +9,8 @@
 <body>
 
 <div class="container">
-{{ if .CurrentUser.UserName }}
-<p>Hello {{ .CurrentUser.FirstName }} {{ .CurrentUser.LastName }}</p>
+{{ if .User.UserName }}
+<p>Hello {{ .User.FirstName }} {{ .User.LastName }}</p>
 <p><a href="/logout">Logout</a>
 {{ else }}
 <div class="errmsg">You must <a href="/login">login</a></div>

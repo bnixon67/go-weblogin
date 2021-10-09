@@ -6,14 +6,32 @@ import (
 	"time"
 )
 
+// HelloPageData record
+type HelloPageData struct {
+	Message string
+	User    User
+}
+
 // HelloHandler prints a simple hello message
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.Method)
-
 	// only GET method is allowed
 	if r.Method != "GET" {
 		log.Println("invalid method", r.Method)
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	// check for valid db
+	if db == nil {
+		log.Println("db is nil")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	// check for valid tmpls
+	if tmpls == nil {
+		log.Println("tmpls is nil")
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
@@ -22,9 +40,12 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("sessionToken")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			log.Print("no sessionToken cookie")
+			log.Println("no sessionToken cookie")
 		} else {
+
 			log.Println("error getting cookie", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
 	} else {
 		sessionToken = c.Value
@@ -35,23 +56,22 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	if sessionToken != "" {
 		currentUser, err = GetUserForSessionToken(sessionToken)
 		if err != nil {
-			log.Println("GetUserForSessionToken failed", err)
+			log.Println("GetUserForSessionToken failed:", err)
 			currentUser = User{}
 		} else {
 
 			// check if token is expired
-			// redundant for security since the client (browser) should expire the token
 			if currentUser.SessionExpires.Before(time.Now()) {
 				log.Printf("token expired for %q", currentUser.UserName)
 				currentUser = User{}
 			} else {
-				log.Printf("%+v", currentUser)
+				log.Println("UserName =", currentUser.UserName)
 			}
 		}
 	}
 
 	// display page
-	err = tmpls.ExecuteTemplate(w, "hello.html", LoginPageData{"", currentUser})
+	err = tmpls.ExecuteTemplate(w, "hello.html", HelloPageData{Message: "", User: currentUser})
 	if err != nil {
 		log.Println("error executing template", err)
 		w.WriteHeader(http.StatusInternalServerError)
