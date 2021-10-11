@@ -8,7 +8,7 @@ import (
 )
 
 // LogoutHandler handles /logout requests
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method, "from", r.RemoteAddr)
 
 	// only GET method is allowed
@@ -26,7 +26,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	// display page
-	err := tmpls.ExecuteTemplate(w, "logout.html", nil)
+	err := app.tmpls.ExecuteTemplate(w, "logout.html", nil)
 	if err != nil {
 		log.Println("error executing template", err)
 		w.WriteHeader(http.StatusInternalServerError)

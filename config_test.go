@@ -39,12 +39,12 @@ func TestNewConfigFromFile(t *testing.T) {
 
 	// test with a valid filename and file with empty json
 	fileName = "test/empty.json"
-	config, err = NewConfigFromFile(fileName)
+	config, err := NewConfigFromFile(fileName)
 	if err != nil {
 		t.Fatalf("NewConfigFromFile(%q) failed: %v", fileName, err)
 	}
 	if config != (Config{}) {
-		t.Errorf("got %+v, expected %+v", config, Config{})
+		t.Errorf("got %+v, expected %+v", app.config, Config{})
 	}
 
 	// test with a valid filename and file with invalid json

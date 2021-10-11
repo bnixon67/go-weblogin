@@ -13,7 +13,7 @@ type HelloPageData struct {
 }
 
 // HelloHandler prints a simple hello message
-func HelloHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	// only GET method is allowed
 	if r.Method != "GET" {
 		log.Println("invalid method", r.Method)
@@ -22,15 +22,15 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check for valid db
-	if db == nil {
-		log.Println("db is nil")
+	if app.db == nil {
+		log.Println("app.db is nil")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	// check for valid tmpls
-	if tmpls == nil {
-		log.Println("tmpls is nil")
+	if app.tmpls == nil {
+		log.Println("app.tmpls is nil")
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -54,7 +54,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	// get user for sessionToken
 	var currentUser User
 	if sessionToken != "" {
-		currentUser, err = GetUserForSessionToken(sessionToken)
+		currentUser, err = app.GetUserForSessionToken(sessionToken)
 		if err != nil {
 			log.Println("GetUserForSessionToken failed:", err)
 			currentUser = User{}
@@ -71,7 +71,7 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// display page
-	err = tmpls.ExecuteTemplate(w, "hello.html", HelloPageData{Message: "", User: currentUser})
+	err = app.tmpls.ExecuteTemplate(w, "hello.html", HelloPageData{Message: "", User: currentUser})
 	if err != nil {
 		log.Println("error executing template", err)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -11,7 +11,7 @@ func TestHelloHandlerInvalidMethod(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/hello", nil)
 
-	HelloHandler(w, r)
+	app.HelloHandler(w, r)
 
 	expectedStatus := http.StatusMethodNotAllowed
 	if w.Code != expectedStatus {
@@ -23,7 +23,7 @@ func TestHelloHandlerWithoutCookie(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/hello", nil)
 
-	HelloHandler(w, r)
+	app.HelloHandler(w, r)
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
@@ -41,7 +41,7 @@ func TestHelloHandlerWithBadSessionToken(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/hello", nil)
 	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: "foo"})
 
-	HelloHandler(w, r)
+	app.HelloHandler(w, r)
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
@@ -56,12 +56,12 @@ func TestHelloHandlerWithBadSessionToken(t *testing.T) {
 
 func TestHelloHandlerWithGoodSessionToken(t *testing.T) {
 	// TODO: generate valid session token instead of hard coding
-	token := "47MCgM9wrkkkfWZiWfFqBo5AI87u_NN4qPjjArH_osY="
+	token := "-Pr58QZNv-tnSgEW7MlNIx3rzbLOoMaD8Q2uxSF0xPk="
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/hello", nil)
 	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: token})
 
-	HelloHandler(w, r)
+	app.HelloHandler(w, r)
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {

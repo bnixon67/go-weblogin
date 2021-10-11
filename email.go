@@ -22,10 +22,10 @@ type MailMessage struct {
 	Body    string
 }
 
-func SendEmail(to, subject, body string) error {
+func SendEmail(smtpUser, smtpPassword, smtpHost, smtpPort, to, subject, body string) error {
 
 	mailMessage := MailMessage{
-		From:    config.SmtpUser,
+		From:    smtpUser,
 		To:      to,
 		Subject: subject,
 		Body:    body,
@@ -41,9 +41,9 @@ func SendEmail(to, subject, body string) error {
 
 	fmt.Print(message)
 
-	auth := smtp.PlainAuth("", config.SmtpUser, config.SmtpPassword, config.SmtpHost)
+	auth := smtp.PlainAuth("", smtpUser, smtpPassword, smtpHost)
 
-	err = smtp.SendMail(config.SmtpHost+":"+config.SmtpPort, auth, mailMessage.From, []string{mailMessage.To}, message.Bytes())
+	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, mailMessage.From, []string{mailMessage.To}, message.Bytes())
 	if err != nil {
 		log.Print("SendMail failed")
 		log.Print(err)

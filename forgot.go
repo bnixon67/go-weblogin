@@ -8,20 +8,20 @@ import (
 )
 
 // ForgotHandler handles /forgot requests
-func ForgotHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.Method)
 
 	switch r.Method {
 
 	case "GET":
-		err := tmpls.ExecuteTemplate(w, "forgot.html", nil)
+		err := app.tmpls.ExecuteTemplate(w, "forgot.html", nil)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
 	case "POST":
-		forgotPut(w, r)
+		app.forgotPut(w, r)
 
 	default:
 		log.Println("Invalid method", r.Method)
@@ -31,7 +31,7 @@ func ForgotHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // forgotPut is called for the PUT method of the LoginHandler
-func forgotPut(w http.ResponseWriter, r *http.Request) {
+func (app *App) forgotPut(w http.ResponseWriter, r *http.Request) {
 	// get form values
 	email := r.PostFormValue("email")
 
@@ -42,7 +42,7 @@ func forgotPut(w http.ResponseWriter, r *http.Request) {
 	}
 	if msg != "" {
 		log.Println(msg)
-		err := tmpls.ExecuteTemplate(w, "forgot.html", msg)
+		err := app.tmpls.ExecuteTemplate(w, "forgot.html", msg)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -51,9 +51,9 @@ func forgotPut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// attempt to login the given userName with the given password
-	userName, err := GetUserNameForEmail(email)
+	userName, err := app.GetUserNameForEmail(email)
 	if err != nil || userName == "" {
-		err := tmpls.ExecuteTemplate(w, "forgot.html", err)
+		err := app.tmpls.ExecuteTemplate(w, "forgot.html", err)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -70,7 +70,7 @@ func forgotPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	SaveResetTokenForUser(userName, resetToken)
+	app.SaveResetTokenForUser(userName, resetToken)
 	if err != nil {
 		log.Print("SaveForgotTokenForUser failed")
 		log.Print(err)
@@ -80,9 +80,9 @@ func forgotPut(w http.ResponseWriter, r *http.Request) {
 
 	resetURL := "http://192.168.1.111:8000/reset?rtoken=" + resetToken
 
-	SendEmail(email, "Reset Pasword", resetURL)
+	SendEmail(app.config.SmtpUser, app.config.SmtpPassword, app.config.SmtpHost, app.config.SmtpPort, email, "Reset Pasword", resetURL)
 
-	err = tmpls.ExecuteTemplate(w, "forgot_sent.html", err)
+	err = app.tmpls.ExecuteTemplate(w, "forgot_sent.html", err)
 	if err != nil {
 		log.Println("error executing template", err)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -20,11 +20,11 @@ type User struct {
 var ErrSessionTokenNotFound = errors.New("sessionToken not found")
 
 // GetUserForSessionToken returns a user for the given sessionToken
-func GetUserForSessionToken(sessionToken string) (User, error) {
+func (app *App) GetUserForSessionToken(sessionToken string) (User, error) {
 	user := User{}
 
 	qry := "SELECT userName, sessionToken, firstName, lastName, email, sessionExpires FROM users WHERE sessionToken=?"
-	result := db.QueryRow(qry, sessionToken)
+	result := app.db.QueryRow(qry, sessionToken)
 	err := result.Scan(&user.UserName, &user.SessionToken, &user.FirstName, &user.LastName, &user.Email, &user.SessionExpires)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -37,10 +37,10 @@ func GetUserForSessionToken(sessionToken string) (User, error) {
 }
 
 // CheckForUserName returns true if the given userName already exists
-func CheckForUserName(userName string) (bool, error) {
+func (app *App) CheckForUserName(userName string) (bool, error) {
 	var num int
 
-	row := db.QueryRow("SELECT 1 FROM users WHERE userName=?", userName)
+	row := app.db.QueryRow("SELECT 1 FROM users WHERE userName=?", userName)
 	err := row.Scan(&num)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -57,10 +57,10 @@ func CheckForUserName(userName string) (bool, error) {
 var ErrNoUserName = errors.New("no username for email")
 
 // GetUserNameForEmail returns the userName for a given email
-func GetUserNameForEmail(email string) (string, error) {
+func (app *App) GetUserNameForEmail(email string) (string, error) {
 	var userName string
 
-	row := db.QueryRow("SELECT username FROM users WHERE email=?", email)
+	row := app.db.QueryRow("SELECT username FROM users WHERE email=?", email)
 	err := row.Scan(&userName)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -76,10 +76,10 @@ func GetUserNameForEmail(email string) (string, error) {
 }
 
 // GetUserNameForResetToken returns the userName for a given reset token
-func GetUserNameForResetToken(resetToken string) (string, error) {
+func (app *App) GetUserNameForResetToken(resetToken string) (string, error) {
 	var userName string
 
-	row := db.QueryRow("SELECT username FROM users WHERE resetToken=?", resetToken)
+	row := app.db.QueryRow("SELECT username FROM users WHERE resetToken=?", resetToken)
 	err := row.Scan(&userName)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -94,8 +94,8 @@ func GetUserNameForResetToken(resetToken string) (string, error) {
 	return userName, err
 }
 
-func SaveResetTokenForUser(userName string, resetToken string) error {
-	result, err := db.Exec("UPDATE users SET resetToken  = ? WHERE username = ?", resetToken, userName)
+func (app *App) SaveResetTokenForUser(userName string, resetToken string) error {
+	result, err := app.db.Exec("UPDATE users SET resetToken  = ? WHERE username = ?", resetToken, userName)
 	if err != nil {
 		log.Printf("Unable to store resetToken for %q", userName)
 		log.Print(err)

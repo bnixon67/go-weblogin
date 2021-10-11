@@ -12,16 +12,14 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// db is the global datbase handle
-var db *sql.DB
+type App struct {
+	db     *sql.DB
+	tmpls  *template.Template
+	config Config
+}
 
-// tmpls is the gloabl for the parsed HTML templates
-var tmpls *template.Template
-
-// config is the global for the config values
-var config Config
-
-func InitApp(configFileName string) error {
+func NewApp(configFileName string) (*App, error) {
+	var app App
 	var err error
 
 	// use custom log writer
@@ -29,50 +27,50 @@ func InitApp(configFileName string) error {
 	log.SetOutput(new(LogWriter))
 
 	// read config file
-	config, err = NewConfigFromFile(configFileName)
+	app.config, err = NewConfigFromFile(configFileName)
 	if err != nil {
 		log.Printf("unable to read config file %q, %v", configFileName, err)
-		return err
+		return &app, err
 	}
 
 	// ensure required config values have been provided
-	if !config.IsValid() {
+	if !app.config.IsValid() {
 		log.Printf("config is not valid")
-		return err
+		return &app, err
 	}
 
 	// TODO: handle this default value
-	if config.SessionExpiresHours == 0 {
-		config.SessionExpiresHours = 24
+	if app.config.SessionExpiresHours == 0 {
+		app.config.SessionExpiresHours = 24
 	}
 
 	// init database connection
-	db, err = initDB(config.SQLDriverName, config.SQLDataSourceName)
+	app.db, err = initDB(app.config.SQLDriverName, app.config.SQLDataSourceName)
 	if err != nil {
 		log.Printf("initDB failed: %v", err)
-		return err
+		return &app, err
 	}
 
 	// init HTML templates
-	tmpls, err = initTemplates(config.ParseGlobPattern)
+	app.tmpls, err = initTemplates(app.config.ParseGlobPattern)
 	if err != nil {
 		log.Printf("initTemplates failed: %v", err)
-		return err
+		return &app, err
 	}
 
-	return err
+	return &app, err
 }
 
 // main function
 func main() {
-
 	// config file must be passed as argument and not empty
 	if len(os.Args) != 2 || os.Args[1] == "" {
 		fmt.Printf("%s [CONFIG FILE]\n", os.Args[0])
 		return
 	}
 
-	if InitApp(os.Args[1]) != nil {
+	app, err := NewApp(os.Args[1])
+	if err != nil {
 		log.Printf("init failed")
 		return
 	}
@@ -89,18 +87,18 @@ func main() {
 	}
 
 	// register handlers
-	http.HandleFunc("/login", LoginHandler)
-	http.HandleFunc("/register", RegisterHandler)
-	http.HandleFunc("/logout", LogoutHandler)
-	http.HandleFunc("/forgot", ForgotHandler)
-	http.HandleFunc("/reset", ResetHandler)
-	http.HandleFunc("/hello", HelloHandler)
+	http.HandleFunc("/login", app.LoginHandler)
+	http.HandleFunc("/register", app.RegisterHandler)
+	http.HandleFunc("/logout", app.LogoutHandler)
+	http.HandleFunc("/forgot", app.ForgotHandler)
+	http.HandleFunc("/reset", app.ResetHandler)
+	http.HandleFunc("/hello", app.HelloHandler)
 	http.Handle("/style.css", http.FileServer(http.Dir("html")))
 	http.Handle("/", http.RedirectHandler("/hello", http.StatusMovedPermanently))
 
 	// run server
 	// TODO: move certs to config file
-	err := s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
+	err = s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
 	if err != nil {
 		log.Printf("ListandServeTLS failed: %v", err)
 	}

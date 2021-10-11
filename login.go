@@ -18,7 +18,7 @@ type LoginPageData struct {
 }
 
 // LoginHandler handles /login requests
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	log.Print(r.Method)
 
 	switch r.Method {
@@ -31,18 +31,18 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("sessionToken")
 		if err == nil {
 			sessionToken = c.Value
-			currentUser, _ = GetUserForSessionToken(sessionToken)
+			currentUser, _ = app.GetUserForSessionToken(sessionToken)
 			log.Printf("%+v", currentUser)
 		}
 
-		err = tmpls.ExecuteTemplate(w, "login.html", nil)
+		err = app.tmpls.ExecuteTemplate(w, "login.html", nil)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
 	case "POST":
-		loginPut(w, r)
+		app.loginPut(w, r)
 
 	default:
 		log.Println("Invalid method", r.Method)
@@ -52,7 +52,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // loginPut is called for the PUT method of the LoginHandler
-func loginPut(w http.ResponseWriter, r *http.Request) {
+func (app *App) loginPut(w http.ResponseWriter, r *http.Request) {
 	// get form values
 	userName := r.PostFormValue("username")
 	password := r.PostFormValue("password")
@@ -69,7 +69,7 @@ func loginPut(w http.ResponseWriter, r *http.Request) {
 	}
 	if msg != "" {
 		log.Println(msg)
-		err := tmpls.ExecuteTemplate(w, "login.html", msg)
+		err := app.tmpls.ExecuteTemplate(w, "login.html", msg)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -78,9 +78,9 @@ func loginPut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// attempt to login the given userName with the given password
-	sessionToken, sessionExpires, err := loginUser(userName, password)
+	sessionToken, sessionExpires, err := app.loginUser(userName, password)
 	if err != nil {
-		err := tmpls.ExecuteTemplate(w, "login.html", err)
+		err := app.tmpls.ExecuteTemplate(w, "login.html", err)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -103,12 +103,12 @@ func loginPut(w http.ResponseWriter, r *http.Request) {
 }
 
 // loginUser returns a sessionToken if the given userName and password is correct, otherwise error
-func loginUser(userName, password string) (string, time.Time, error) {
+func (app *App) loginUser(userName, password string) (string, time.Time, error) {
 	var sessionToken string
 	var sessionExpires time.Time
 
 	// get hashed password for the given user
-	result := db.QueryRow("SELECT hashedPassword FROM users WHERE username=?", userName)
+	result := app.db.QueryRow("SELECT hashedPassword FROM users WHERE username=?", userName)
 	var hashedPassword string
 	err := result.Scan(&hashedPassword)
 	if err != nil {
@@ -136,9 +136,9 @@ func loginUser(userName, password string) (string, time.Time, error) {
 	}
 
 	// store the sessionToken
-	sessionExpires = time.Now().Add(time.Duration(config.SessionExpiresHours) * time.Hour)
+	sessionExpires = time.Now().Add(time.Duration(app.config.SessionExpiresHours) * time.Hour)
 
-	_, err = db.Query("UPDATE users SET sessionToken = ?, sessionExpires = ? WHERE username = ?", sessionToken, sessionExpires, userName)
+	_, err = app.db.Query("UPDATE users SET sessionToken = ?, sessionExpires = ? WHERE username = ?", sessionToken, sessionExpires, userName)
 	if err != nil {
 		log.Printf("Unable to store sessionToken for %q", userName)
 		log.Print(err)
