@@ -13,6 +13,7 @@ func TestMain(m *testing.M) {
 
 	app, err = NewApp("config.json")
 	if err != nil {
+		return
 	}
 
 	os.Exit(m.Run())
