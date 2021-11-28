@@ -42,7 +42,7 @@ func logPanicIfEmpty(str, message string) {
 
 func logIfEmpty(str, message string) bool {
 	if str == "" {
-		log.Printf(message)
+		log.Print(message)
 		return true
 	}
 
