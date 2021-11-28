@@ -94,7 +94,7 @@ func (app *App) GetUserNameForResetToken(resetToken string) (string, error) {
 	return userName, err
 }
 
-func (app *App) SaveResetTokenForUser(userName string, resetToken string) error {
+func (app *App) SaveResetTokenForUser(userName, resetToken string) error {
 	result, err := app.db.Exec("UPDATE users SET resetToken  = ? WHERE username = ?", resetToken, userName)
 	if err != nil {
 		log.Printf("Unable to store resetToken for %q", userName)
