@@ -14,7 +14,7 @@ func GenerateRandomString(n int) (string, error) {
 	// get b random bytes
 	_, err := rand.Read(b)
 	if err != nil {
-		log.Panic(err)
+		log.Print("rand.Read() failed, ", err)
 		return "", err
 	}
 
