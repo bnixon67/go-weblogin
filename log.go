@@ -33,13 +33,7 @@ func funcName(depth int) string {
 	return names[len(names)-1]
 }
 
-// logPanicIfEmpty calls log.Panic with the given message if str is empty
-func logPanicIfEmpty(str, message string) {
-	if str == "" {
-		log.Panic(message)
-	}
-}
-
+// logIfEmpty logs message if str is empty and returns true, otherwise false
 func logIfEmpty(str, message string) bool {
 	if str == "" {
 		log.Print(message)
