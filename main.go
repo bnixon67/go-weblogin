@@ -98,6 +98,7 @@ func main() {
 
 	// run server
 	// TODO: move certs to config file
+	log.Println("Listening on", s.Addr)
 	err = s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
 	if err != nil {
 		log.Printf("ListandServeTLS failed: %v", err)

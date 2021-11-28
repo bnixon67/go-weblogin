@@ -45,11 +45,13 @@ func NewConfigFromFile(fileName string) (Config, error) {
 
 // closeConfig closes the Config file
 func closeConfig(f *os.File) {
-	log.Printf("closing %q", f.Name())
+	if f != nil {
+		log.Printf("closing %q", f.Name())
+	}
 
 	err := f.Close()
 	if err != nil {
-		log.Panic(err)
+		log.Print("Close() failed, ", err)
 	}
 }
 
