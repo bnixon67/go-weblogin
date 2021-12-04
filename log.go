@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"runtime"
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ type LogWriter struct{}
 const timeFormat = "2006-01-02 15:04:05 "
 
 func (w LogWriter) Write(data []byte) (int, error) {
-	return fmt.Print(time.Now().Format(timeFormat), funcName(4), ": ", string(data))
+	return fmt.Fprint(os.Stderr, time.Now().Format(timeFormat), funcName(4), ": ", string(data))
 }
 
 func funcName(depth int) string {
