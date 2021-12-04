@@ -13,7 +13,7 @@ type LogWriter struct{}
 
 const timeFormat = "2006-01-02 15:04:05 "
 
-func (w LogWriter) Write(data []byte) (int, error) {
+func (_ LogWriter) Write(data []byte) (int, error) {
 	return fmt.Fprint(os.Stderr, time.Now().Format(timeFormat), funcName(4), ": ", string(data))
 }
 
