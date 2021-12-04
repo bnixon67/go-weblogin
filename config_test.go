@@ -38,7 +38,7 @@ func TestNewConfigFromFile(t *testing.T) {
 	var fileName string
 
 	// test with a valid filename and file with empty json
-	fileName = "test/empty.json"
+	fileName = "testdata/empty.json"
 	config, err := NewConfigFromFile(fileName)
 	if err != nil {
 		t.Fatalf("NewConfigFromFile(%q) failed: %v", fileName, err)
@@ -48,7 +48,7 @@ func TestNewConfigFromFile(t *testing.T) {
 	}
 
 	// test with a valid filename and file with invalid json
-	fileName = "test/invalid.json"
+	fileName = "testdata/invalid.json"
 	config, err = NewConfigFromFile(fileName)
 	if err == nil {
 		t.Errorf("expected NewConfigFromFile(%q) to fail", fileName)
@@ -58,7 +58,7 @@ func TestNewConfigFromFile(t *testing.T) {
 	}
 
 	// test with a valid filename and file with valid json
-	fileName = "test/valid.json"
+	fileName = "testdata/valid.json"
 	config, err = NewConfigFromFile(fileName)
 	if err != nil {
 		t.Fatalf("NewConfigFromFile(%q) failed: %v", fileName, err)
