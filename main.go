@@ -18,13 +18,18 @@ type App struct {
 	config Config
 }
 
-func NewApp(configFileName string) (*App, error) {
+func NewApp(configFileName, logFileName string) (*App, error) {
 	var app App
 	var err error
 
-	// use custom log writer
+	// use custom writer for log
+	lw, err := NewLogWriter(logFileName)
+	if err != nil {
+		log.Printf("unable to create NewLogWriter, %v", err)
+		return &app, err
+	}
 	log.SetFlags(0)
-	log.SetOutput(new(LogWriter))
+	log.SetOutput(lw)
 
 	// read config file
 	app.config, err = NewConfigFromFile(configFileName)
@@ -69,9 +74,10 @@ func main() {
 		return
 	}
 
-	app, err := NewApp(os.Args[1])
+	// TODO: allow logfile to specified in config file
+	app, err := NewApp(os.Args[1], "")
 	if err != nil {
-		log.Printf("init failed")
+		log.Println("init failed", err)
 		return
 	}
 
