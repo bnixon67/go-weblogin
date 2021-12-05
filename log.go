@@ -10,12 +10,15 @@ import (
 	"time"
 )
 
-// LogWriter is a custom io.Writer that can be used to output log entries. Each write will be prefixed with date/time and the function name of the caller to log.
+// LogWriter is a custom io.Writer to output log entries prefixed with date/time and the function name of the caller to log.
 type LogWriter struct {
 	w io.Writer
 }
 
-const timeFormat = "2006-01-02 15:04:05 "
+const (
+	timeFormat = "2006-01-02 15:04:05 "
+	fileMode   = 0600
+)
 
 // NewLogWriter creates a new LogWriter. The filename defines where to write the logfile. If filename is blank, then os.Stderr is used.
 func NewLogWriter(filename string) (LogWriter, error) {
@@ -25,7 +28,7 @@ func NewLogWriter(filename string) (LogWriter, error) {
 	if filename == "" {
 		lw.w = os.Stderr
 	} else {
-		lw.w, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		lw.w, err = os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, fileMode)
 	}
 
 	return lw, err
