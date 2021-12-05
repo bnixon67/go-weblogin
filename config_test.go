@@ -20,7 +20,6 @@ func TestConfigIsValid(t *testing.T) {
 	}
 
 	for _, testCase := range cases {
-		t.Logf("%+v", testCase.config)
 		got := testCase.config.IsValid()
 		if got != testCase.expected {
 			t.Errorf("c.IsValid(%+v) = %v; expected %v", testCase.config, got, testCase.expected)
