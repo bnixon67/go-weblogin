@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<title>Reset Forgotten Password</title>
-<link rel="stylesheet" href="style.css">
+  <title>Reset Forgotten Password</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/w3.css">
 </head>
-
 <body>
-
-<form method="post">
-<div class="container">
-
-<h1>Reset Forgotten Password</h1>
-<p>Please provide the reset token and new password below.</p>
-<hr>
-
-<label for="rtoken"><b>Reset Token</b></label>
-<input type="text" placeholder="Enter your Reset Token" id="rtoken" name="rtoken" maxlength="44" required value="{{.ResetToken}}">
-
-<label for="password1"><b>Password</b></label>
-<input type="password" placeholder="Enter your desired password" id="password1" name="password1" required>
-
-<label for="password"><b>Repeat Password</b></label>
-<input type="password" placeholder="Repeat your desired password" id="password2" name="password2">
-
-<div class="errmsg">{{.Msg}}</div>
-<hr>
-
-<button type="submit" class="submitbtn">Reset Password</button>
-</div>
-
-<div class="container signin">
-<p>If you do not have an account, <a href="/register">Register</a>.</p>
-<div>
-
-</form>
-
+  <div class="w3-container w3-indigo">
+    <h2>Reset Password</h2>
+  </div>
+  <div class="w3-container w3-light-grey">
+    <p>Please provide the reset token and a new password below.</p>
+  </div>
+  <form method="post" class="w3-container">
+    <p>
+      <label for="rtoken"><b>Reset Token</b></label>
+      <input class="w3-input w3-border" type="text" placeholder="Enter your Reset Token" id="rtoken" name="rtoken" maxlength="44" required="" value="{{.ResetToken}}">
+    </p>
+    <p>
+      <label for="password1"><b>Password</b></label> <input class="w3-input w3-border" type="password" placeholder="Enter your desired password" id="password1" name="password1" required="">
+    </p>
+    <p>
+      <label for="password2"><b>Repeat Password</b></label>
+      <input class="w3-input w3-border" type="password" placeholder="Repeat your desired password" id="password2" name="password2">
+    </p>
+    <button type="submit" class="w3-button w3-indigo">Reset Password</button>
+  </form>
+  <div class="w3-panel w3-pale-red w3-center">
+    {{.Msg}}
+  </div>
+  <div class="w3-panel w3-bar w3-light-grey">
+    <a class="w3-bar-item" href="/login">Login</a>
+    <a class="w3-bar-item" href="/register">Register for an account</a>
+  </div>
 </body>
 </html>

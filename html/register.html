@@ -1,49 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-<title>Register</title>
-<link rel="stylesheet" href="style.css">
+  <title>Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/w3.css">
 </head>
-
 <body>
-
-<form method="post">
-<div class="container">
-
-<h1>Register</h1>
-<p>Please provide the following information to register.</p>
-<hr>
-
-<label for="userName"><b>User Name<b></label>
-<input type="text" placeholder="Enter your desired User Name" id="userName" name="userName" maxlength="30" required>
-
-<label for="firstName"><b>First Name</b></label>
-<input type="text" placeholder="Enter your First Name" id="firstName" name="firstName" maxlength="50" required>
-
-<label for="lastName"><b>Last Name</b></label>
-<input type="text" placeholder="Enter your Last Name" id="lastName" name="lastName" maxlength="50" required>
-
-<label for="email"><b>Email Address</b></label>
-<input type="email" placeholder="Enter your Email Address" id="email" name="email" maxlength="256" required>
-
-<label for="password1"><b>Password</b></label>
-<input type="password" placeholder="Enter your desired password" id="password1" name="password1" required>
-
-<label for="password"><b>Repeat Password</b></label>
-<input type="password" placeholder="Repeat your desired password" id="password2" name="password2">
-
-<div class="errmsg">{{.}}</div>
-<hr>
-
-<button type="submit" class="submitbtn">Register</button>
-</div>
-
-<div class="container signin">
-<p>If you already have an account, <a href="/login">Login</a>.</p>
-<div>
-
-</form>
-
+  <div class="w3-container w3-indigo">
+    <h2>Register</h2>
+  </div>
+  <div class="w3-container w3-light-grey">
+    <p>Please provide the following information to register. If you already have an account, <a href="/login">Login</a>.</p>
+  </div>
+  <form method="post" class="w3-container">
+    <p>
+      <label for="userName"><b>User Name</b></label>
+      <input class="w3-input w3-border" type="text" placeholder="Enter your desired User Name" id="userName" name="userName" maxlength="30" required="">
+    </p>
+    <p>
+      <label for="firstName"><b>First Name</b></label>
+      <input class="w3-input w3-border" type="text" placeholder="Enter your First Name" id="firstName" name="firstName" maxlength="50" required="">
+    </p>
+    <p>
+      <label for="lastName"><b>Last Name</b></label>
+      <input class="w3-input w3-border" type="text" placeholder="Enter your Last Name" id="lastName" name="lastName" maxlength="50" required="">
+    </p>
+    <p>
+      <label for="email"><b>Email Address</b></label>
+      <input class="w3-input w3-border" type="email" placeholder="Enter your Email Address" id="email" name="email" maxlength="256" required="">
+    </p>
+    <p>
+      <label for="password1"><b>Password</b></label>
+      <input class="w3-input w3-border" type="password" placeholder="Enter your desired password" id="password1" name="password1" required="">
+    </p>
+    <p>
+      <label for="password2"><b>Repeat Password</b></label>
+      <input class="w3-input w3-border" type="password" placeholder="Repeat your desired password" id="password2" name="password2">
+    </p>
+    <button type="submit" class="w3-button w3-indigo">Register</button>
+  </form>
 </body>
 </html>
