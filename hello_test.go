@@ -8,6 +8,8 @@ import (
 )
 
 func TestHelloHandlerInvalidMethod(t *testing.T) {
+	app := AppForTest(t)
+
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodPost, "/hello", nil)
 
@@ -20,6 +22,8 @@ func TestHelloHandlerInvalidMethod(t *testing.T) {
 }
 
 func TestHelloHandlerWithoutCookie(t *testing.T) {
+	app := AppForTest(t)
+
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/hello", nil)
 
@@ -37,6 +41,8 @@ func TestHelloHandlerWithoutCookie(t *testing.T) {
 }
 
 func TestHelloHandlerWithBadSessionToken(t *testing.T) {
+	app := AppForTest(t)
+
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/hello", nil)
 	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: "foo"})
@@ -55,6 +61,8 @@ func TestHelloHandlerWithBadSessionToken(t *testing.T) {
 }
 
 func TestHelloHandlerWithGoodSessionToken(t *testing.T) {
+	app := AppForTest(t)
+
 	// TODO: better way to define a test user
 	token, _, err := app.loginUser("test", "password")
 	if err != nil {

@@ -5,6 +5,8 @@ import (
 )
 
 func TestConfigIsValid(t *testing.T) {
+	InitLogging("test.log")
+
 	// TODO: generate programmatically based on required values
 	cases := []struct {
 		config   Config
@@ -29,6 +31,8 @@ func TestConfigIsValid(t *testing.T) {
 }
 
 func TestNewConfigFromFile(t *testing.T) {
+	InitLogging("test.log")
+
 	// test empty (invaild) file name
 	_, err := NewConfigFromFile("")
 	if err == nil {

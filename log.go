@@ -20,6 +20,20 @@ const (
 	fileMode   = 0600
 )
 
+// InitLogging initializes logging for the application.
+func InitLogging(logFileName string) error {
+	// use custom writer for log
+	lw, err := NewLogWriter(logFileName)
+	if err != nil {
+		log.Printf("unable to create NewLogWriter, %v", err)
+		return err
+	}
+	log.SetFlags(0)
+	log.SetOutput(lw)
+
+	return err
+}
+
 // NewLogWriter creates a new LogWriter. The filename defines where to write the logfile. If filename is blank, then os.Stderr is used.
 func NewLogWriter(filename string) (LogWriter, error) {
 	var lw LogWriter

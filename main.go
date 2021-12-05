@@ -22,14 +22,10 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	var app App
 	var err error
 
-	// use custom writer for log
-	lw, err := NewLogWriter(logFileName)
+	err = InitLogging(logFileName)
 	if err != nil {
-		log.Printf("unable to create NewLogWriter, %v", err)
 		return &app, err
 	}
-	log.SetFlags(0)
-	log.SetOutput(lw)
 
 	// read config file
 	app.config, err = NewConfigFromFile(configFileName)
