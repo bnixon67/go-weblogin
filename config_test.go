@@ -5,6 +5,7 @@ import (
 )
 
 func TestConfigIsValid(t *testing.T) {
+	// TODO: generate programmatically based on required values
 	cases := []struct {
 		config   Config
 		expected bool
@@ -43,7 +44,7 @@ func TestNewConfigFromFile(t *testing.T) {
 		t.Fatalf("NewConfigFromFile(%q) failed: %v", fileName, err)
 	}
 	if config != (Config{}) {
-		t.Errorf("got %+v, expected %+v", app.config, Config{})
+		t.Errorf("got %+v, expected %+v", config, Config{})
 	}
 
 	// test with a valid filename and file with invalid json
