@@ -18,20 +18,20 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 
 	err = InitLogging(logFileName)
 	if err != nil {
-		return &app, err
+		return nil, err
 	}
 
 	// read config file
 	app.config, err = NewConfigFromFile(configFileName)
 	if err != nil {
 		log.Printf("unable to read config file %q, %v", configFileName, err)
-		return &app, err
+		return nil, err
 	}
 
 	// ensure required config values have been provided
 	if !app.config.IsValid() {
 		log.Printf("config is not valid")
-		return &app, err
+		return nil, err
 	}
 
 	// TODO: handle this default value
@@ -43,14 +43,14 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	app.db, err = initDB(app.config.SQLDriverName, app.config.SQLDataSourceName)
 	if err != nil {
 		log.Printf("initDB failed: %v", err)
-		return &app, err
+		return nil, err
 	}
 
 	// init HTML templates
 	app.tmpls, err = initTemplates(app.config.ParseGlobPattern)
 	if err != nil {
 		log.Printf("initTemplates failed: %v", err)
-		return &app, err
+		return nil, err
 	}
 
 	return &app, err
