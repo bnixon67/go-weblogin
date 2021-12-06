@@ -51,6 +51,13 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+const (
+	MSG_MISSING_USERNAME_PASSWORD = "Missing username and password"
+	MSG_MISSING_USERNAME          = "Missing username"
+	MSG_MISSING_PASSWORD          = "Missing password"
+	MSG_LOGIN_FAILED              = "Login Failed"
+)
+
 // loginPut is called for the PUT method of the LoginHandler
 func (app *App) loginPut(w http.ResponseWriter, r *http.Request) {
 	// get form values
@@ -61,11 +68,11 @@ func (app *App) loginPut(w http.ResponseWriter, r *http.Request) {
 	var msg string
 	switch {
 	case userName == "" && password == "":
-		msg = "Missing username and password"
+		msg = MSG_MISSING_USERNAME_PASSWORD
 	case userName == "":
-		msg = "Missing username"
+		msg = MSG_MISSING_USERNAME
 	case password == "":
-		msg = "Missing password"
+		msg = MSG_MISSING_PASSWORD
 	}
 	if msg != "" {
 		log.Println(msg)
@@ -80,7 +87,7 @@ func (app *App) loginPut(w http.ResponseWriter, r *http.Request) {
 	// attempt to login the given userName with the given password
 	sessionToken, sessionExpires, err := app.loginUser(userName, password)
 	if err != nil {
-		err := app.tmpls.ExecuteTemplate(w, "login.html", err)
+		err := app.tmpls.ExecuteTemplate(w, "login.html", MSG_LOGIN_FAILED)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
