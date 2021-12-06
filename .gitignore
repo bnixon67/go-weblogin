@@ -4,3 +4,4 @@ cover.html
 cover.out
 *.swp
 *.log
+coverage.*
