@@ -2,16 +2,19 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"html/template"
 	"log"
 )
 
+// App contains variables to reuse across the application, mostly in the Handler functions, to eliminate global variables.
 type App struct {
 	db     *sql.DB
 	tmpls  *template.Template
 	config Config
 }
 
+// NewApp returns a new App based on the config and log filenames provided.
 func NewApp(configFileName, logFileName string) (*App, error) {
 	var app App
 	var err error
@@ -30,8 +33,8 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 
 	// ensure required config values have been provided
 	if !app.config.IsValid() {
-		log.Printf("config is not valid")
-		return nil, err
+		log.Printf("invalid config")
+		return nil, errors.New("invalid config")
 	}
 
 	// TODO: handle this default value

@@ -78,7 +78,7 @@ func (app *App) forgotPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resetURL := "http://192.168.1.111:8000/reset?rtoken=" + resetToken
+	resetURL := "https://" + app.config.ServerAddr + "/reset?rtoken=" + resetToken
 
 	SendEmail(app.config.SmtpUser, app.config.SmtpPassword, app.config.SmtpHost, app.config.SmtpPort, email, "Reset Pasword", resetURL)
 

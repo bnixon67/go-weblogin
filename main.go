@@ -21,13 +21,13 @@ func main() {
 	// TODO: allow logfile to specified in config file
 	app, err := NewApp(os.Args[1], "")
 	if err != nil {
-		log.Println("init failed", err)
+		log.Printf("could not create NewApp, %v", err)
 		return
 	}
 
 	// define HTTP server
 	s := &http.Server{
-		Addr:              ":8443",
+		Addr:              app.config.ServerAddr,
 		Handler:           &logRequestHandler{http.DefaultServeMux},
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

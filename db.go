@@ -22,7 +22,7 @@ func initDB(driverName, dataSourceName string) (*sql.DB, error) {
 	db.SetMaxOpenConns(25)
 	db.SetMaxIdleConns(25)
 
-	// Ping to confirm connection
+	// ping database to confirm connection
 	err = db.Ping()
 	if err != nil {
 		return nil, err

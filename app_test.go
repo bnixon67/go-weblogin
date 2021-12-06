@@ -14,13 +14,14 @@ func AppForTest(t *testing.T) *App {
 		app, err = NewApp("config.json", "test.log")
 		if err != nil {
 			app = nil
-			t.Fatal("cannot create NewApp")
+			t.Fatalf("cannot create NewApp, %v", err)
 		}
 	}
 
 	return app
 }
 
+// TestNewApp provides tests for the NewApp function.
 func TestNewApp(t *testing.T) {
 	app, err := NewApp("", "test.log")
 	if err == nil {
