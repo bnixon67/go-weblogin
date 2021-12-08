@@ -8,7 +8,8 @@ import (
 
 // Config represents the configuration values.
 type Config struct {
-	ServerAddr string // server address
+	ServerHost string
+	ServerPort string
 
 	SQLDriverName     string // driverName for sql.Open
 	SQLDataSourceName string // dataSourceName for sql.Open
@@ -60,7 +61,8 @@ func (c Config) IsValid() bool {
 	// ensure required config values have been provided
 	// test conditions on separate lines to avoid short circuit evaluation
 	isEmpty := false
-	isEmpty = logIfEmpty(c.ServerAddr, "missing or empty ServerAddr in config file") || isEmpty
+	isEmpty = logIfEmpty(c.ServerHost, "missing or empty ServerHost in config file") || isEmpty
+	isEmpty = logIfEmpty(c.ServerPort, "missing or empty ServerPort in config file") || isEmpty
 	isEmpty = logIfEmpty(c.SQLDriverName, "missing or empty SQLDriverName in config file") || isEmpty
 	isEmpty = logIfEmpty(c.SQLDataSourceName, "missing or empty SQLDataSourceName in config file") || isEmpty
 	isEmpty = logIfEmpty(c.ParseGlobPattern, "missing or empty ParseGlobPattern in config file") || isEmpty

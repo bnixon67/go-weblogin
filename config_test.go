@@ -12,14 +12,15 @@ func TestConfigIsValid(t *testing.T) {
 		config   Config
 		expected bool
 	}{
-		{Config{ServerAddr: "", SQLDriverName: "", SQLDataSourceName: "", ParseGlobPattern: ""}, false},
-		{Config{ServerAddr: "", SQLDriverName: "", SQLDataSourceName: "", ParseGlobPattern: "foo"}, false},
-		{Config{ServerAddr: "", SQLDriverName: "", SQLDataSourceName: "foo", ParseGlobPattern: ""}, false},
-		{Config{ServerAddr: "", SQLDriverName: "", SQLDataSourceName: "foo", ParseGlobPattern: "foo"}, false},
-		{Config{ServerAddr: "foo", SQLDriverName: "foo", SQLDataSourceName: "", ParseGlobPattern: ""}, false},
-		{Config{ServerAddr: "foo", SQLDriverName: "foo", SQLDataSourceName: "", ParseGlobPattern: "foo"}, false},
-		{Config{ServerAddr: "foo", SQLDriverName: "foo", SQLDataSourceName: "foo", ParseGlobPattern: ""}, false},
-		{Config{ServerAddr: "foo", SQLDriverName: "foo", SQLDataSourceName: "foo", ParseGlobPattern: "foo"}, true},
+		{Config{ServerHost: "", SQLDriverName: "", SQLDataSourceName: "", ParseGlobPattern: ""}, false},
+		{Config{ServerHost: "", SQLDriverName: "", SQLDataSourceName: "", ParseGlobPattern: "foo"}, false},
+		{Config{ServerHost: "", SQLDriverName: "", SQLDataSourceName: "foo", ParseGlobPattern: ""}, false},
+		{Config{ServerHost: "", SQLDriverName: "", SQLDataSourceName: "foo", ParseGlobPattern: "foo"}, false},
+		{Config{ServerHost: "foo", SQLDriverName: "foo", SQLDataSourceName: "", ParseGlobPattern: ""}, false},
+		{Config{ServerHost: "foo", SQLDriverName: "foo", SQLDataSourceName: "", ParseGlobPattern: "foo"}, false},
+		{Config{ServerHost: "foo", SQLDriverName: "foo", SQLDataSourceName: "foo", ParseGlobPattern: ""}, false},
+		{Config{ServerHost: "foo", SQLDriverName: "foo", SQLDataSourceName: "foo", ParseGlobPattern: "foo"}, false},
+		{Config{ServerHost: "foo", ServerPort: "foo", SQLDriverName: "foo", SQLDataSourceName: "foo", ParseGlobPattern: "foo"}, true},
 	}
 
 	for _, testCase := range cases {

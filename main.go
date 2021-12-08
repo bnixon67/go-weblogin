@@ -27,7 +27,7 @@ func main() {
 
 	// define HTTP server
 	s := &http.Server{
-		Addr:              app.config.ServerAddr,
+		Addr:              ":" + app.config.ServerPort,
 		Handler:           &logRequestHandler{http.DefaultServeMux},
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

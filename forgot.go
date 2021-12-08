@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -78,7 +79,7 @@ func (app *App) forgotPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resetURL := "https://" + app.config.ServerAddr + "/reset?rtoken=" + resetToken
+	resetURL := fmt.Sprintf("https://%s:%s/reset?rtoken=%s", app.config.ServerHost, app.config.ServerPort, resetToken)
 
 	SendEmail(app.config.SmtpUser, app.config.SmtpPassword, app.config.SmtpHost, app.config.SmtpPort, email, "Reset Pasword", resetURL)
 
