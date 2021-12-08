@@ -34,15 +34,14 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 func (app *App) registerPut(w http.ResponseWriter, r *http.Request) {
 	// get form values
 	userName := r.PostFormValue("userName")
-	firstName := r.PostFormValue("firstName")
-	lastName := r.PostFormValue("lastName")
+	fullName := r.PostFormValue("fullName")
 	email := r.PostFormValue("email")
 	password1 := r.PostFormValue("password1")
 	password2 := r.PostFormValue("password2")
 
 	// check for missing values
 	// redundant given client side required fields, but good practice
-	if userName == "" || password1 == "" || password2 == "" || firstName == "" || lastName == "" || email == "" {
+	if userName == "" || password1 == "" || password2 == "" || fullName == "" || email == "" {
 		msg := "Missing values"
 		log.Println(msg, "for", userName)
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
@@ -92,8 +91,8 @@ func (app *App) registerPut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// store the user and hashed password
-	_, err = app.db.Query("INSERT INTO users(username, hashedPassword, firstName, lastName, email) VALUES (?, ?, ?, ?, ?)",
-		userName, string(hashedPassword), firstName, lastName, email)
+	_, err = app.db.Query("INSERT INTO users(username, hashedPassword, fullName, email) VALUES (?, ?, ?, ?)",
+		userName, string(hashedPassword), fullName, email)
 	if err != nil {
 		msg := "Unable to register user"
 		log.Println(msg, "for", userName, err)

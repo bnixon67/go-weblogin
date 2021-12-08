@@ -2,8 +2,7 @@ DROP TABLE IF EXISTS `users`;
 
 CREATE TABLE `users` (
   `userName` varchar(30) NOT NULL,
-  `firstName` varchar(50) DEFAULT NULL,
-  `lastName` varchar(50) DEFAULT NULL,
+  `fullName` varchar(70) DEFAULT NULL,
   `email` varchar(256) DEFAULT NULL,
   `hashedPassword` char(72) NOT NULL,
   `sessionToken` varchar(44) DEFAULT NULL,

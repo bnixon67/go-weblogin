@@ -11,8 +11,7 @@ import (
 type User struct {
 	UserName       string
 	SessionToken   string
-	FirstName      string
-	LastName       string
+	FullName       string
 	Email          string
 	SessionExpires time.Time
 }
@@ -23,9 +22,9 @@ var ErrSessionTokenNotFound = errors.New("sessionToken not found")
 func (app *App) GetUserForSessionToken(sessionToken string) (User, error) {
 	user := User{}
 
-	qry := "SELECT userName, sessionToken, firstName, lastName, email, sessionExpires FROM users WHERE sessionToken=?"
+	qry := "SELECT userName, sessionToken, fullName, email, sessionExpires FROM users WHERE sessionToken=?"
 	result := app.db.QueryRow(qry, sessionToken)
-	err := result.Scan(&user.UserName, &user.SessionToken, &user.FirstName, &user.LastName, &user.Email, &user.SessionExpires)
+	err := result.Scan(&user.UserName, &user.SessionToken, &user.FullName, &user.Email, &user.SessionExpires)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return User{}, ErrSessionTokenNotFound
