@@ -35,6 +35,11 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+const (
+	MSG_MISSING_RESET_VALUES = "Missing values"
+	MSG_MISMATCHED_PASSWORDS = "Passwords do not match"
+)
+
 // resetPut is called for the PUT method of the RegisterHandler
 func (app *App) resetPut(w http.ResponseWriter, r *http.Request, tmplFileName string) {
 	// get form values
@@ -45,7 +50,7 @@ func (app *App) resetPut(w http.ResponseWriter, r *http.Request, tmplFileName st
 	// check for missing values
 	// redundant given client side required fields, but good practice
 	if resetToken == "" || password1 == "" || password2 == "" {
-		msg := "Missing values"
+		msg := MSG_MISSING_RESET_VALUES
 		log.Println(msg)
 		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
@@ -58,7 +63,7 @@ func (app *App) resetPut(w http.ResponseWriter, r *http.Request, tmplFileName st
 	// check that password fields match
 	// may be redundant if done client side, but good practice
 	if password1 != password2 {
-		msg := "Passwords do not match"
+		msg := MSG_MISMATCHED_PASSWORDS
 		log.Println(msg)
 		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
