@@ -63,7 +63,7 @@ func (app *App) GetUserNameForEmail(email string) (string, error) {
 	err := row.Scan(&userName)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("No username for %q", email)
+			log.Printf("no username for %q", email)
 			return "", ErrNoUserName
 		}
 		log.Printf("query for email %q failed", email)

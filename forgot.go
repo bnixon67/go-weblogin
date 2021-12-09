@@ -31,6 +31,11 @@ func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+const (
+	MSG_MISSING_EMAIL = "Missing email"
+	MSG_NO_SUCH_USER  = "There is no registered User Name for the Email provided."
+)
+
 // forgotPut is called for the PUT method of the LoginHandler
 func (app *App) forgotPut(w http.ResponseWriter, r *http.Request) {
 	// get form values
@@ -39,7 +44,7 @@ func (app *App) forgotPut(w http.ResponseWriter, r *http.Request) {
 	// check for missing values
 	var msg string
 	if email == "" {
-		msg = "Missing email"
+		msg = MSG_MISSING_EMAIL
 	}
 	if msg != "" {
 		log.Println(msg)
@@ -51,10 +56,11 @@ func (app *App) forgotPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// attempt to login the given userName with the given password
+	// get userName for email provided on the form
 	userName, err := app.GetUserNameForEmail(email)
 	if err != nil || userName == "" {
-		err := app.tmpls.ExecuteTemplate(w, "forgot.html", err)
+		msg = MSG_NO_SUCH_USER
+		err := app.tmpls.ExecuteTemplate(w, "forgot.html", msg)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -80,7 +86,6 @@ func (app *App) forgotPut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resetURL := fmt.Sprintf("https://%s:%s/reset?rtoken=%s", app.config.ServerHost, app.config.ServerPort, resetToken)
-
 	SendEmail(app.config.SmtpUser, app.config.SmtpPassword, app.config.SmtpHost, app.config.SmtpPort, email, "Reset Pasword", resetURL)
 
 	err = app.tmpls.ExecuteTemplate(w, "forgot_sent.html", err)
