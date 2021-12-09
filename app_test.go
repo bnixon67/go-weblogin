@@ -30,4 +30,20 @@ func TestNewApp(t *testing.T) {
 	if app != nil {
 		t.Errorf("got app=%v, expected nil for NewApp(\"\", \"\")\n", app)
 	}
+
+	app, err = NewApp("", "/foo/bar")
+	if err == nil {
+		t.Error("expected non-nill err for NewApp(\"\", \"\")\n")
+	}
+	if app != nil {
+		t.Errorf("got app=%v, expected nil for NewApp(\"\", \"\")\n", app)
+	}
+
+	app, err = NewApp("testdata/empty.json", "test.log")
+	if err == nil {
+		t.Error("expected non-nill err for NewApp(\"\", \"\")\n")
+	}
+	if app != nil {
+		t.Errorf("got app=%v, expected nil for NewApp(\"\", \"\")\n", app)
+	}
 }

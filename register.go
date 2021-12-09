@@ -30,6 +30,12 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+const (
+	MSG_REGISTER_MISSING_VALUES           = "Please provide all the required values"
+	MSG_REGISTER_ERR_EXISTING_USER        = "Sorry, your desired User Name already exists. Please try a different User Name"
+	MSG_REGISTER_ERR_MISMATCHED_PASSWORDS = "Password do not match."
+)
+
 // registerPut is called for the PUT method of the RegisterHandler
 func (app *App) registerPut(w http.ResponseWriter, r *http.Request) {
 	// get form values
@@ -42,7 +48,7 @@ func (app *App) registerPut(w http.ResponseWriter, r *http.Request) {
 	// check for missing values
 	// redundant given client side required fields, but good practice
 	if userName == "" || password1 == "" || password2 == "" || fullName == "" || email == "" {
-		msg := "Missing values"
+		msg := MSG_REGISTER_MISSING_VALUES
 		log.Println(msg, "for", userName)
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
@@ -56,7 +62,7 @@ func (app *App) registerPut(w http.ResponseWriter, r *http.Request) {
 	exists, _ := app.CheckForUserName(userName)
 	if exists {
 		log.Printf("UserName exists for %q", userName)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", "Sorry, your desired User Name already exists. Please try a different User Name")
+		err := app.tmpls.ExecuteTemplate(w, "register.html", MSG_REGISTER_ERR_EXISTING_USER)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -67,7 +73,7 @@ func (app *App) registerPut(w http.ResponseWriter, r *http.Request) {
 	// check that password fields match
 	// may be redundant if done client side, but good practice
 	if password1 != password2 {
-		msg := "Passwords do not match"
+		msg := MSG_REGISTER_ERR_MISMATCHED_PASSWORDS
 		log.Println(msg, "for", userName)
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
