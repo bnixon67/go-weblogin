@@ -19,11 +19,13 @@ type LoginPageData struct {
 
 // LoginHandler handles /login requests
 func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.Method)
+	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
+		log.Println("invalid method", r.Method)
+		return
+	}
 
 	switch r.Method {
-
-	case "GET":
+	case http.MethodGet:
 		// get currentUser if sessionToken exists
 		var sessionToken string
 		var currentUser User
@@ -41,14 +43,9 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-	case "POST":
-		app.loginPut(w, r)
-
-	default:
-		log.Println("Invalid method", r.Method)
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	case http.MethodPost:
+		app.loginPost(w, r)
 	}
-
 }
 
 const (
@@ -58,8 +55,8 @@ const (
 	MSG_LOGIN_FAILED              = "Login Failed"
 )
 
-// loginPut is called for the PUT method of the LoginHandler
-func (app *App) loginPut(w http.ResponseWriter, r *http.Request) {
+// loginPost is called for the POST method of the LoginHandler
+func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// get form values
 	userName := r.PostFormValue("username")
 	password := r.PostFormValue("password")

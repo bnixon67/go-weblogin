@@ -14,10 +14,8 @@ type HelloPageData struct {
 
 // HelloHandler prints a simple hello message
 func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
-	// only GET method is allowed
-	if r.Method != "GET" {
+	if !ValidMethod(w, r, []string{http.MethodGet}) {
 		log.Println("invalid method", r.Method)
-		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 

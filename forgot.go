@@ -10,25 +10,22 @@ import (
 
 // ForgotHandler handles /forgot requests
 func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method)
+	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
+		log.Println("invalid method", r.Method)
+		return
+	}
 
 	switch r.Method {
-
-	case "GET":
+	case http.MethodGet:
 		err := app.tmpls.ExecuteTemplate(w, "forgot.html", nil)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-	case "POST":
-		app.forgotPut(w, r)
-
-	default:
-		log.Println("Invalid method", r.Method)
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	case http.MethodPost:
+		app.forgotPost(w, r)
 	}
-
 }
 
 const (
@@ -36,8 +33,8 @@ const (
 	MSG_NO_SUCH_USER  = "There is no registered User Name for the Email provided."
 )
 
-// forgotPut is called for the PUT method of the LoginHandler
-func (app *App) forgotPut(w http.ResponseWriter, r *http.Request) {
+// forgotPost is called for the POST method of the LoginHandler
+func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	// get form values
 	email := r.PostFormValue("email")
 

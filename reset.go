@@ -14,23 +14,21 @@ type ResetData struct {
 
 // ResetHandler handles /rest requests
 func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.Method, "from", r.RemoteAddr)
+	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
+		log.Println("invalid method", r.Method)
+		return
+	}
 
 	switch r.Method {
-
-	case "GET":
+	case http.MethodGet:
 		err := app.tmpls.ExecuteTemplate(w, "reset.html", ResetData{ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-	case "POST":
-		app.resetPut(w, r, "reset.html")
-
-	default:
-		log.Println("Invalid method", r.Method)
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	case http.MethodPost:
+		app.resetPost(w, r, "reset.html")
 	}
 
 }
@@ -40,8 +38,8 @@ const (
 	MSG_MISMATCHED_PASSWORDS = "Passwords do not match"
 )
 
-// resetPut is called for the PUT method of the RegisterHandler
-func (app *App) resetPut(w http.ResponseWriter, r *http.Request, tmplFileName string) {
+// resetPost is called for the POST method of the RegisterHandler
+func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName string) {
 	// get form values
 	resetToken := r.PostFormValue("rtoken")
 	password1 := r.PostFormValue("password1")

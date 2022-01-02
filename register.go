@@ -9,25 +9,22 @@ import (
 
 // RegisterHandler handles /register requests
 func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.Method)
+	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
+		log.Println("invalid method", r.Method)
+		return
+	}
 
 	switch r.Method {
-
-	case "GET":
+	case http.MethodGet:
 		err := app.tmpls.ExecuteTemplate(w, "register.html", nil)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 
-	case "POST":
-		app.registerPut(w, r)
-
-	default:
-		log.Println("Invalid method", r.Method)
-		w.WriteHeader(http.StatusMethodNotAllowed)
+	case http.MethodPost:
+		app.registerPost(w, r)
 	}
-
 }
 
 const (
@@ -36,8 +33,8 @@ const (
 	MSG_REGISTER_ERR_MISMATCHED_PASSWORDS = "Password do not match."
 )
 
-// registerPut is called for the PUT method of the RegisterHandler
-func (app *App) registerPut(w http.ResponseWriter, r *http.Request) {
+// registerPost is called for the POST method of the RegisterHandler
+func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// get form values
 	userName := r.PostFormValue("userName")
 	fullName := r.PostFormValue("fullName")
