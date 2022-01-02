@@ -5,3 +5,5 @@ cover.out
 *.swp
 *.log
 coverage.*
+go-web-login
+nohup.out
