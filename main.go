@@ -63,6 +63,12 @@ type logRequestHandler struct {
 
 // ServerHTTP for logRequestHandler log the HTTP request and then calls the next HTTP handler specified
 func (l *logRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.RemoteAddr, r.Method, r.RequestURI)
+	var ip string
+	ip = r.Header.Get("X-Real-IP")
+	if ip == "" {
+		ip = r.RemoteAddr
+	}
+
+	log.Println(ip, r.Method, r.RequestURI)
 	l.next.ServeHTTP(w, r)
 }
