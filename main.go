@@ -43,8 +43,14 @@ func main() {
 	http.HandleFunc("/forgot", app.ForgotHandler)
 	http.HandleFunc("/reset", app.ResetHandler)
 	http.HandleFunc("/hello", app.HelloHandler)
-	http.Handle("/style.css", http.FileServer(http.Dir("html")))
-	http.Handle("/w3.css", http.FileServer(http.Dir("html")))
+	http.HandleFunc("/w3.css",
+		func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFile(w, r, "html/w3.css")
+		})
+	http.HandleFunc("/favicon.ico",
+		func(w http.ResponseWriter, r *http.Request) {
+			http.ServeFile(w, r, "html/favicon.ico")
+		})
 	http.Handle("/", http.RedirectHandler("/hello", http.StatusMovedPermanently))
 
 	// run server
