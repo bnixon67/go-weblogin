@@ -157,3 +157,28 @@ func TestLoginHandlerPostValidUserNameAndPassword(t *testing.T) {
 		t.Fatalf("got body %q, expected %q", w.Body, expected)
 	}
 }
+
+func TestLoginHandlerPostValidUserNameAndInvalidPassword(t *testing.T) {
+	data := url.Values{
+		"username": {"test"},
+		"password": {"invalid"},
+	}
+
+	app := AppForTest(t)
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	app.LoginHandler(w, r)
+
+	expectedStatus := http.StatusOK
+	if w.Code != expectedStatus {
+		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+	}
+
+	expectedInBody := MSG_LOGIN_FAILED
+	if !strings.Contains(w.Body.String(), expectedInBody) {
+		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+	}
+}
