@@ -11,6 +11,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+var (
+	ErrNoSuchUser      = errors.New("no such user")
+	ErrInvalidPassword = errors.New("invalid password")
+	ErrInternalFailure = errors.New("login failed due to internal error")
+)
+
 // LoginPageData record
 type LoginPageData struct {
 	Message     string
@@ -117,26 +123,25 @@ func (app *App) loginUser(userName, password string) (string, time.Time, error) 
 	err := result.Scan(&hashedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("Username %q does not exist", userName)
-			return sessionToken, sessionExpires, errors.New("login failed")
+			log.Printf("%v %q", ErrNoSuchUser, userName)
+			return sessionToken, sessionExpires, ErrNoSuchUser
 		}
-		log.Println("Login failed", err)
-		return sessionToken, sessionExpires, errors.New("login failed")
+		log.Printf("query failed for %q: %v", userName, err)
+		return sessionToken, sessionExpires, ErrInternalFailure
 	}
 
 	// compared hashed password with given password
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err != nil {
-		log.Printf("Invalid password for %q", userName)
-		return sessionToken, sessionExpires, errors.New("login failed")
+		log.Printf("%v for %q", ErrInvalidPassword, userName)
+		return sessionToken, sessionExpires, ErrInvalidPassword
 	}
 
 	// create a new random sessions token
 	sessionToken, err = GenerateRandomString(32)
 	if err != nil {
-		log.Print("Could not generate sessionToken")
-		log.Print(err)
-		return sessionToken, sessionExpires, errors.New("login failed")
+		log.Printf("unable to GenerateRandomString: %v", err)
+		return sessionToken, sessionExpires, ErrInternalFailure
 	}
 
 	// store the sessionToken
@@ -144,9 +149,8 @@ func (app *App) loginUser(userName, password string) (string, time.Time, error) 
 
 	_, err = app.db.Query("UPDATE users SET sessionToken = ?, sessionExpires = ? WHERE username = ?", sessionToken, sessionExpires, userName)
 	if err != nil {
-		log.Printf("Unable to store sessionToken for %q", userName)
-		log.Print(err)
-		return sessionToken, sessionExpires, errors.New("login failed")
+		log.Printf("update sessionToken failed for %q: %v", userName, err)
+		return sessionToken, sessionExpires, ErrInternalFailure
 	}
 
 	return sessionToken, sessionExpires, nil

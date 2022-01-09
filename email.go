@@ -52,8 +52,7 @@ func SendEmail(smtpUser, smtpPassword, smtpHost, smtpPort, to, subject, body str
 	// send email
 	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, mailMessage.From, []string{mailMessage.To}, message.Bytes())
 	if err != nil {
-		log.Print("SendMail failed")
-		log.Print(err)
+		log.Printf("SendMail failed: %v", err)
 		return err
 	}
 

@@ -7,6 +7,8 @@ import (
 	"log"
 )
 
+var ErrInvalidConfig = errors.New("invalid config")
+
 // App contains variables to reuse across the application, mostly in the Handler functions, to eliminate global variables.
 type App struct {
 	db     *sql.DB
@@ -33,8 +35,8 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 
 	// ensure required config values have been provided
 	if !app.config.IsValid() {
-		log.Printf("invalid config")
-		return nil, errors.New("invalid config")
+		log.Println(ErrInvalidConfig)
+		return nil, ErrInvalidConfig
 	}
 
 	// TODO: handle this default value

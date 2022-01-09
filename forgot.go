@@ -68,16 +68,14 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	// get a new random token to reset password
 	resetToken, err := GenerateRandomString(32)
 	if err != nil {
-		log.Print("Could not generate resetToken")
-		log.Print(err)
+		log.Printf("could not generate resetToken: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	app.SaveResetTokenForUser(userName, resetToken)
 	if err != nil {
-		log.Print("SaveForgotTokenForUser failed")
-		log.Print(err)
+		log.Printf("SaveForgotTokenForUser failed: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}

@@ -16,7 +16,12 @@ type User struct {
 	SessionExpires time.Time
 }
 
-var ErrSessionTokenNotFound = errors.New("sessionToken not found")
+var (
+	ErrSessionTokenNotFound = errors.New("sessionToken not found")
+	ErrNoUserForEmail       = errors.New("no username for email")
+	ErrNoUserForResetToken  = errors.New("no username for resetToken")
+	ErrTooManyRows          = errors.New("too many rows affected")
+)
 
 // GetUserForSessionToken returns a user for the given sessionToken
 func (app *App) GetUserForSessionToken(sessionToken string) (User, error) {
@@ -45,15 +50,12 @@ func (app *App) CheckForUserName(userName string) (bool, error) {
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
-		log.Printf("query for userName %q failed", userName)
-		log.Print(err)
+		log.Printf("query for userName %q failed: %v", userName, err)
 		return false, err
 	}
 
 	return true, err
 }
-
-var ErrNoUserName = errors.New("no username for email")
 
 // GetUserNameForEmail returns the userName for a given email
 func (app *App) GetUserNameForEmail(email string) (string, error) {
@@ -64,10 +66,9 @@ func (app *App) GetUserNameForEmail(email string) (string, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("no username for %q", email)
-			return "", ErrNoUserName
+			return "", ErrNoUserForEmail
 		}
-		log.Printf("query for email %q failed", email)
-		log.Print(err)
+		log.Printf("query for email %q failed: %v", email, err)
 		return "", err
 	}
 
@@ -83,10 +84,9 @@ func (app *App) GetUserNameForResetToken(resetToken string) (string, error) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("No username for %q", resetToken)
-			return "", ErrNoUserName
+			return "", ErrNoUserForResetToken
 		}
-		log.Printf("query for resetToken %q failed", resetToken)
-		log.Print(err)
+		log.Printf("query for resetToken %q failed: %v", resetToken, err)
 		return "", err
 	}
 
@@ -96,21 +96,18 @@ func (app *App) GetUserNameForResetToken(resetToken string) (string, error) {
 func (app *App) SaveResetTokenForUser(userName, resetToken string) error {
 	result, err := app.db.Exec("UPDATE users SET resetToken  = ? WHERE username = ?", resetToken, userName)
 	if err != nil {
-		log.Printf("Unable to store resetToken for %q", userName)
-		log.Print(err)
+		log.Printf("update resetToken for %q failed: %v", userName, err)
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		log.Print("RowsAffected() is not nil")
-		log.Print(err)
+		log.Printf("RowsAffected() is not nil: %v", err)
 		return err
 	}
 	if rowsAffected != 1 {
 		log.Printf("expected to affect 1 row, affected %d", rowsAffected)
-		log.Print(err)
-		return err
+		return ErrTooManyRows
 	}
 
 	log.Printf("Saved resetToken %q for %q", resetToken, userName)
