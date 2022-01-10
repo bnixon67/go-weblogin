@@ -1,6 +1,6 @@
 {
 	"ServerHost": "host",
-	"ServerPost": "port",
+	"ServerPort": "port",
 
 	"SqlDriverName": "mysql",
 	"SqlDataSourceName": "user:password@/gologin?parseTime=true",
