@@ -7,7 +7,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// TODO: handle duplicate emails
+const (
+	MSG_REGISTER_MISSING_VALUES       = "Please provide all the required values"
+	MSG_REGISTER_USER_EXISTS          = "Your desired User Name already exists."
+	MSG_REGISTER_EMAIL_EXISTS         = "A User Name already exists for this Email Address."
+	MSG_REGISTER_MISMATCHED_PASSWORDS = "Password do not match."
+)
 
 // RegisterHandler handles /register requests
 func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,12 +33,6 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		app.registerPost(w, r)
 	}
 }
-
-const (
-	MSG_REGISTER_MISSING_VALUES           = "Please provide all the required values"
-	MSG_REGISTER_ERR_EXISTING_USER        = "Sorry, your desired User Name already exists. Please try a different User Name"
-	MSG_REGISTER_ERR_MISMATCHED_PASSWORDS = "Password do not match."
-)
 
 // registerPost is called for the POST method of the RegisterHandler
 func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
@@ -58,10 +57,32 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that userName doesn't already exist
-	exists, _ := app.CheckForUserName(userName)
-	if exists {
-		log.Printf("UserName exists for %q", userName)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", MSG_REGISTER_ERR_EXISTING_USER)
+	userExists, err := app.CheckForUserName(userName)
+	if err != nil {
+		log.Printf("error from CheckForUserName(%q): %v", userName, err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if userExists {
+		log.Printf("userName %q already exists", userName)
+		err := app.tmpls.ExecuteTemplate(w, "register.html", MSG_REGISTER_USER_EXISTS)
+		if err != nil {
+			log.Println("error executing template", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// check that email doesn't already exist
+	emailExists, err := app.CheckForEmail(email)
+	if err != nil {
+		log.Printf("error from CheckForEmail(%q): %v", email, err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if emailExists {
+		log.Printf("email %q already exists", email)
+		err := app.tmpls.ExecuteTemplate(w, "register.html", MSG_REGISTER_EMAIL_EXISTS)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -72,7 +93,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// check that password fields match
 	// may be redundant if done client side, but good practice
 	if password1 != password2 {
-		msg := MSG_REGISTER_ERR_MISMATCHED_PASSWORDS
+		msg := MSG_REGISTER_MISMATCHED_PASSWORDS
 		log.Println(msg, "for", userName)
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {

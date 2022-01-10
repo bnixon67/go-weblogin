@@ -57,6 +57,23 @@ func (app *App) CheckForUserName(userName string) (bool, error) {
 	return true, err
 }
 
+// CheckForEmail returns true if the given email already exists
+func (app *App) CheckForEmail(email string) (bool, error) {
+	var num int
+
+	row := app.db.QueryRow("SELECT 1 FROM users WHERE email=?", email)
+	err := row.Scan(&num)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		log.Printf("query for email %q failed: %v", email, err)
+		return false, err
+	}
+
+	return true, err
+}
+
 // GetUserNameForEmail returns the userName for a given email
 func (app *App) GetUserNameForEmail(email string) (string, error) {
 	var userName string

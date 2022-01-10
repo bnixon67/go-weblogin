@@ -82,13 +82,13 @@ func TestRegisterHandlerPostExistingUser(t *testing.T) {
 		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MSG_REGISTER_ERR_EXISTING_USER
+	expectedInBody := MSG_REGISTER_USER_EXISTS
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
-func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
+func TestRegisterHandlerPostExistingEmail(t *testing.T) {
 	randomUserName, err := GenerateRandomString(8)
 	if err != nil {
 		t.Fatalf("could not GenerateRandomString")
@@ -96,7 +96,7 @@ func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
 	data := url.Values{
 		"userName":  {randomUserName},
 		"fullName":  {"full name"},
-		"email":     {"email"},
+		"email":     {"test@email"},
 		"password1": {"password one"},
 		"password2": {"password two"},
 	}
@@ -114,7 +114,39 @@ func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
 		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MSG_REGISTER_ERR_MISMATCHED_PASSWORDS
+	expectedInBody := MSG_REGISTER_EMAIL_EXISTS
+	if !strings.Contains(w.Body.String(), expectedInBody) {
+		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+	}
+}
+
+func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
+	randomUserName, err := GenerateRandomString(8)
+	if err != nil {
+		t.Fatalf("could not GenerateRandomString")
+	}
+	data := url.Values{
+		"userName":  {randomUserName},
+		"fullName":  {"full name"},
+		"email":     {randomUserName + "@email"},
+		"password1": {"password one"},
+		"password2": {"password two"},
+	}
+
+	app := AppForTest(t)
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPost, "/register", strings.NewReader(data.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	app.RegisterHandler(w, r)
+
+	expectedStatus := http.StatusOK
+	if w.Code != expectedStatus {
+		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+	}
+
+	expectedInBody := MSG_REGISTER_MISMATCHED_PASSWORDS
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -128,7 +160,7 @@ func TestRegisterHandlerPostValid(t *testing.T) {
 	data := url.Values{
 		"userName":  {randomUserName},
 		"fullName":  {"full name"},
-		"email":     {"email"},
+		"email":     {randomUserName + "@email"},
 		"password1": {"password"},
 		"password2": {"password"},
 	}
