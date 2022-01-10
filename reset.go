@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -41,9 +42,9 @@ const (
 // resetPost is called for the POST method of the RegisterHandler
 func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName string) {
 	// get form values
-	resetToken := r.PostFormValue("rtoken")
-	password1 := r.PostFormValue("password1")
-	password2 := r.PostFormValue("password2")
+	resetToken := strings.TrimSpace(r.PostFormValue("rtoken"))
+	password1 := strings.TrimSpace(r.PostFormValue("password1"))
+	password2 := strings.TrimSpace(r.PostFormValue("password2"))
 
 	// check for missing values
 	// redundant given client side required fields, but good practice

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -36,7 +37,7 @@ const (
 // forgotPost is called for the POST method of the LoginHandler
 func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	// get form values
-	email := r.PostFormValue("email")
+	email := strings.TrimSpace(r.PostFormValue("email"))
 
 	// check for missing values
 	var msg string

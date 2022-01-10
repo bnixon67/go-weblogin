@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -64,8 +65,8 @@ const (
 // loginPost is called for the POST method of the LoginHandler
 func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// get form values
-	userName := r.PostFormValue("username")
-	password := r.PostFormValue("password")
+	userName := strings.TrimSpace(r.PostFormValue("username"))
+	password := strings.TrimSpace(r.PostFormValue("password"))
 
 	// check for missing values
 	var msg string

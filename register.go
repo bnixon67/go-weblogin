@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -37,11 +38,11 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 // registerPost is called for the POST method of the RegisterHandler
 func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// get form values
-	userName := r.PostFormValue("userName")
-	fullName := r.PostFormValue("fullName")
-	email := r.PostFormValue("email")
-	password1 := r.PostFormValue("password1")
-	password2 := r.PostFormValue("password2")
+	userName := strings.TrimSpace(r.PostFormValue("userName"))
+	fullName := strings.TrimSpace(r.PostFormValue("fullName"))
+	email := strings.TrimSpace(r.PostFormValue("email"))
+	password1 := strings.TrimSpace(r.PostFormValue("password1"))
+	password2 := strings.TrimSpace(r.PostFormValue("password2"))
 
 	// check for missing values
 	// redundant given client side required fields, but good practice
