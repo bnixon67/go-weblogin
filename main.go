@@ -43,14 +43,8 @@ func main() {
 	http.HandleFunc("/forgot", app.ForgotHandler)
 	http.HandleFunc("/reset", app.ResetHandler)
 	http.HandleFunc("/hello", app.HelloHandler)
-	http.HandleFunc("/w3.css",
-		func(w http.ResponseWriter, r *http.Request) {
-			http.ServeFile(w, r, "html/w3.css")
-		})
-	http.HandleFunc("/favicon.ico",
-		func(w http.ResponseWriter, r *http.Request) {
-			http.ServeFile(w, r, "html/favicon.ico")
-		})
+	http.HandleFunc("/w3.css", serveFileHandler("html/w3.css"))
+	http.HandleFunc("/favicon.ico", serveFileHandler("html/favicon.ico"))
 	http.Handle("/", http.RedirectHandler("/hello", http.StatusMovedPermanently))
 
 	// run server
@@ -59,6 +53,12 @@ func main() {
 	err = s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
 	if err != nil {
 		log.Printf("ListandServeTLS failed: %v", err)
+	}
+}
+
+func serveFileHandler(file string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, file)
 	}
 }
 
