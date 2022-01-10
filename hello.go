@@ -57,7 +57,6 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 			log.Println("GetUserForSessionToken failed:", err)
 			currentUser = User{}
 		} else {
-
 			// check if token is expired
 			if currentUser.SessionExpires.Before(time.Now()) {
 				log.Printf("token expired for %q", currentUser.UserName)

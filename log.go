@@ -17,7 +17,7 @@ type LogWriter struct {
 
 const (
 	timeFormat = "2006-01-02 15:04:05 "
-	fileMode   = 0600
+	fileMode   = 0o600
 )
 
 // InitLogging initializes logging for the application.

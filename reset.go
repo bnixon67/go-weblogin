@@ -31,7 +31,6 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		app.resetPost(w, r, "reset.html")
 	}
-
 }
 
 const (
