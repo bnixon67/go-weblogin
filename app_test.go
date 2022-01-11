@@ -23,27 +23,58 @@ func AppForTest(t *testing.T) *App {
 
 // TestNewApp provides tests for the NewApp function.
 func TestNewApp(t *testing.T) {
-	app, err := NewApp("", "test.log")
-	if err == nil {
-		t.Error("expected non-nill err for NewApp(\"\", \"\")\n")
-	}
-	if app != nil {
-		t.Errorf("got app=%v, expected nil for NewApp(\"\", \"\")\n", app)
+	cases := []struct {
+		name           string
+		configFileName string
+		logFileName    string
+		errExpected    bool
+		appExpected    bool
+	}{
+		{
+			name:           "emptyConfigFileName",
+			configFileName: "",
+			logFileName:    "test.log",
+			errExpected:    true,
+			appExpected:    false,
+		},
+		{
+			name:           "badLogFileName",
+			configFileName: "",
+			logFileName:    "/foo/bar",
+			errExpected:    true,
+			appExpected:    false,
+		},
+		{
+			name:           "emptyConfig",
+			configFileName: "testdata/empty.json",
+			logFileName:    "test.log",
+			errExpected:    true,
+			appExpected:    false,
+		},
+		{
+			name:           "validConfigAndLog",
+			configFileName: "config.json",
+			logFileName:    "test.log",
+			errExpected:    false,
+			appExpected:    true,
+		},
 	}
 
-	app, err = NewApp("", "/foo/bar")
-	if err == nil {
-		t.Error("expected non-nill err for NewApp(\"\", \"\")\n")
-	}
-	if app != nil {
-		t.Errorf("got app=%v, expected nil for NewApp(\"\", \"\")\n", app)
-	}
-
-	app, err = NewApp("testdata/empty.json", "test.log")
-	if err == nil {
-		t.Error("expected non-nill err for NewApp(\"\", \"\")\n")
-	}
-	if app != nil {
-		t.Errorf("got app=%v, expected nil for NewApp(\"\", \"\")\n", app)
+	for _, c := range cases {
+		t.Run(c.name, func(*testing.T) {
+			app, err := NewApp(c.configFileName, c.logFileName)
+			if c.errExpected && err == nil {
+				t.Errorf("expected error, got err==nil for NewApp(%q, %q)", c.configFileName, c.logFileName)
+			}
+			if !c.errExpected && err != nil {
+				t.Errorf("expected no error, got err=%q for NewApp(%q, %q)", err, c.configFileName, c.logFileName)
+			}
+			if c.appExpected && app == nil {
+				t.Errorf("expected app, got app=nil for NewApp(%q, %q)", c.configFileName, c.logFileName)
+			}
+			if !c.appExpected && app != nil {
+				t.Errorf("expected app==nil, got app=%v for NewApp(%q, %q)", app, c.configFileName, c.logFileName)
+			}
+		})
 	}
 }
