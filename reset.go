@@ -97,7 +97,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	}
 
 	// store the user and hashed password
-	_, err = app.db.Query("UPDATE users SET hashedPassword = ? WHERE username = ?", string(hashedPassword), userName)
+	_, err = app.db.Exec("UPDATE users SET hashedPassword = ? WHERE username = ?", string(hashedPassword), userName)
 	if err != nil {
 		log.Printf("update password failed for %q: %v", userName, err)
 		w.WriteHeader(http.StatusInternalServerError)

@@ -118,7 +118,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// store the user and hashed password
-	_, err = app.db.Query("INSERT INTO users(username, hashedPassword, fullName, email) VALUES (?, ?, ?, ?)",
+	_, err = app.db.Exec("INSERT INTO users(username, hashedPassword, fullName, email) VALUES (?, ?, ?, ?)",
 		userName, string(hashedPassword), fullName, email)
 	if err != nil {
 		msg := "Unable to register user"
