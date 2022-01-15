@@ -26,3 +26,10 @@ func SaveNewSession(db *sql.DB, userName string, hrs int) (Session, error) {
 	_, err = db.Exec(qry, session.Token, session.Expires, userName)
 	return session, err
 }
+
+// RemoveSession removes the given sessionToken
+func RemoveSession(db *sql.DB, sessionToken string) error {
+	qry := "DELETE FROM sessions WHERE token = ?"
+	_, err := db.Exec(qry, sessionToken)
+	return err
+}
