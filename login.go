@@ -1,15 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"errors"
 	"log"
 	"net/http"
 	"strings"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
-	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -17,12 +14,6 @@ var (
 	ErrInvalidPassword = errors.New("invalid password")
 	ErrInternalFailure = errors.New("login failed due to internal error")
 )
-
-// LoginPageData record
-type LoginPageData struct {
-	Message     string
-	CurrentUser User
-}
 
 // LoginHandler handles /login requests
 func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,18 +24,7 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		// get currentUser if sessionToken exists
-		var sessionToken string
-		var currentUser User
-		var err error
-		c, err := r.Cookie("sessionToken")
-		if err == nil {
-			sessionToken = c.Value
-			currentUser, _ = app.GetUserForSessionToken(sessionToken)
-			log.Printf("%+v", currentUser)
-		}
-
-		err = app.tmpls.ExecuteTemplate(w, "login.html", nil)
+		err := app.tmpls.ExecuteTemplate(w, "login.html", nil)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -89,7 +69,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// attempt to login the given userName with the given password
-	sessionToken, sessionExpires, err := app.loginUser(userName, password)
+	session, err := app.LoginUser(userName, password)
 	if err != nil {
 		err := app.tmpls.ExecuteTemplate(w, "login.html", MSG_LOGIN_FAILED)
 		if err != nil {
@@ -99,60 +79,31 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// login successful
-
-	// create a cookie for the sessionToken
+	// login successful, so create a cookie for the sessionToken
 	http.SetCookie(w, &http.Cookie{
 		Name:    "sessionToken",
-		Value:   sessionToken,
-		Expires: sessionExpires,
+		Value:   session.Token,
+		Expires: session.Expires,
 	})
-	log.Printf("Login for %q successful with sessionToken %q expires %q",
-		userName, sessionToken, sessionExpires.UTC().Format(time.RFC3339Nano))
+	log.Printf("valid login for %q", userName)
 
 	http.Redirect(w, r, "/hello", http.StatusSeeOther)
 }
 
-// loginUser returns a sessionToken if the given userName and password is correct, otherwise error
-func (app *App) loginUser(userName, password string) (string, time.Time, error) {
-	var sessionToken string
-	var sessionExpires time.Time
-
-	// get hashed password for the given user
-	result := app.db.QueryRow("SELECT hashedPassword FROM users WHERE username=?", userName)
-	var hashedPassword string
-	err := result.Scan(&hashedPassword)
+// LoginUser returns a Session if userName and password is correct
+func (app *App) LoginUser(userName, password string) (Session, error) {
+	err := app.CheckUserPassword(userName, password)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			log.Printf("%v %q", ErrNoSuchUser, userName)
-			return sessionToken, sessionExpires, ErrNoSuchUser
-		}
-		log.Printf("query failed for %q: %v", userName, err)
-		return sessionToken, sessionExpires, ErrInternalFailure
+		log.Printf("invalid password for %q: %v", userName, err)
+		return Session{}, err
 	}
 
-	// compared hashed password with given password
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	// create and save a new session
+	session, err := SaveNewSession(app.db, userName, app.config.SessionExpiresHours)
 	if err != nil {
-		log.Printf("%v for %q", ErrInvalidPassword, userName)
-		return sessionToken, sessionExpires, ErrInvalidPassword
+		log.Printf("unable to SaveNewSession: %v", err)
+		return Session{}, ErrInternalFailure
 	}
 
-	// create a new random sessions token
-	sessionToken, err = GenerateRandomString(32)
-	if err != nil {
-		log.Printf("unable to GenerateRandomString: %v", err)
-		return sessionToken, sessionExpires, ErrInternalFailure
-	}
-
-	// store the sessionToken
-	sessionExpires = time.Now().Add(time.Duration(app.config.SessionExpiresHours) * time.Hour)
-
-	_, err = app.db.Query("UPDATE users SET sessionToken = ?, sessionExpires = ? WHERE username = ?", sessionToken, sessionExpires, userName)
-	if err != nil {
-		log.Printf("update sessionToken failed for %q: %v", userName, err)
-		return sessionToken, sessionExpires, ErrInternalFailure
-	}
-
-	return sessionToken, sessionExpires, nil
+	return session, nil
 }

@@ -64,14 +64,14 @@ func TestHelloHandlerWithGoodSessionToken(t *testing.T) {
 	app := AppForTest(t)
 
 	// TODO: better way to define a test user
-	token, _, err := app.loginUser("test", "password")
+	session, err := app.LoginUser("test", "password")
 	if err != nil {
 		t.Fatalf("could not login user to get session token")
 	}
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/hello", nil)
-	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: token})
+	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: session.Token})
 
 	app.HelloHandler(w, r)
 

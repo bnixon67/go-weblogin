@@ -3,8 +3,9 @@ package main
 import (
 	"database/sql"
 	"errors"
-	"log"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User represents a user stored in the database
@@ -17,22 +18,21 @@ type User struct {
 }
 
 var (
-	ErrSessionTokenNotFound = errors.New("sessionToken not found")
-	ErrNoUserForEmail       = errors.New("no username for email")
-	ErrNoUserForResetToken  = errors.New("no username for resetToken")
-	ErrTooManyRows          = errors.New("too many rows affected")
+	ErrNoUserForEmail      = errors.New("no username for email")
+	ErrNoUserForResetToken = errors.New("no username for resetToken")
+	ErrTooManyRows         = errors.New("too many rows affected")
 )
 
 // GetUserForSessionToken returns a user for the given sessionToken
-func (app *App) GetUserForSessionToken(sessionToken string) (User, error) {
+func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 	user := User{}
 
 	qry := "SELECT userName, sessionToken, fullName, email, sessionExpires FROM users WHERE sessionToken=?"
-	result := app.db.QueryRow(qry, sessionToken)
+	result := db.QueryRow(qry, sessionToken)
 	err := result.Scan(&user.UserName, &user.SessionToken, &user.FullName, &user.Email, &user.SessionExpires)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return User{}, ErrSessionTokenNotFound
+			return User{}, err
 		}
 		return User{}, err
 	}
@@ -50,7 +50,6 @@ func (app *App) CheckForUserName(userName string) (bool, error) {
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
-		log.Printf("query for userName %q failed: %v", userName, err)
 		return false, err
 	}
 
@@ -67,7 +66,6 @@ func (app *App) CheckForEmail(email string) (bool, error) {
 		if err == sql.ErrNoRows {
 			return false, nil
 		}
-		log.Printf("query for email %q failed: %v", email, err)
 		return false, err
 	}
 
@@ -82,10 +80,8 @@ func (app *App) GetUserNameForEmail(email string) (string, error) {
 	err := row.Scan(&userName)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("no username for %q", email)
 			return "", ErrNoUserForEmail
 		}
-		log.Printf("query for email %q failed: %v", email, err)
 		return "", err
 	}
 
@@ -100,10 +96,8 @@ func (app *App) GetUserNameForResetToken(resetToken string) (string, error) {
 	err := row.Scan(&userName)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Printf("No username for %q", resetToken)
 			return "", ErrNoUserForResetToken
 		}
-		log.Printf("query for resetToken %q failed: %v", resetToken, err)
 		return "", err
 	}
 
@@ -113,20 +107,37 @@ func (app *App) GetUserNameForResetToken(resetToken string) (string, error) {
 func (app *App) SaveResetTokenForUser(userName, resetToken string) error {
 	result, err := app.db.Exec("UPDATE users SET resetToken  = ? WHERE username = ?", resetToken, userName)
 	if err != nil {
-		log.Printf("update resetToken for %q failed: %v", userName, err)
 		return err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		log.Printf("RowsAffected() is not nil: %v", err)
 		return err
 	}
 	if rowsAffected != 1 {
-		log.Printf("expected to affect 1 row, affected %d", rowsAffected)
 		return ErrTooManyRows
 	}
 
-	log.Printf("Saved resetToken %q for %q", resetToken, userName)
 	return err
+}
+
+func (app *App) CheckUserPassword(userName, password string) error {
+	// get hashed password for the given user
+	result := app.db.QueryRow("SELECT hashedPassword FROM users WHERE username=?", userName)
+	var hashedPassword string
+	err := result.Scan(&hashedPassword)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return ErrNoSuchUser
+		}
+		return err
+	}
+
+	// compared hashed password with given password
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

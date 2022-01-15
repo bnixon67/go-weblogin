@@ -37,10 +37,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	var sessionToken string
 	c, err := r.Cookie("sessionToken")
 	if err != nil {
-		if err == http.ErrNoCookie {
-			log.Println("no sessionToken cookie")
-		} else {
-
+		if err != http.ErrNoCookie {
 			log.Println("error getting cookie", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -52,7 +49,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	// get user for sessionToken
 	var currentUser User
 	if sessionToken != "" {
-		currentUser, err = app.GetUserForSessionToken(sessionToken)
+		currentUser, err = GetUserForSessionToken(app.db, sessionToken)
 		if err != nil {
 			log.Println("GetUserForSessionToken failed:", err)
 			currentUser = User{}
