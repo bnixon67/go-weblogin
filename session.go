@@ -22,6 +22,7 @@ func SaveNewSession(db *sql.DB, userName string, hrs int) (Session, error) {
 	}
 	session.Expires = time.Now().Add(time.Duration(hrs) * time.Hour)
 
-	_, err = db.Query("UPDATE users SET sessionToken = ?, sessionExpires = ? WHERE username = ?", session.Token, session.Expires, userName)
+	qry := "INSERT INTO sessions(token, expires, userName) VALUES(?, ?, ?)"
+	_, err = db.Exec(qry, session.Token, session.Expires, userName)
 	return session, err
 }

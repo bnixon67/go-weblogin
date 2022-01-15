@@ -28,7 +28,7 @@ var (
 func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 	user := User{}
 
-	qry := "SELECT userName, sessionToken, fullName, email, sessionExpires FROM users WHERE sessionToken=?"
+	qry := "SELECT users.userName, token, fullName, email, expires FROM users INNER JOIN sessions ON users.userName=sessions.userName WHERE token=?"
 	result := db.QueryRow(qry, sessionToken)
 	err := result.Scan(&user.UserName, &user.SessionToken, &user.FullName, &user.Email, &user.SessionExpires)
 	if err != nil {
