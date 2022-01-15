@@ -51,7 +51,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	if sessionToken != "" {
 		currentUser, err = GetUserForSessionToken(app.db, sessionToken)
 		if err != nil {
-			log.Println("GetUserForSessionToken failed:", err)
+			log.Printf("failed to get user for session %q: %v", sessionToken, err)
 			currentUser = User{}
 		} else {
 			// check if token is expired

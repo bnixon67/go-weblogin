@@ -18,6 +18,7 @@ type User struct {
 }
 
 var (
+	ErrSessionNotFound     = errors.New("session not found")
 	ErrNoUserForEmail      = errors.New("no username for email")
 	ErrNoUserForResetToken = errors.New("no username for resetToken")
 	ErrTooManyRows         = errors.New("too many rows affected")
@@ -32,7 +33,7 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 	err := result.Scan(&user.UserName, &user.SessionToken, &user.FullName, &user.Email, &user.SessionExpires)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return User{}, err
+			return User{}, ErrSessionNotFound
 		}
 		return User{}, err
 	}
