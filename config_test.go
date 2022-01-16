@@ -37,7 +37,7 @@ func TestConfigIsValid(t *testing.T) {
 	cases[len(cases)-1].expected = true
 
 	for _, testCase := range cases {
-		got := testCase.config.IsValid()
+		got, _ := testCase.config.IsValid()
 		if got != testCase.expected {
 			t.Errorf("c.IsValid(%+v) = %v; expected %v", testCase.config, got, testCase.expected)
 		}

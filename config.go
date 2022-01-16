@@ -26,7 +26,7 @@ type Config struct {
 
 // NewConfigFromFile returns a Config from the given fileName.
 func NewConfigFromFile(fileName string) (Config, error) {
-	log.Printf("reading %q", fileName)
+	log.Printf("INFO - reading %q", fileName)
 
 	config := Config{}
 
@@ -34,38 +34,30 @@ func NewConfigFromFile(fileName string) (Config, error) {
 	if err != nil {
 		return config, err
 	}
-	defer closeConfig(configFile)
+	defer configFile.Close()
 
 	err = json.NewDecoder(configFile).Decode(&config)
 
 	return config, err
 }
 
-// closeConfig closes the Config file. This is mostly unnecessary for readable files, but may help in debugging. See https://www.joeshaw.org/dont-defer-close-on-writable-files/ for more information.
-func closeConfig(f *os.File) {
-	if f == nil {
-		log.Printf("unexpected nil file")
-		return
+func appendIfEmpty(missing []string, str, msg string) []string {
+	if str == "" {
+		missing = append(missing, msg)
 	}
 
-	log.Printf("closing %q", f.Name())
-
-	err := f.Close()
-	if err != nil {
-		log.Print("Close() failed, ", err)
-	}
+	return missing
 }
 
 // IsValid returns true if the config has all the required values.
-func (c Config) IsValid() bool {
-	// ensure required config values have been provided
-	// test conditions on separate lines to avoid short circuit evaluation
-	isEmpty := false
-	isEmpty = logIfEmpty(c.ServerHost, "missing or empty ServerHost in config file") || isEmpty
-	isEmpty = logIfEmpty(c.ServerPort, "missing or empty ServerPort in config file") || isEmpty
-	isEmpty = logIfEmpty(c.SQLDriverName, "missing or empty SQLDriverName in config file") || isEmpty
-	isEmpty = logIfEmpty(c.SQLDataSourceName, "missing or empty SQLDataSourceName in config file") || isEmpty
-	isEmpty = logIfEmpty(c.ParseGlobPattern, "missing or empty ParseGlobPattern in config file") || isEmpty
+func (c Config) IsValid() (bool, []string) {
+	var missing []string
 
-	return !isEmpty
+	missing = appendIfEmpty(missing, c.ServerHost, "ServerHost")
+	missing = appendIfEmpty(missing, c.ServerPort, "ServerPort")
+	missing = appendIfEmpty(missing, c.SQLDriverName, "SQLDriverName")
+	missing = appendIfEmpty(missing, c.SQLDataSourceName, "DataSourceName")
+	missing = appendIfEmpty(missing, c.ParseGlobPattern, "ParseGlobPattern")
+
+	return missing == nil, missing
 }

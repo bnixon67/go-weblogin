@@ -5,11 +5,12 @@ import (
 	"errors"
 	"html/template"
 	"log"
+	"strings"
 )
 
 var ErrInvalidConfig = errors.New("invalid config")
 
-// App contains variables to reuse across the application, mostly in the Handler functions, to eliminate global variables.
+// App contains common variables to reuse to eliminate global variables.
 type App struct {
 	db     *sql.DB
 	tmpls  *template.Template
@@ -34,8 +35,9 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	}
 
 	// ensure required config values have been provided
-	if !app.config.IsValid() {
-		log.Println(ErrInvalidConfig)
+	isValid, missing := app.config.IsValid()
+	if !isValid {
+		log.Printf("config missing %s", strings.Join(missing, ", "))
 		return nil, ErrInvalidConfig
 	}
 

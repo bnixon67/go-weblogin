@@ -72,13 +72,3 @@ func funcName(depth int) string {
 	names := strings.Split(fn.Name(), ".")
 	return names[len(names)-1]
 }
-
-// logIfEmpty logs message if str is empty and returns true, otherwise false.
-func logIfEmpty(str, message string) bool {
-	if str == "" {
-		log.Print(message)
-		return true
-	}
-
-	return false
-}

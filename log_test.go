@@ -19,19 +19,3 @@ func TestFuncName(t *testing.T) {
 		t.Errorf("got %q, expected %q", name, expected)
 	}
 }
-
-func TestLogIfEmpty(t *testing.T) {
-	v := ""
-	expected := true
-	isEmpty := logIfEmpty(v, "test")
-	if isEmpty != expected {
-		t.Errorf("got %v, expected %v, for %q", isEmpty, expected, v)
-	}
-
-	v = "foo"
-	expected = false
-	isEmpty = logIfEmpty(v, "test")
-	if isEmpty != expected {
-		t.Errorf("got %v, expected %v, for %q", isEmpty, expected, v)
-	}
-}
