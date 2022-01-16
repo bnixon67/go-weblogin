@@ -11,7 +11,6 @@ import (
 
 var (
 	ErrNoSuchUser      = errors.New("no such user")
-	ErrInvalidPassword = errors.New("invalid password")
 	ErrInternalFailure = errors.New("login failed due to internal error")
 )
 

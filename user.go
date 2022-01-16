@@ -19,7 +19,6 @@ var (
 	ErrSessionNotFound     = errors.New("session not found")
 	ErrNoUserForEmail      = errors.New("no username for email")
 	ErrNoUserForResetToken = errors.New("no username for resetToken")
-	ErrTooManyRows         = errors.New("too many rows affected")
 	ErrSessionExpired      = errors.New("session expired")
 )
 
