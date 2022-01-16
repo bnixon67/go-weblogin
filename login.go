@@ -69,7 +69,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// attempt to login the given userName with the given password
-	session, err := app.LoginUser(userName, password)
+	token, err := app.LoginUser(userName, password)
 	if err != nil {
 		err := app.tmpls.ExecuteTemplate(w, "login.html", MSG_LOGIN_FAILED)
 		if err != nil {
@@ -79,31 +79,31 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// login successful, so create a cookie for the sessionToken
+	// login successful, so create a cookie for the session Token
 	http.SetCookie(w, &http.Cookie{
 		Name:    "sessionToken",
-		Value:   session.Token,
-		Expires: session.Expires,
+		Value:   token.Value,
+		Expires: token.Expires,
 	})
 	log.Printf("valid login for %q", userName)
 
 	http.Redirect(w, r, "/hello", http.StatusSeeOther)
 }
 
-// LoginUser returns a Session if userName and password is correct
-func (app *App) LoginUser(userName, password string) (Session, error) {
+// LoginUser returns a session Token if userName and password is correct
+func (app *App) LoginUser(userName, password string) (Token, error) {
 	err := app.CheckUserPassword(userName, password)
 	if err != nil {
 		log.Printf("invalid password for %q: %v", userName, err)
-		return Session{}, err
+		return Token{}, err
 	}
 
-	// create and save a new session
-	session, err := SaveNewSession(app.db, userName, app.config.SessionExpiresHours)
+	// create and save a new session token
+	token, err := SaveNewToken(app.db, "session", userName, app.config.SessionExpiresHours)
 	if err != nil {
-		log.Printf("unable to SaveNewSession: %v", err)
-		return Session{}, ErrInternalFailure
+		log.Printf("unable to save session token: %v", err)
+		return Token{}, ErrInternalFailure
 	}
 
-	return session, nil
+	return token, nil
 }

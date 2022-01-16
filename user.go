@@ -28,7 +28,7 @@ var (
 func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 	user := User{}
 
-	qry := "SELECT users.userName, token, fullName, email, expires FROM users INNER JOIN sessions ON users.userName=sessions.userName WHERE token=?"
+	qry := `SELECT users.userName, value, fullName, email, expires FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND value=?`
 	result := db.QueryRow(qry, sessionToken)
 	err := result.Scan(&user.UserName, &user.SessionToken, &user.FullName, &user.Email, &user.SessionExpires)
 	if err != nil {
@@ -90,10 +90,11 @@ func (app *App) GetUserNameForEmail(email string) (string, error) {
 }
 
 // GetUserNameForResetToken returns the userName for a given reset token
-func (app *App) GetUserNameForResetToken(resetToken string) (string, error) {
+func (app *App) GetUserNameForResetToken(tokenValue string) (string, error) {
 	var userName string
 
-	row := app.db.QueryRow("SELECT username FROM users WHERE resetToken=?", resetToken)
+	qry := `SELECT userName FROM tokens WHERE type="reset" AND value=?`
+	row := app.db.QueryRow(qry, tokenValue)
 	err := row.Scan(&userName)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -103,23 +104,6 @@ func (app *App) GetUserNameForResetToken(resetToken string) (string, error) {
 	}
 
 	return userName, err
-}
-
-func (app *App) SaveResetTokenForUser(userName, resetToken string) error {
-	result, err := app.db.Exec("UPDATE users SET resetToken  = ? WHERE username = ?", resetToken, userName)
-	if err != nil {
-		return err
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected != 1 {
-		return ErrTooManyRows
-	}
-
-	return err
 }
 
 func (app *App) CheckUserPassword(userName, password string) error {

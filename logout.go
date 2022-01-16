@@ -14,8 +14,8 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get sessionToken from cookie, if it exists
-	var sessionToken string
+	// get sessionTokenValue from cookie, if it exists
+	var sessionTokenValue string
 	c, err := r.Cookie("sessionToken")
 	if err != nil {
 		if err != http.ErrNoCookie {
@@ -24,7 +24,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		sessionToken = c.Value
+		sessionTokenValue = c.Value
 	}
 
 	// create an empty sessionToken cookie with negative MaxAge to delete
@@ -36,10 +36,10 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// remove session from database
 	// TODO: consider removing all sessions for user
-	if sessionToken != "" {
-		err := RemoveSession(app.db, sessionToken)
+	if sessionTokenValue != "" {
+		err := RemoveToken(app.db, "session", sessionTokenValue)
 		if err != nil {
-			log.Printf("remove session failed for %q: %v", sessionToken, err)
+			log.Printf("remove token failed for %q: %v", sessionTokenValue, err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

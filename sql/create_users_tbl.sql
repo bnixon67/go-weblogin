@@ -5,8 +5,6 @@ CREATE TABLE `users` (
   `fullName` varchar(70) NOT NULL,
   `email` varchar(256) NOT NULL,
   `hashedPassword` char(72) NOT NULL,
-  `resetToken` varchar(44) DEFAULT NULL,
-  `resetExpires` datetime DEFAULT NULL,
   PRIMARY KEY (`userName`),
   UNIQUE KEY `email` (`email`)
 );

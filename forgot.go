@@ -62,22 +62,15 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get a new random token to reset password
-	resetToken, err := GenerateRandomString(32)
+	// create and save a new session token
+	resetToken, err := SaveNewToken(app.db, "reset", userName, app.config.SessionExpiresHours)
 	if err != nil {
-		log.Printf("could not generate resetToken: %v", err)
+		log.Printf("unable to save reset token: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	app.SaveResetTokenForUser(userName, resetToken)
-	if err != nil {
-		log.Printf("SaveForgotTokenForUser failed: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	resetURL := fmt.Sprintf("https://%s:%s/reset?rtoken=%s", app.config.ServerHost, app.config.ServerPort, resetToken)
+	resetURL := fmt.Sprintf("https://%s:%s/reset?rtoken=%s", app.config.ServerHost, app.config.ServerPort, resetToken.Value)
 	SendEmail(app.config.SmtpUser, app.config.SmtpPassword, app.config.SmtpHost, app.config.SmtpPort, email, "Reset Pasword", resetURL)
 
 	err = app.tmpls.ExecuteTemplate(w, "forgot_sent.html", err)

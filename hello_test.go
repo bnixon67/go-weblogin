@@ -64,14 +64,14 @@ func TestHelloHandlerWithGoodSessionToken(t *testing.T) {
 	app := AppForTest(t)
 
 	// TODO: better way to define a test user
-	session, err := app.LoginUser("test", "password")
+	token, err := app.LoginUser("test", "password")
 	if err != nil {
 		t.Errorf("could not login user to get session token")
 	}
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/hello", nil)
-	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: session.Token})
+	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: token.Value})
 
 	app.HelloHandler(w, r)
 
@@ -80,8 +80,8 @@ func TestHelloHandlerWithGoodSessionToken(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := "You must <a href=\"/login\">login</a>"
-	if strings.Contains(w.Body.String(), expectedInBody) {
+	expectedInBody := "<a href=\"/logout\">Logout</a>"
+	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
