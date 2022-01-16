@@ -51,6 +51,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get userName for email provided on the form
+	// TODO: send email rather than exposing no user for email
 	userName, err := GetUserNameForEmail(app.db, email)
 	if err != nil || userName == "" {
 		log.Printf("failed to GetUserNameForEmail %q: %v", email, err)
@@ -63,7 +64,8 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create and save a new session token
-	resetToken, err := SaveNewToken(app.db, "reset", userName, app.config.SessionExpiresHours)
+	// TODO: use config value for ResetExpiresHours
+	resetToken, err := SaveNewToken(app.db, "reset", userName, 12, 1)
 	if err != nil {
 		log.Printf("unable to save reset token: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)

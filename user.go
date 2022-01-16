@@ -10,11 +10,9 @@ import (
 
 // User represents a user stored in the database
 type User struct {
-	UserName       string
-	SessionToken   string
-	FullName       string
-	Email          string
-	SessionExpires time.Time
+	UserName string
+	FullName string
+	Email    string
 }
 
 var (
@@ -22,20 +20,27 @@ var (
 	ErrNoUserForEmail      = errors.New("no username for email")
 	ErrNoUserForResetToken = errors.New("no username for resetToken")
 	ErrTooManyRows         = errors.New("too many rows affected")
+	ErrSessionExpired      = errors.New("session expired")
 )
 
 // GetUserForSessionToken returns a user for the given sessionToken
 func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
+	hashedValue := hash(sessionToken)
 	user := User{}
+	var expires time.Time
 
-	qry := `SELECT users.userName, value, fullName, email, expires FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND value=?`
-	result := db.QueryRow(qry, sessionToken)
-	err := result.Scan(&user.UserName, &user.SessionToken, &user.FullName, &user.Email, &user.SessionExpires)
+	qry := `SELECT users.userName, fullName, email, expires FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND hashedValue=?`
+	result := db.QueryRow(qry, hashedValue)
+	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &expires)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return User{}, ErrSessionNotFound
 		}
 		return User{}, err
+	}
+
+	if expires.Before(time.Now()) {
+		return User{}, ErrSessionExpired
 	}
 
 	return user, err
@@ -86,9 +91,10 @@ func GetUserNameForEmail(db *sql.DB, email string) (string, error) {
 // GetUserNameForResetToken returns the userName for a given reset token
 func GetUserNameForResetToken(db *sql.DB, tokenValue string) (string, error) {
 	var userName string
+	hashedValue := hash(tokenValue)
 
-	qry := `SELECT userName FROM tokens WHERE type="reset" AND value=?`
-	row := db.QueryRow(qry, tokenValue)
+	qry := `SELECT userName FROM tokens WHERE type="reset" AND hashedValue=?`
+	row := db.QueryRow(qry, hashedValue)
 	err := row.Scan(&userName)
 	if err != nil {
 		if err == sql.ErrNoRows {

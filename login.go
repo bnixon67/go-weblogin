@@ -99,7 +99,7 @@ func (app *App) LoginUser(userName, password string) (Token, error) {
 	}
 
 	// create and save a new session token
-	token, err := SaveNewToken(app.db, "session", userName, app.config.SessionExpiresHours)
+	token, err := SaveNewToken(app.db, "session", userName, 32, app.config.SessionExpiresHours)
 	if err != nil {
 		log.Printf("unable to save session token: %v", err)
 		return Token{}, ErrInternalFailure

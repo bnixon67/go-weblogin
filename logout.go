@@ -28,11 +28,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create an empty sessionToken cookie with negative MaxAge to delete
-	http.SetCookie(w, &http.Cookie{
-		Name:   "sessionToken",
-		Value:  "",
-		MaxAge: -1,
-	})
+	http.SetCookie(w, &http.Cookie{Name: "sessionToken", Value: "", MaxAge: -1})
 
 	// remove session from database
 	// TODO: consider removing all sessions for user
@@ -40,7 +36,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		err := RemoveToken(app.db, "session", sessionTokenValue)
 		if err != nil {
 			log.Printf("remove token failed for %q: %v", sessionTokenValue, err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
@@ -50,7 +46,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err = app.tmpls.ExecuteTemplate(w, "logout.html", nil)
 	if err != nil {
 		log.Println("error executing template", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 }
