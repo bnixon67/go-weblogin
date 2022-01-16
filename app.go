@@ -22,6 +22,7 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	var app App
 	var err error
 
+	// init logging
 	err = InitLogging(logFileName)
 	if err != nil {
 		return nil, err
@@ -30,14 +31,14 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	// read config file
 	app.config, err = NewConfigFromFile(configFileName)
 	if err != nil {
-		log.Printf("unable to read config file %q, %v", configFileName, err)
+		log.Printf("failed to read config %q: %v", configFileName, err)
 		return nil, err
 	}
 
 	// ensure required config values have been provided
 	isValid, missing := app.config.IsValid()
 	if !isValid {
-		log.Printf("config missing %s", strings.Join(missing, ", "))
+		log.Printf("config is missing %s", strings.Join(missing, ", "))
 		return nil, ErrInvalidConfig
 	}
 
@@ -47,16 +48,16 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	}
 
 	// init database connection
-	app.db, err = initDB(app.config.SQLDriverName, app.config.SQLDataSourceName)
+	app.db, err = InitDB(app.config.SQLDriverName, app.config.SQLDataSourceName)
 	if err != nil {
-		log.Printf("initDB failed: %v", err)
+		log.Printf("failed to InitDB: %v", err)
 		return nil, err
 	}
 
 	// init HTML templates
-	app.tmpls, err = initTemplates(app.config.ParseGlobPattern)
+	app.tmpls, err = InitTemplates(app.config.ParseGlobPattern)
 	if err != nil {
-		log.Printf("initTemplates failed: %v", err)
+		log.Printf("failed to InitTemplates: %v", err)
 		return nil, err
 	}
 

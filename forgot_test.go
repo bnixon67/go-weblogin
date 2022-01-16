@@ -18,7 +18,7 @@ func TestForgotHandlerInvalidMethod(t *testing.T) {
 
 	expectedStatus := http.StatusMethodNotAllowed
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 }
 
@@ -32,12 +32,12 @@ func TestForgotHandlerGet(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "Forgot"
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -51,12 +51,12 @@ func TestForgotHandlerPostMissingEmail(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_MISSING_EMAIL
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -73,12 +73,12 @@ func TestForgotHandlerPostInvalidEmail(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_NO_SUCH_USER
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -95,11 +95,11 @@ func TestForgotHandlerPostValidEmail(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "If you provided a valid email"
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }

@@ -6,7 +6,7 @@ import (
 
 func TestInitDB(t *testing.T) {
 	// test invalid
-	db, err := initDB("", "")
+	db, err := InitDB("", "")
 	if err == nil {
 		t.Errorf("initDB returned nil err for empty values")
 	}

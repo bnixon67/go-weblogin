@@ -17,7 +17,7 @@ func TestHelloHandlerInvalidMethod(t *testing.T) {
 
 	expectedStatus := http.StatusMethodNotAllowed
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 }
 
@@ -31,12 +31,12 @@ func TestHelloHandlerWithoutCookie(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "You must <a href=\"/login\">Login</a>"
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -51,12 +51,12 @@ func TestHelloHandlerWithBadSessionToken(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "You must <a href=\"/login\">Login</a>"
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -66,7 +66,7 @@ func TestHelloHandlerWithGoodSessionToken(t *testing.T) {
 	// TODO: better way to define a test user
 	session, err := app.LoginUser("test", "password")
 	if err != nil {
-		t.Fatalf("could not login user to get session token")
+		t.Errorf("could not login user to get session token")
 	}
 
 	w := httptest.NewRecorder()
@@ -77,11 +77,11 @@ func TestHelloHandlerWithGoodSessionToken(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "You must <a href=\"/login\">login</a>"
 	if strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }

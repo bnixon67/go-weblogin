@@ -8,8 +8,8 @@ import (
 
 // Config represents the configuration values.
 type Config struct {
-	ServerHost string
-	ServerPort string
+	ServerHost string // host to listen on
+	ServerPort string // port to listen on
 
 	SQLDriverName     string // driverName for sql.Open
 	SQLDataSourceName string // dataSourceName for sql.Open
@@ -28,14 +28,13 @@ type Config struct {
 func NewConfigFromFile(fileName string) (Config, error) {
 	log.Printf("INFO - reading %q", fileName)
 
-	config := Config{}
-
 	configFile, err := os.Open(fileName)
 	if err != nil {
-		return config, err
+		return Config{}, err
 	}
 	defer configFile.Close()
 
+	var config Config
 	err = json.NewDecoder(configFile).Decode(&config)
 
 	return config, err

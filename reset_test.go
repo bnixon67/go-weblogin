@@ -18,7 +18,7 @@ func TestResetHandlerInvalidMethod(t *testing.T) {
 
 	expectedStatus := http.StatusMethodNotAllowed
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 }
 
@@ -32,12 +32,12 @@ func TestResetHandlerGet(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "Reset"
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -51,12 +51,12 @@ func TestResetHandlerPostMissingValues(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_MISSING_RESET_VALUES
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -77,11 +77,11 @@ func TestResetHandlerPostMismatchedPassword(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_MISMATCHED_PASSWORDS
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }

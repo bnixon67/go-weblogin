@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-// initDB initializes a connection to the database
-func initDB(driverName, dataSourceName string) (*sql.DB, error) {
+// InitDB initializes a connection to the database
+func InitDB(driverName, dataSourceName string) (*sql.DB, error) {
 	log.Println("initialize database connection")
 
 	// open connection to database

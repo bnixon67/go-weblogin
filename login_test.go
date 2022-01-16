@@ -18,7 +18,7 @@ func TestLoginHandlerInvalidMethod(t *testing.T) {
 
 	expectedStatus := http.StatusMethodNotAllowed
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 }
 
@@ -32,12 +32,12 @@ func TestLoginHandlerGet(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "<form method=\"post\""
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -51,12 +51,12 @@ func TestLoginHandlerPostMissingUserNameAndPassword(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_MISSING_USERNAME_PASSWORD
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -75,12 +75,12 @@ func TestLoginHandlerPostMissingPassword(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_MISSING_PASSWORD
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -99,12 +99,12 @@ func TestLoginHandlerPostMissingUserName(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_MISSING_USERNAME
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -124,12 +124,12 @@ func TestLoginHandlerPostInvalidUserNameAndPassword(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_LOGIN_FAILED
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -149,12 +149,12 @@ func TestLoginHandlerPostValidUserNameAndPassword(t *testing.T) {
 
 	expectedStatus := http.StatusSeeOther
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expected := ""
 	if w.Body.String() != expected {
-		t.Fatalf("got body %q, expected %q", w.Body, expected)
+		t.Errorf("got body %q, expected %q", w.Body, expected)
 	}
 }
 
@@ -174,11 +174,11 @@ func TestLoginHandlerPostValidUserNameAndInvalidPassword(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_LOGIN_FAILED
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }

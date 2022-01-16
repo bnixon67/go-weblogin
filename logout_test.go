@@ -17,7 +17,7 @@ func TestLogoutHandlerInvalidMethod(t *testing.T) {
 
 	expectedStatus := http.StatusMethodNotAllowed
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 }
 
@@ -40,22 +40,22 @@ func TestLogoutHandlerGet(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "You have been logged out."
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 
 	c, err := getCookie("sessionToken", w.Result().Cookies())
 	if err != nil {
-		t.Fatalf("sessionToken cookie missing")
+		t.Errorf("sessionToken cookie missing")
 	}
 	if c.Value != "" {
-		t.Fatalf("sessionToken not empty")
+		t.Errorf("sessionToken not empty")
 	}
 	if c.MaxAge != -1 {
-		t.Fatalf("sessionToken.MaxAge not -1")
+		t.Errorf("sessionToken.MaxAge not -1")
 	}
 }

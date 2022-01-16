@@ -18,7 +18,7 @@ func TestRegisterHandlerInvalidMethod(t *testing.T) {
 
 	expectedStatus := http.StatusMethodNotAllowed
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 }
 
@@ -32,12 +32,12 @@ func TestRegisterHandlerGet(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "Register"
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -51,12 +51,12 @@ func TestRegisterHandlerPostMissingValues(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_REGISTER_MISSING_VALUES
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
@@ -79,19 +79,19 @@ func TestRegisterHandlerPostExistingUser(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_REGISTER_USER_EXISTS
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
 func TestRegisterHandlerPostExistingEmail(t *testing.T) {
 	randomUserName, err := GenerateRandomString(8)
 	if err != nil {
-		t.Fatalf("could not GenerateRandomString")
+		t.Errorf("could not GenerateRandomString")
 	}
 	data := url.Values{
 		"userName":  {randomUserName},
@@ -111,19 +111,19 @@ func TestRegisterHandlerPostExistingEmail(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_REGISTER_EMAIL_EXISTS
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
 func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
 	randomUserName, err := GenerateRandomString(8)
 	if err != nil {
-		t.Fatalf("could not GenerateRandomString")
+		t.Errorf("could not GenerateRandomString")
 	}
 	data := url.Values{
 		"userName":  {randomUserName},
@@ -143,19 +143,19 @@ func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := MSG_REGISTER_MISMATCHED_PASSWORDS
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
 func TestRegisterHandlerPostValid(t *testing.T) {
 	randomUserName, err := GenerateRandomString(8)
 	if err != nil {
-		t.Fatalf("could not GenerateRandomString")
+		t.Errorf("could not GenerateRandomString")
 	}
 	data := url.Values{
 		"userName":  {randomUserName},
@@ -175,17 +175,17 @@ func TestRegisterHandlerPostValid(t *testing.T) {
 
 	expectedStatus := http.StatusSeeOther
 	if w.Code != expectedStatus {
-		t.Fatalf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := ""
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Fatalf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 
 	got := w.Header().Get("Location")
 	expected := "/login"
 	if got != expected {
-		t.Fatalf("got location %q, expected %q", got, expected)
+		t.Errorf("got location %q, expected %q", got, expected)
 	}
 }
