@@ -58,9 +58,9 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that userName doesn't already exist
-	userExists, err := app.CheckForUserName(userName)
+	userExists, err := UserExists(app.db, userName)
 	if err != nil {
-		log.Printf("error from CheckForUserName(%q): %v", userName, err)
+		log.Printf("error in UserExists for %q: %v", userName, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -75,9 +75,9 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that email doesn't already exist
-	emailExists, err := app.CheckForEmail(email)
+	emailExists, err := EmailExists(app.db, email)
 	if err != nil {
-		log.Printf("error from CheckForEmail(%q): %v", email, err)
+		log.Printf("error in EmailExists for %q: %v", email, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

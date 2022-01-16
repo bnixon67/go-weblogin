@@ -51,7 +51,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get userName for email provided on the form
-	userName, err := app.GetUserNameForEmail(email)
+	userName, err := GetUserNameForEmail(app.db, email)
 	if err != nil || userName == "" {
 		log.Printf("failed to GetUserNameForEmail %q: %v", email, err)
 		err := app.tmpls.ExecuteTemplate(w, "forgot.html", MSG_NO_SUCH_USER)

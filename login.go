@@ -92,7 +92,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 
 // LoginUser returns a session Token if userName and password is correct
 func (app *App) LoginUser(userName, password string) (Token, error) {
-	err := app.CheckUserPassword(userName, password)
+	err := CompareUserPassword(app.db, userName, password)
 	if err != nil {
 		log.Printf("invalid password for %q: %v", userName, err)
 		return Token{}, err

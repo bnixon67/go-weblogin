@@ -41,11 +41,11 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 	return user, err
 }
 
-// CheckForUserName returns true if the given userName already exists
-func (app *App) CheckForUserName(userName string) (bool, error) {
+// RowExists return true if the given query returns at least one row
+func RowExists(db *sql.DB, qry string, args ...interface{}) (bool, error) {
 	var num int
 
-	row := app.db.QueryRow("SELECT 1 FROM users WHERE userName=?", userName)
+	row := db.QueryRow(qry, args...)
 	err := row.Scan(&num)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -57,27 +57,21 @@ func (app *App) CheckForUserName(userName string) (bool, error) {
 	return true, err
 }
 
-// CheckForEmail returns true if the given email already exists
-func (app *App) CheckForEmail(email string) (bool, error) {
-	var num int
+// UserExists returns true if the given userName already exists in db
+func UserExists(db *sql.DB, userName string) (bool, error) {
+	return RowExists(db, "SELECT 1 FROM users WHERE userName=?", userName)
+}
 
-	row := app.db.QueryRow("SELECT 1 FROM users WHERE email=?", email)
-	err := row.Scan(&num)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return true, err
+// EmailExists returns true if the given email already exists
+func EmailExists(db *sql.DB, email string) (bool, error) {
+	return RowExists(db, "SELECT 1 FROM users WHERE email=?", email)
 }
 
 // GetUserNameForEmail returns the userName for a given email
-func (app *App) GetUserNameForEmail(email string) (string, error) {
+func GetUserNameForEmail(db *sql.DB, email string) (string, error) {
 	var userName string
 
-	row := app.db.QueryRow("SELECT username FROM users WHERE email=?", email)
+	row := db.QueryRow("SELECT username FROM users WHERE email=?", email)
 	err := row.Scan(&userName)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -90,11 +84,11 @@ func (app *App) GetUserNameForEmail(email string) (string, error) {
 }
 
 // GetUserNameForResetToken returns the userName for a given reset token
-func (app *App) GetUserNameForResetToken(tokenValue string) (string, error) {
+func GetUserNameForResetToken(db *sql.DB, tokenValue string) (string, error) {
 	var userName string
 
 	qry := `SELECT userName FROM tokens WHERE type="reset" AND value=?`
-	row := app.db.QueryRow(qry, tokenValue)
+	row := db.QueryRow(qry, tokenValue)
 	err := row.Scan(&userName)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -106,9 +100,12 @@ func (app *App) GetUserNameForResetToken(tokenValue string) (string, error) {
 	return userName, err
 }
 
-func (app *App) CheckUserPassword(userName, password string) error {
+// CompareUserPassword compares the password and hashed password for the user.
+// Returns nil on success or an error on failure.
+func CompareUserPassword(db *sql.DB, userName, password string) error {
 	// get hashed password for the given user
-	result := app.db.QueryRow("SELECT hashedPassword FROM users WHERE username=?", userName)
+	qry := `SELECT hashedPassword FROM users WHERE username=?`
+	result := db.QueryRow(qry, userName)
 	var hashedPassword string
 	err := result.Scan(&hashedPassword)
 	if err != nil {
