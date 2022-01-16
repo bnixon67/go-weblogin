@@ -30,7 +30,7 @@ func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 const (
-	MSG_MISSING_EMAIL = "Missing email"
+	MSG_MISSING_EMAIL = "Please provide an Email"
 	MSG_NO_SUCH_USER  = "There is no registered User Name for the Email provided."
 )
 
@@ -40,13 +40,9 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(r.PostFormValue("email"))
 
 	// check for missing values
-	var msg string
 	if email == "" {
-		msg = MSG_MISSING_EMAIL
-	}
-	if msg != "" {
-		log.Println(msg)
-		err := app.tmpls.ExecuteTemplate(w, "forgot.html", msg)
+		log.Print("email is empty")
+		err := app.tmpls.ExecuteTemplate(w, "forgot.html", MSG_MISSING_EMAIL)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -57,8 +53,8 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	// get userName for email provided on the form
 	userName, err := app.GetUserNameForEmail(email)
 	if err != nil || userName == "" {
-		msg = MSG_NO_SUCH_USER
-		err := app.tmpls.ExecuteTemplate(w, "forgot.html", msg)
+		log.Printf("failed to GetUserNameForEmail %q: %v", email, err)
+		err := app.tmpls.ExecuteTemplate(w, "forgot.html", MSG_NO_SUCH_USER)
 		if err != nil {
 			log.Println("error executing template", err)
 			w.WriteHeader(http.StatusInternalServerError)
