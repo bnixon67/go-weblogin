@@ -7,8 +7,6 @@ import (
 )
 
 func TestNewConfigFromFile(t *testing.T) {
-	InitLogging("test.log")
-
 	// test empty (invaild) file name
 	_, err := NewConfigFromFile("")
 	if err == nil {
@@ -59,12 +57,11 @@ func hasBit(n int, pos uint) bool {
 }
 
 func TestConfigIsValid(t *testing.T) {
-	InitLogging("test.log")
-
 	type tcase struct {
 		config   Config
 		expected bool
 	}
+
 	var cases []tcase
 
 	// required fields
@@ -73,11 +70,13 @@ func TestConfigIsValid(t *testing.T) {
 	// generate test cases based on required fields by looping thru all the possibilities and using bit logic to set fields
 	for a := 0; a < int(math.Pow(2, float64(len(required)))); a++ {
 		config := Config{}
+
 		for n := len(required) - 1; n >= 0; n-- {
 			if hasBit(a, uint(n)) {
 				reflect.ValueOf(&config).Elem().FieldByName(required[n]).SetString("x")
 			}
 		}
+
 		cases = append(cases, tcase{config, false})
 	}
 	// last case should be true since all required fields are present

@@ -10,7 +10,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// main function
 func main() {
 	// config file must be passed as argument and not empty
 	if len(os.Args) != 2 || os.Args[1] == "" {
@@ -26,6 +25,7 @@ func main() {
 	}
 
 	// define HTTP server
+	// TODO: add values to config file
 	s := &http.Server{
 		Addr:              ":" + app.config.ServerPort,
 		Handler:           &logRequestHandler{http.DefaultServeMux},
@@ -62,12 +62,12 @@ func serveFileHandler(file string) http.HandlerFunc {
 	}
 }
 
-// logRequestHandler is middleware that logs all HTTP requests and then calls the next HTTP handler specified
+// logRequestHandler is middleware that logs all HTTP requests and then calls the next HTTP handler specified.
 type logRequestHandler struct {
 	next http.Handler
 }
 
-// ServerHTTP for logRequestHandler log the HTTP request and then calls the next HTTP handler specified
+// ServerHTTP for logRequestHandler log the HTTP request and then calls the next HTTP handler specified.
 func (l *logRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var ip string
 	ip = r.Header.Get("X-Real-IP")

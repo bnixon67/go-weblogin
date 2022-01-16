@@ -54,7 +54,7 @@ func TestResetHandlerPostMissingValues(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MSG_MISSING_RESET_VALUES
+	expectedInBody := MsgMissingRequired
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -80,7 +80,7 @@ func TestResetHandlerPostMismatchedPassword(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MSG_MISMATCHED_PASSWORDS
+	expectedInBody := MsgPasswordsDifferent
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}

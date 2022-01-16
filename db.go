@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// InitDB initializes a connection to the database
+// InitDB initializes a connection to the database.
 func InitDB(driverName, dataSourceName string) (*sql.DB, error) {
 	log.Println("initialize database connection")
 

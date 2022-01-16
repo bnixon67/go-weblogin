@@ -4,17 +4,17 @@ import (
 	"testing"
 )
 
-// global to provide a singleton app
-var app *App
+// global to provide a singleton app.
+var app *App //nolint
 
 // AppForTest is a helper function that returns an App used for testing.
 func AppForTest(t *testing.T) *App {
-	var err error
-
 	if app == nil {
-		app, err = NewApp("config.json", "test.log")
+		var err error
+		app, err = NewApp("config.json", TestLogFile)
 		if err != nil {
 			app = nil
+
 			t.Errorf("cannot create NewApp, %v", err)
 		}
 	}

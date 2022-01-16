@@ -48,7 +48,7 @@ func NewLogWriter(filename string) (LogWriter, error) {
 	return lw, err
 }
 
-// Write satifies the io.Writer interface and outputs the data prefixed as noted above.
+// Write satisfies io.Writer interface to output with prefixed as noted above.
 func (lw LogWriter) Write(data []byte) (int, error) {
 	return fmt.Fprint(lw.w, time.Now().Format(timeFormat), funcName(4), ": ", string(data))
 }

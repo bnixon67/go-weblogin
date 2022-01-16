@@ -54,7 +54,7 @@ func TestRegisterHandlerPostMissingValues(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MSG_REGISTER_MISSING_VALUES
+	expectedInBody := MsgMissingRequired
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -82,7 +82,7 @@ func TestRegisterHandlerPostExistingUser(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MSG_REGISTER_USER_EXISTS
+	expectedInBody := MsgUserNameExists
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -114,7 +114,7 @@ func TestRegisterHandlerPostExistingEmail(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MSG_REGISTER_EMAIL_EXISTS
+	expectedInBody := MsgEmailExists
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -146,7 +146,7 @@ func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MSG_REGISTER_MISMATCHED_PASSWORDS
+	expectedInBody := MsgPasswordsDifferent
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}

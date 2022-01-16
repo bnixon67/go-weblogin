@@ -7,20 +7,21 @@ import (
 	"time"
 )
 
-// Token represent a token for the user
+// Token represent a token for the user.
 type Token struct {
 	Value   string
 	Expires time.Time
 	Type    string
 }
 
+// hash returns a hex encoded sha256 hash of the given string.
 func hash(s string) string {
 	h := sha256.New()
 	h.Write([]byte(s))
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// SaveNewToken creates and saves a token for user of size that expires in hrs
+// SaveNewToken creates and saves a token for user of size that expires in hrs.
 func SaveNewToken(db *sql.DB, tType, userName string, size, hrs int) (Token, error) {
 	var err error
 
@@ -39,7 +40,7 @@ func SaveNewToken(db *sql.DB, tType, userName string, size, hrs int) (Token, err
 	return token, err
 }
 
-// RemoveToken removes the given sessionToken
+// RemoveToken removes the given sessionToken.
 func RemoveToken(db *sql.DB, tType, tValue string) error {
 	hashedValue := hash(tValue)
 

@@ -1,13 +1,14 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// LogoutHandler handles /logout requests
+// LogoutHandler handles /logout requests.
 func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
 		log.Println("invalid method", r.Method)
@@ -18,7 +19,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	var sessionTokenValue string
 	c, err := r.Cookie("sessionToken")
 	if err != nil {
-		if err != http.ErrNoCookie {
+		if !errors.Is(err, http.ErrNoCookie) {
 			log.Println("error getting cookie", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
@@ -39,7 +40,6 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-
 	}
 
 	// display page

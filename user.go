@@ -8,7 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// User represents a user stored in the database
+// User represents a user stored in the database.
 type User struct {
 	UserName string
 	FullName string
@@ -22,17 +22,20 @@ var (
 	ErrSessionExpired      = errors.New("session expired")
 )
 
-// GetUserForSessionToken returns a user for the given sessionToken
+// GetUserForSessionToken returns a user for the given sessionToken.
 func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
+	var (
+		expires time.Time
+		user    User
+	)
+
 	hashedValue := hash(sessionToken)
-	user := User{}
-	var expires time.Time
 
 	qry := `SELECT users.userName, fullName, email, expires FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND hashedValue=?`
 	result := db.QueryRow(qry, hashedValue)
 	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &expires)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return User{}, ErrSessionNotFound
 		}
 		return User{}, err
@@ -45,14 +48,14 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 	return user, err
 }
 
-// RowExists return true if the given query returns at least one row
+// RowExists return true if the given query returns at least one row.
 func RowExists(db *sql.DB, qry string, args ...interface{}) (bool, error) {
 	var num int
 
 	row := db.QueryRow(qry, args...)
 	err := row.Scan(&num)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return false, nil
 		}
 		return false, err
@@ -61,24 +64,24 @@ func RowExists(db *sql.DB, qry string, args ...interface{}) (bool, error) {
 	return true, err
 }
 
-// UserExists returns true if the given userName already exists in db
+// UserExists returns true if the given userName already exists in db.
 func UserExists(db *sql.DB, userName string) (bool, error) {
 	return RowExists(db, "SELECT 1 FROM users WHERE userName=?", userName)
 }
 
-// EmailExists returns true if the given email already exists
+// EmailExists returns true if the given email already exists.
 func EmailExists(db *sql.DB, email string) (bool, error) {
 	return RowExists(db, "SELECT 1 FROM users WHERE email=?", email)
 }
 
-// GetUserNameForEmail returns the userName for a given email
+// GetUserNameForEmail returns the userName for a given email.
 func GetUserNameForEmail(db *sql.DB, email string) (string, error) {
 	var userName string
 
 	row := db.QueryRow("SELECT username FROM users WHERE email=?", email)
 	err := row.Scan(&userName)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return "", ErrNoUserForEmail
 		}
 		return "", err
@@ -87,7 +90,7 @@ func GetUserNameForEmail(db *sql.DB, email string) (string, error) {
 	return userName, err
 }
 
-// GetUserNameForResetToken returns the userName for a given reset token
+// GetUserNameForResetToken returns the userName for a given reset token.
 func GetUserNameForResetToken(db *sql.DB, tokenValue string) (string, error) {
 	var userName string
 	hashedValue := hash(tokenValue)
@@ -96,7 +99,7 @@ func GetUserNameForResetToken(db *sql.DB, tokenValue string) (string, error) {
 	row := db.QueryRow(qry, hashedValue)
 	err := row.Scan(&userName)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return "", ErrNoUserForResetToken
 		}
 		return "", err
@@ -111,10 +114,11 @@ func CompareUserPassword(db *sql.DB, userName, password string) error {
 	// get hashed password for the given user
 	qry := `SELECT hashedPassword FROM users WHERE username=?`
 	result := db.QueryRow(qry, userName)
+
 	var hashedPassword string
 	err := result.Scan(&hashedPassword)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return ErrNoSuchUser
 		}
 		return err

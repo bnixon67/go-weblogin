@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"log"
 )
 
 // GenerateRandomString returns n bytes encoded in URL friendly base64.
@@ -14,7 +13,6 @@ func GenerateRandomString(n int) (string, error) {
 	// get b random bytes
 	_, err := rand.Read(b)
 	if err != nil {
-		log.Print("rand.Read() failed, ", err)
 		return "", err
 	}
 

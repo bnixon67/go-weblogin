@@ -18,10 +18,10 @@ type Config struct {
 
 	SessionExpiresHours int // number of hours session is valid
 
-	SmtpHost     string // SMTP host to send email
-	SmtpPort     string // SMTP port to send email
-	SmtpUser     string // SMTP user to send email
-	SmtpPassword string // SMTP password to send email
+	SMTPHost     string // SMTP host to send email
+	SMTPPort     string // SMTP port to send email
+	SMTPUser     string // SMTP user to send email
+	SMTPPassword string // SMTP password to send email
 }
 
 // NewConfigFromFile returns a Config from the given fileName.

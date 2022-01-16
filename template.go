@@ -6,10 +6,10 @@ import (
 )
 
 func noescape(s string) template.HTML {
-	return template.HTML(s)
+	return template.HTML(s) //nolint
 }
 
-// InitTemplates parses the templates
+// InitTemplates parses the templates.
 func InitTemplates(pattern string) (*template.Template, error) {
 	log.Print("Initialize templates")
 

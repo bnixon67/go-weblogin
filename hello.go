@@ -1,17 +1,18 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
 )
 
-// HelloPageData record
+// HelloPageData contains data passed to the HTML template.
 type HelloPageData struct {
 	Message string
 	User    User
 }
 
-// HelloHandler prints a simple hello message
+// HelloHandler prints a simple hello message.
 func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
 		log.Println("invalid method", r.Method)
@@ -22,7 +23,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	var sessionToken string
 	c, err := r.Cookie("sessionToken")
 	if err != nil {
-		if err != http.ErrNoCookie {
+		if !errors.Is(err, http.ErrNoCookie) {
 			log.Println("error getting cookie", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return

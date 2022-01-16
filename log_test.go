@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+const TestLogFile = "test.log"
+
 func TestInitLogging(t *testing.T) {
 	// invalid file name
 	err := InitLogging("/foo/bar")

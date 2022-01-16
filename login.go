@@ -14,7 +14,7 @@ var (
 	ErrInternalFailure = errors.New("login failed due to internal error")
 )
 
-// LoginHandler handles /login requests
+// LoginHandler handles /login requests.
 func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
 		log.Println("invalid method", r.Method)
@@ -36,13 +36,13 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 const (
-	MSG_MISSING_USERNAME_PASSWORD = "Missing username and password"
-	MSG_MISSING_USERNAME          = "Missing username"
-	MSG_MISSING_PASSWORD          = "Missing password"
-	MSG_LOGIN_FAILED              = "Login Failed"
+	MsgMissingUserNameAndPassword = "Missing username and password"
+	MsgMissingUserName            = "Missing username"
+	MsgMissingPassword            = "Missing password"
+	MsgLoginFailed                = "Login Failed"
 )
 
-// loginPost is called for the POST method of the LoginHandler
+// loginPost is called for the POST method of the LoginHandler.
 func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// get form values
 	userName := strings.TrimSpace(r.PostFormValue("username"))
@@ -52,11 +52,11 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	var msg string
 	switch {
 	case userName == "" && password == "":
-		msg = MSG_MISSING_USERNAME_PASSWORD
+		msg = MsgMissingUserNameAndPassword
 	case userName == "":
-		msg = MSG_MISSING_USERNAME
+		msg = MsgMissingUserName
 	case password == "":
-		msg = MSG_MISSING_PASSWORD
+		msg = MsgMissingPassword
 	}
 	if msg != "" {
 		log.Println(msg)
@@ -72,7 +72,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// attempt to login the given userName with the given password
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
-		err := app.tmpls.ExecuteTemplate(w, "login.html", MSG_LOGIN_FAILED)
+		err := app.tmpls.ExecuteTemplate(w, "login.html", MsgLoginFailed)
 		if err != nil {
 			log.Println("error executing template", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -92,7 +92,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/hello", http.StatusSeeOther)
 }
 
-// LoginUser returns a session Token if userName and password is correct
+// LoginUser returns a session Token if userName and password is correct.
 func (app *App) LoginUser(userName, password string) (Token, error) {
 	err := CompareUserPassword(app.db, userName, password)
 	if err != nil {

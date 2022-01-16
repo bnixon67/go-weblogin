@@ -9,7 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// ForgotHandler handles /forgot requests
+// ForgotHandler handles /forgot requests.
 func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
 		log.Println("invalid method", r.Method)
@@ -31,11 +31,11 @@ func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 const (
-	MSG_MISSING_EMAIL = "Please provide an Email"
-	MSG_NO_SUCH_USER  = "There is no registered User Name for the Email provided."
+	MsgMissingEmail = "Please provide an Email"
+	MsgNoSuchUser   = "There is no registered User Name for the Email provided."
 )
 
-// forgotPost is called for the POST method of the LoginHandler
+// forgotPost is called for the POST method of the LoginHandler.
 func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	// get form values
 	email := strings.TrimSpace(r.PostFormValue("email"))
@@ -43,7 +43,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	// check for missing values
 	if email == "" {
 		log.Print("email is empty")
-		err := app.tmpls.ExecuteTemplate(w, "forgot.html", MSG_MISSING_EMAIL)
+		err := app.tmpls.ExecuteTemplate(w, "forgot.html", MsgMissingEmail)
 		if err != nil {
 			log.Println("error executing template", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -57,7 +57,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	userName, err := GetUserNameForEmail(app.db, email)
 	if err != nil || userName == "" {
 		log.Printf("failed to GetUserNameForEmail %q: %v", email, err)
-		err := app.tmpls.ExecuteTemplate(w, "forgot.html", MSG_NO_SUCH_USER)
+		err := app.tmpls.ExecuteTemplate(w, "forgot.html", MsgNoSuchUser)
 		if err != nil {
 			log.Println("error executing template", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -76,9 +76,14 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resetURL := fmt.Sprintf("https://%s:%s/reset?rtoken=%s", app.config.ServerHost, app.config.ServerPort, resetToken.Value)
-	SendEmail(app.config.SmtpUser, app.config.SmtpPassword, app.config.SmtpHost, app.config.SmtpPort, email, "Reset Pasword", resetURL)
+	err = SendEmail(app.config.SMTPUser, app.config.SMTPPassword, app.config.SMTPHost, app.config.SMTPPort, email, "Reset Pasword", resetURL)
+	if err != nil {
+		log.Printf("unable to SendEmail: %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 
-	err = app.tmpls.ExecuteTemplate(w, "forgot_sent.html", err)
+	err = app.tmpls.ExecuteTemplate(w, "forgot_sent.html", nil)
 	if err != nil {
 		log.Println("error executing template", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

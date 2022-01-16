@@ -13,7 +13,7 @@ type ResetData struct {
 	ResetToken string
 }
 
-// ResetHandler handles /rest requests
+// ResetHandler handles /rest requests.
 func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
 		log.Println("invalid method", r.Method)
@@ -34,12 +34,7 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-const (
-	MSG_MISSING_RESET_VALUES = "Missing values"
-	MSG_MISMATCHED_PASSWORDS = "Passwords do not match"
-)
-
-// resetPost is called for the POST method of the RegisterHandler
+// resetPost is called for the POST method of the RegisterHandler.
 func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName string) {
 	// get form values
 	resetToken := strings.TrimSpace(r.PostFormValue("rtoken"))
@@ -49,7 +44,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	// check for missing values
 	// redundant given client side required fields, but good practice
 	if resetToken == "" || password1 == "" || password2 == "" {
-		msg := MSG_MISSING_RESET_VALUES
+		msg := MsgMissingRequired
 		log.Println(msg)
 		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
@@ -63,7 +58,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	// check that password fields match
 	// may be redundant if done client side, but good practice
 	if password1 != password2 {
-		msg := MSG_MISMATCHED_PASSWORDS
+		msg := MsgPasswordsDifferent
 		log.Println(msg)
 		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {

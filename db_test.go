@@ -5,6 +5,7 @@ import (
 )
 
 func TestInitDB(t *testing.T) {
+	// TODO: test valid
 	// test invalid
 	db, err := InitDB("", "")
 	if err == nil {
@@ -13,6 +14,4 @@ func TestInitDB(t *testing.T) {
 	if db != nil {
 		t.Errorf("initDB returned non-nil db for empty values")
 	}
-
-	// TODO: test valid
 }

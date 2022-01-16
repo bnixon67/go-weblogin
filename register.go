@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	MSG_REGISTER_MISSING_VALUES       = "Please provide all the required values"
-	MSG_REGISTER_USER_EXISTS          = "Your desired User Name already exists."
-	MSG_REGISTER_EMAIL_EXISTS         = "A User Name already exists for this Email Address."
-	MSG_REGISTER_MISMATCHED_PASSWORDS = "Password do not match."
+	MsgMissingRequired    = "Please provide all the required values"
+	MsgUserNameExists     = "Your desired User Name already exists."
+	MsgEmailExists        = "A User Name already exists for this Email Address."
+	MsgPasswordsDifferent = "Password do not match."
 )
 
-// RegisterHandler handles /register requests
+// RegisterHandler handles /register requests.
 func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
 		log.Println("invalid method", r.Method)
@@ -36,7 +36,7 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// registerPost is called for the POST method of the RegisterHandler
+// registerPost is called for the POST method of the RegisterHandler.
 func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// get form values
 	userName := strings.TrimSpace(r.PostFormValue("userName"))
@@ -48,7 +48,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// check for missing values
 	// redundant given client side required fields, but good practice
 	if userName == "" || password1 == "" || password2 == "" || fullName == "" || email == "" {
-		msg := MSG_REGISTER_MISSING_VALUES
+		msg := MsgMissingRequired
 		log.Println(msg, "for", userName)
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
@@ -68,7 +68,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if userExists {
 		log.Printf("userName %q already exists", userName)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", MSG_REGISTER_USER_EXISTS)
+		err := app.tmpls.ExecuteTemplate(w, "register.html", MsgUserNameExists)
 		if err != nil {
 			log.Println("error executing template", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -86,7 +86,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if emailExists {
 		log.Printf("email %q already exists", email)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", MSG_REGISTER_EMAIL_EXISTS)
+		err := app.tmpls.ExecuteTemplate(w, "register.html", MsgEmailExists)
 		if err != nil {
 			log.Println("error executing template", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -98,7 +98,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// check that password fields match
 	// may be redundant if done client side, but good practice
 	if password1 != password2 {
-		msg := MSG_REGISTER_MISMATCHED_PASSWORDS
+		msg := MsgPasswordsDifferent
 		log.Println(msg, "for", userName)
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
