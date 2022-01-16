@@ -20,7 +20,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err != http.ErrNoCookie {
 			log.Println("error getting cookie", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 	} else {

@@ -27,7 +27,8 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "register.html", nil)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
 	case http.MethodPost:
@@ -52,7 +53,8 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -69,7 +71,8 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "register.html", MSG_REGISTER_USER_EXISTS)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -86,7 +89,8 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "register.html", MSG_REGISTER_EMAIL_EXISTS)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -99,7 +103,8 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -112,7 +117,8 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -126,7 +132,8 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}

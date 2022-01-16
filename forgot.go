@@ -21,7 +21,8 @@ func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "forgot.html", nil)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
 	case http.MethodPost:
@@ -45,7 +46,8 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "forgot.html", MSG_MISSING_EMAIL)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -58,7 +60,8 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "forgot.html", MSG_NO_SUCH_USER)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -68,7 +71,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	resetToken, err := SaveNewToken(app.db, "reset", userName, 12, 1)
 	if err != nil {
 		log.Printf("unable to save reset token: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
@@ -78,6 +81,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	err = app.tmpls.ExecuteTemplate(w, "forgot_sent.html", err)
 	if err != nil {
 		log.Println("error executing template", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
 }

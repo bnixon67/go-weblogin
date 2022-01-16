@@ -25,7 +25,8 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "reset.html", ResetData{ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
 	case http.MethodPost:
@@ -53,7 +54,8 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -66,7 +68,8 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -78,7 +81,8 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -91,7 +95,8 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 		err := app.tmpls.ExecuteTemplate(w, tmplFileName, msg)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -100,7 +105,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	_, err = app.db.Exec("UPDATE users SET hashedPassword = ? WHERE username = ?", string(hashedPassword), userName)
 	if err != nil {
 		log.Printf("update password failed for %q: %v", userName, err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 

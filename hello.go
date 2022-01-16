@@ -24,7 +24,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err != http.ErrNoCookie {
 			log.Println("error getting cookie", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 	} else {
@@ -49,7 +49,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	err = app.tmpls.ExecuteTemplate(w, "hello.html", HelloPageData{Message: "", User: currentUser})
 	if err != nil {
 		log.Println("error executing template", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 }

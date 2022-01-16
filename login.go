@@ -27,7 +27,8 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "login.html", nil)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 
 	case http.MethodPost:
@@ -63,7 +64,8 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "login.html", msg)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
@@ -74,7 +76,8 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 		err := app.tmpls.ExecuteTemplate(w, "login.html", MSG_LOGIN_FAILED)
 		if err != nil {
 			log.Println("error executing template", err)
-			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
 		}
 		return
 	}
