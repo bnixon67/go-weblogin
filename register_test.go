@@ -39,6 +39,12 @@ func TestRegisterHandlerGet(t *testing.T) {
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
+
+	got := w.Header().Get("Location")
+	expected := ""
+	if got != expected {
+		t.Errorf("got location %q, expected %q", got, expected)
+	}
 }
 
 func TestRegisterHandlerPostMissingValues(t *testing.T) {
@@ -58,6 +64,12 @@ func TestRegisterHandlerPostMissingValues(t *testing.T) {
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
+
+	got := w.Header().Get("Location")
+	expected := ""
+	if got != expected {
+		t.Errorf("got location %q, expected %q", got, expected)
+	}
 }
 
 func TestRegisterHandlerPostExistingUser(t *testing.T) {
@@ -66,7 +78,7 @@ func TestRegisterHandlerPostExistingUser(t *testing.T) {
 		"fullName":  {"full name"},
 		"email":     {"email"},
 		"password1": {"password one"},
-		"password2": {"password two"},
+		"password2": {"password one"},
 	}
 
 	app := AppForTest(t)
@@ -86,6 +98,12 @@ func TestRegisterHandlerPostExistingUser(t *testing.T) {
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
+
+	got := w.Header().Get("Location")
+	expected := ""
+	if got != expected {
+		t.Errorf("got location %q, expected %q", got, expected)
+	}
 }
 
 func TestRegisterHandlerPostExistingEmail(t *testing.T) {
@@ -98,7 +116,7 @@ func TestRegisterHandlerPostExistingEmail(t *testing.T) {
 		"fullName":  {"full name"},
 		"email":     {"test@email"},
 		"password1": {"password one"},
-		"password2": {"password two"},
+		"password2": {"password one"},
 	}
 
 	app := AppForTest(t)
@@ -117,6 +135,12 @@ func TestRegisterHandlerPostExistingEmail(t *testing.T) {
 	expectedInBody := MsgEmailExists
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
+	}
+
+	got := w.Header().Get("Location")
+	expected := ""
+	if got != expected {
+		t.Errorf("got location %q, expected %q", got, expected)
 	}
 }
 
@@ -149,6 +173,12 @@ func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
 	expectedInBody := MsgPasswordsDifferent
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
+	}
+
+	got := w.Header().Get("Location")
+	expected := ""
+	if got != expected {
+		t.Errorf("got location %q, expected %q", got, expected)
 	}
 }
 

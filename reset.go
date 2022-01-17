@@ -22,7 +22,7 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := ExecTemplateOrError(app.tmpls, w, "reset.html", ResetData{ResetToken: r.URL.Query().Get("rtoken")})
+		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "reset.html", ResetData{ResetToken: r.URL.Query().Get("rtoken")}))
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -45,7 +45,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if resetToken == "" || password1 == "" || password2 == "" {
 		msg := MsgMissingRequired
 		log.Println(msg)
-		err := ExecTemplateOrError(app.tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")}))
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -58,7 +58,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
 		log.Println(msg)
-		err := ExecTemplateOrError(app.tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")}))
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -70,7 +70,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if err != nil {
 		log.Printf("invalid reset token: %v", err)
 		msg := "Please provide a valid Reset Token"
-		err := ExecTemplateOrError(app.tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")}))
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -83,7 +83,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if err != nil {
 		msg := "Cannot hash password"
 		log.Println(msg, "for", userName)
-		err := ExecTemplateOrError(app.tmpls, w, tmplFileName, msg)
+		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, tmplFileName, msg))
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return

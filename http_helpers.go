@@ -1,7 +1,6 @@
 package main
 
 import (
-	"html/template"
 	"net/http"
 	"strings"
 )
@@ -34,9 +33,10 @@ func ValidMethod(w http.ResponseWriter, r *http.Request, allowed []string) bool 
 	return false
 }
 
-func ExecTemplateOrError(t *template.Template, w http.ResponseWriter, name string, data interface{}) error {
+// MustOrHTTPError is a helper that wraps a call to a function returning err and uses w to call http.Error to return an InternalServerError.
+func MustOrHTTPError(w http.ResponseWriter, err error) error {
 	code := http.StatusInternalServerError
-	err := t.ExecuteTemplate(w, name, data)
+
 	if err != nil {
 		http.Error(w, http.StatusText(code), code)
 	}

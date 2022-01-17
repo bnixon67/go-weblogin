@@ -23,7 +23,7 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := ExecTemplateOrError(app.tmpls, w, "login.html", nil)
+		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "login.html", nil))
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -59,7 +59,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if msg != "" {
 		log.Println(msg)
-		err := ExecTemplateOrError(app.tmpls, w, "login.html", msg)
+		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "login.html", msg))
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -70,7 +70,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// attempt to login the given userName with the given password
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
-		err := ExecTemplateOrError(app.tmpls, w, "login.html", MsgLoginFailed)
+		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "login.html", MsgLoginFailed))
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return

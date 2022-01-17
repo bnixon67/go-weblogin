@@ -43,7 +43,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// display page
-	err = ExecTemplateOrError(app.tmpls, w, "logout.html", nil)
+	err = MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "logout.html", nil))
 	if err != nil {
 		log.Printf("error executing template: %v", err)
 		return
