@@ -12,7 +12,7 @@ linters:
     - varcheck
     - asciicheck
     - bidichk
-    - cyclop
+#   - cyclop
     - depguard
     - dogsled
     - dupl

@@ -23,10 +23,9 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := app.tmpls.ExecuteTemplate(w, "login.html", nil)
+		err := ExecTemplateOrError(app.tmpls, w, "login.html", nil)
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 
@@ -60,10 +59,9 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if msg != "" {
 		log.Println(msg)
-		err := app.tmpls.ExecuteTemplate(w, "login.html", msg)
+		err := ExecTemplateOrError(app.tmpls, w, "login.html", msg)
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return
@@ -72,10 +70,9 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// attempt to login the given userName with the given password
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
-		err := app.tmpls.ExecuteTemplate(w, "login.html", MsgLoginFailed)
+		err := ExecTemplateOrError(app.tmpls, w, "login.html", MsgLoginFailed)
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return

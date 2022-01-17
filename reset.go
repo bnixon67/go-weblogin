@@ -22,10 +22,9 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := app.tmpls.ExecuteTemplate(w, "reset.html", ResetData{ResetToken: r.URL.Query().Get("rtoken")})
+		err := ExecTemplateOrError(app.tmpls, w, "reset.html", ResetData{ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 
@@ -46,10 +45,9 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if resetToken == "" || password1 == "" || password2 == "" {
 		msg := MsgMissingRequired
 		log.Println(msg)
-		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := ExecTemplateOrError(app.tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return
@@ -60,10 +58,9 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
 		log.Println(msg)
-		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := ExecTemplateOrError(app.tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return
@@ -73,10 +70,9 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if err != nil {
 		log.Printf("invalid reset token: %v", err)
 		msg := "Please provide a valid Reset Token"
-		err := app.tmpls.ExecuteTemplate(w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := ExecTemplateOrError(app.tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return
@@ -87,10 +83,9 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if err != nil {
 		msg := "Cannot hash password"
 		log.Println(msg, "for", userName)
-		err := app.tmpls.ExecuteTemplate(w, tmplFileName, msg)
+		err := ExecTemplateOrError(app.tmpls, w, tmplFileName, msg)
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return

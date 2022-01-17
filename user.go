@@ -132,3 +132,22 @@ func CompareUserPassword(db *sql.DB, userName, password string) error {
 
 	return nil
 }
+
+// RegisterUser registers a user with the given values.
+// Returns nil on success or an error on failure.
+func RegisterUser(db *sql.DB, userName, fullName, email, password string) error {
+	// hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	// store the user and hashed password
+	_, err = db.Exec("INSERT INTO users(username, hashedPassword, fullName, email) VALUES (?, ?, ?, ?)",
+		userName, hashedPassword, fullName, email)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

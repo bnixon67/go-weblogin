@@ -4,8 +4,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -24,16 +22,26 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := app.tmpls.ExecuteTemplate(w, "register.html", nil)
+		err := ExecTemplateOrError(app.tmpls, w, "register.html", nil)
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 
 	case http.MethodPost:
 		app.registerPost(w, r)
 	}
+}
+
+// IsEmpty returns true if any of the strings are empty, otherwise false.
+func IsEmpty(strs ...string) bool {
+	for _, s := range strs {
+		if s == "" {
+			return true
+		}
+	}
+
+	return false
 }
 
 // registerPost is called for the POST method of the RegisterHandler.
@@ -47,16 +55,27 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 
 	// check for missing values
 	// redundant given client side required fields, but good practice
-	if userName == "" || password1 == "" || password2 == "" || fullName == "" || email == "" {
+	if IsEmpty(userName, fullName, email, password1, password2) {
 		msg := MsgMissingRequired
 		log.Println(msg, "for", userName)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
+		err := ExecTemplateOrError(app.tmpls, w, "register.html", msg)
 		if err != nil {
 			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 		return
+	}
+
+	// check that password fields match
+	// may be redundant if done client side, but good practice
+	if password1 != password2 {
+		msg := MsgPasswordsDifferent
+		log.Println(msg, "for", userName)
+		err := ExecTemplateOrError(app.tmpls, w, "register.html", msg)
+		if err != nil {
+			log.Printf("error executing template: %v", err)
+			return
+		}
 	}
 
 	// check that userName doesn't already exist
@@ -68,10 +87,9 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if userExists {
 		log.Printf("userName %q already exists", userName)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", MsgUserNameExists)
+		err := ExecTemplateOrError(app.tmpls, w, "register.html", MsgUserNameExists)
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return
@@ -86,59 +104,27 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if emailExists {
 		log.Printf("email %q already exists", email)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", MsgEmailExists)
+		err := ExecTemplateOrError(app.tmpls, w, "register.html", MsgEmailExists)
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return
 	}
 
-	// check that password fields match
-	// may be redundant if done client side, but good practice
-	if password1 != password2 {
-		msg := MsgPasswordsDifferent
-		log.Println(msg, "for", userName)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
-		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		return
-	}
-
-	// hash the password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password1), bcrypt.DefaultCost)
+	// Register User
+	err = RegisterUser(app.db, userName, fullName, email, password1)
 	if err != nil {
-		msg := "Cannot hash password"
-		log.Println(msg, "for", userName)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
+		log.Printf("unable to RegisterUser %q: %v", userName, err)
+		err := ExecTemplateOrError(app.tmpls, w, "register.html", "Unable to Register User")
 		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return
 	}
 
-	// store the user and hashed password
-	_, err = app.db.Exec("INSERT INTO users(username, hashedPassword, fullName, email) VALUES (?, ?, ?, ?)",
-		userName, hashedPassword, fullName, email)
-	if err != nil {
-		msg := "Unable to register user"
-		log.Println(msg, "for", userName, err)
-		err := app.tmpls.ExecuteTemplate(w, "register.html", msg)
-		if err != nil {
-			log.Println("error executing template", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-		return
-	}
-
-	// register successful
+	// registration successful
 	log.Printf("Username %q registered", userName)
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

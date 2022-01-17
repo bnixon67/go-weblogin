@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"net/http"
 	"strings"
 )
@@ -31,4 +32,13 @@ func ValidMethod(w http.ResponseWriter, r *http.Request, allowed []string) bool 
 
 	http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	return false
+}
+
+func ExecTemplateOrError(t *template.Template, w http.ResponseWriter, name string, data interface{}) error {
+	code := http.StatusInternalServerError
+	err := t.ExecuteTemplate(w, name, data)
+	if err != nil {
+		http.Error(w, http.StatusText(code), code)
+	}
+	return err
 }

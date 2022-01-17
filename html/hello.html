@@ -10,9 +10,11 @@
     <h2>Hello</h2>
   </div>
   {{ if .User.UserName }}
-  <div class="w3-container w3-light-grey">
-    <p>Hello {{ .User.FullName }}</p>
-  </div>
+  <ul class="w3-ul w3-border">
+    <li><b>User Name:</b> {{ .User.UserName }}</li>
+    <li><b>Full Name:</b> {{ .User.FullName }}</li>
+    <li><b>Email:</b> {{ .User.Email }}</li>
+  </ul>
   <div class="w3-panel w3-right-align">
     <a href="/logout">Logout</a>
   </div>

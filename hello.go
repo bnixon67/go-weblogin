@@ -47,10 +47,9 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// display page
-	err = app.tmpls.ExecuteTemplate(w, "hello.html", HelloPageData{Message: "", User: currentUser})
+	err = ExecTemplateOrError(app.tmpls, w, "hello.html", HelloPageData{Message: "", User: currentUser})
 	if err != nil {
-		log.Println("error executing template", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		log.Printf("error executing template: %v", err)
 		return
 	}
 }
