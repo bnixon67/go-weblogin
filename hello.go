@@ -47,7 +47,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// display page
-	err = MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "hello.html", HelloPageData{Message: "", User: currentUser}))
+	err = RenderTemplate(app.tmpls, w, "hello.html", HelloPageData{Message: "", User: currentUser})
 	if err != nil {
 		log.Printf("error executing template: %v", err)
 		return

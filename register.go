@@ -22,7 +22,7 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "register.html", nil))
+		err := RenderTemplate(app.tmpls, w, "register.html", nil)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -58,9 +58,9 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	if IsEmpty(userName, fullName, email, password1, password2) {
 		msg := MsgMissingRequired
 		log.Println(msg, "for", userName)
-		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "register.html", msg))
+		err := RenderTemplate(app.tmpls, w, "register.html", msg)
 		if err != nil {
-			log.Println("error executing template", err)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 		return
@@ -71,7 +71,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
 		log.Println(msg, "for", userName)
-		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "register.html", msg))
+		err := RenderTemplate(app.tmpls, w, "register.html", msg)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -88,7 +88,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if userExists {
 		log.Printf("userName %q already exists", userName)
-		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "register.html", MsgUserNameExists))
+		err := RenderTemplate(app.tmpls, w, "register.html", MsgUserNameExists)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -105,7 +105,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if emailExists {
 		log.Printf("email %q already exists", email)
-		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "register.html", MsgEmailExists))
+		err := RenderTemplate(app.tmpls, w, "register.html", MsgEmailExists)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -117,7 +117,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	err = RegisterUser(app.db, userName, fullName, email, password1)
 	if err != nil {
 		log.Printf("unable to RegisterUser %q: %v", userName, err)
-		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "register.html", "Unable to Register User"))
+		err := RenderTemplate(app.tmpls, w, "register.html", "Unable to Register User")
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return

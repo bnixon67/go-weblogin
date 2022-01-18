@@ -18,9 +18,9 @@ func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "forgot.html", nil))
+		err := RenderTemplate(app.tmpls, w, "forgot.html", nil)
 		if err != nil {
-			log.Println("error executing template", err)
+			log.Printf("error executing template: %v", err)
 			return
 		}
 
@@ -42,7 +42,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	// check for missing values
 	if email == "" {
 		log.Print("email is empty")
-		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "forgot.html", MsgMissingEmail))
+		err := RenderTemplate(app.tmpls, w, "forgot.html", MsgMissingEmail)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -55,7 +55,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	userName, err := GetUserNameForEmail(app.db, email)
 	if err != nil || userName == "" {
 		log.Printf("failed to GetUserNameForEmail %q: %v", email, err)
-		err := MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "forgot.html", MsgNoSuchUser))
+		err := RenderTemplate(app.tmpls, w, "forgot.html", MsgNoSuchUser)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -80,9 +80,9 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = MustOrHTTPError(w, app.tmpls.ExecuteTemplate(w, "forgot_sent.html", nil))
+	err = RenderTemplate(app.tmpls, w, "forgot_sent.html", nil)
 	if err != nil {
-		log.Println("error executing template", err)
+		log.Printf("error executing template: %v", err)
 		return
 	}
 }

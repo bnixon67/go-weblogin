@@ -1,6 +1,7 @@
 package main
 
 import (
+	"html/template"
 	"net/http"
 	"strings"
 )
@@ -33,12 +34,14 @@ func ValidMethod(w http.ResponseWriter, r *http.Request, allowed []string) bool 
 	return false
 }
 
-// MustOrHTTPError is a helper that wraps a call to a function returning err and uses w to call http.Error to return an InternalServerError.
-func MustOrHTTPError(w http.ResponseWriter, err error) error {
-	code := http.StatusInternalServerError
+const MsgTemplateError = "Sorry, the server was unable to display this page. Please contact the administrator."
 
+// RenderTemplate is a helper to call template.ExecuteTemplate and returns a http.Error unpon failure. Like http.Error, it does not otherwise end the request, so the caller must ensure no further writes are done to w if non-nil is returned.
+func RenderTemplate(t *template.Template, w http.ResponseWriter, name string, data interface{}) error {
+	err := t.ExecuteTemplate(w, name, data)
 	if err != nil {
-		http.Error(w, http.StatusText(code), code)
+		http.Error(w, MsgTemplateError, http.StatusInternalServerError)
 	}
+
 	return err
 }
