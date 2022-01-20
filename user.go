@@ -119,7 +119,7 @@ func CompareUserPassword(db *sql.DB, userName, password string) error {
 	err := result.Scan(&hashedPassword)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return ErrNoSuchUser
+			return errors.New("no such user")
 		}
 		return err
 	}

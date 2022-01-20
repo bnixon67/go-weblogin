@@ -2,13 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"errors"
+	"fmt"
 	"html/template"
-	"log"
 	"strings"
 )
-
-var ErrInvalidConfig = errors.New("invalid config")
 
 // App contains common variables to reuse to eliminate global variables.
 type App struct {
@@ -23,23 +20,23 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	var err error
 
 	// init logging
-	err = InitLogging(logFileName)
+	err = InitLog(logFileName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("NewApp: %w", err)
 	}
 
 	// read config file
 	app.config, err = NewConfigFromFile(configFileName)
 	if err != nil {
-		log.Printf("failed to read config %q: %v", configFileName, err)
-		return nil, err
+		return nil, fmt.Errorf("NewApp: %w", err)
 	}
 
 	// ensure required config values have been provided
 	isValid, missing := app.config.IsValid()
 	if !isValid {
-		log.Printf("config is missing %s", strings.Join(missing, ", "))
-		return nil, ErrInvalidConfig
+		return nil,
+			fmt.Errorf("NewApp: invalid config: missing %s",
+				strings.Join(missing, ", "))
 	}
 
 	// TODO: handle this default value
@@ -48,17 +45,16 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	}
 
 	// init database connection
-	app.db, err = InitDB(app.config.SQLDriverName, app.config.SQLDataSourceName)
+	app.db, err = InitDB(app.config.SQLDriverName,
+		app.config.SQLDataSourceName)
 	if err != nil {
-		log.Printf("failed to InitDB: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("NewApp: %w", err)
 	}
 
 	// init HTML templates
 	app.tmpls, err = InitTemplates(app.config.ParseGlobPattern)
 	if err != nil {
-		log.Printf("failed to InitTemplates: %v", err)
-		return nil, err
+		return nil, fmt.Errorf("NewApp: %w", err)
 	}
 
 	return &app, err

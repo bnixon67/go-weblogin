@@ -8,7 +8,7 @@ const TestLogFile = "test.log"
 
 func TestInitLogging(t *testing.T) {
 	// invalid file name
-	err := InitLogging("/foo/bar")
+	err := InitLog("/foo/bar")
 	if err == nil {
 		t.Errorf("got nil, expected non-nil for InitLogging with invalid file name")
 	}

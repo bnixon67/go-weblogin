@@ -1,17 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
-	"log"
 )
-
-func noescape(s string) template.HTML {
-	return template.HTML(s) //nolint
-}
 
 // InitTemplates parses the templates.
 func InitTemplates(pattern string) (*template.Template, error) {
-	log.Print("Initialize templates")
-
-	return template.New("").Funcs(template.FuncMap{"noescape": noescape}).ParseGlob(pattern)
+	tmpls, err := template.New("html").ParseGlob(pattern)
+	if err != nil {
+		return nil, fmt.Errorf("InitTemplates: %w", err)
+	}
+	return tmpls, nil
 }

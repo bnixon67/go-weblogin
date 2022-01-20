@@ -65,7 +65,17 @@ func TestConfigIsValid(t *testing.T) {
 	var cases []tcase
 
 	// required fields
-	required := []string{"ServerHost", "ServerPort", "SQLDriverName", "SQLDataSourceName", "ParseGlobPattern"}
+	required := []string{
+		"ServerHost",
+		"ServerPort",
+		"SQLDriverName",
+		"SQLDataSourceName",
+		"ParseGlobPattern",
+		"SMTPHost",
+		"SMTPPort",
+		"SMTPUser",
+		"SMTPPassword",
+	}
 
 	// generate test cases based on required fields by looping thru all the possibilities and using bit logic to set fields
 	for a := 0; a < int(math.Pow(2, float64(len(required)))); a++ {

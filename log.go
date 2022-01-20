@@ -20,13 +20,12 @@ const (
 	fileMode   = 0o600
 )
 
-// InitLogging initializes logging for the application.
-func InitLogging(logFileName string) error {
+// InitLog initializes logging for the application.
+func InitLog(logFileName string) error {
 	// use custom writer for log
 	lw, err := NewLogWriter(logFileName)
 	if err != nil {
-		log.Printf("unable to create NewLogWriter, %v", err)
-		return err
+		return fmt.Errorf("InitLog: %w", err)
 	}
 	log.SetFlags(0)
 	log.SetOutput(lw)

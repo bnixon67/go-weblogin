@@ -18,17 +18,21 @@ func main() {
 	}
 
 	// TODO: allow logfile to specified in config file
-	app, err := NewApp(os.Args[1], "")
+	configFileName := os.Args[1]
+	logFileName := ""
+	app, err := NewApp(configFileName, logFileName)
 	if err != nil {
-		log.Printf("could not create NewApp, %v", err)
+		log.Printf("failed to create app: %v", err)
 		return
 	}
+	log.Printf("created app using config %q and log %q",
+		configFileName, logFileName)
 
 	// define HTTP server
 	// TODO: add values to config file
 	s := &http.Server{
 		Addr:              ":" + app.config.ServerPort,
-		Handler:           &logRequestHandler{http.DefaultServeMux},
+		Handler:           &LogRequestHandler{http.DefaultServeMux},
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       30 * time.Second,
@@ -43,12 +47,13 @@ func main() {
 	http.HandleFunc("/forgot", app.ForgotHandler)
 	http.HandleFunc("/reset", app.ResetHandler)
 	http.HandleFunc("/hello", app.HelloHandler)
-	http.HandleFunc("/w3.css", serveFileHandler("html/w3.css"))
-	http.HandleFunc("/favicon.ico", serveFileHandler("html/favicon.ico"))
-	http.Handle("/", http.RedirectHandler("/hello", http.StatusMovedPermanently))
+	http.HandleFunc("/w3.css", ServeFileHandler("html/w3.css"))
+	http.HandleFunc("/favicon.ico", ServeFileHandler("html/favicon.ico"))
+	http.Handle("/",
+		http.RedirectHandler("/hello", http.StatusMovedPermanently))
 
 	// run server
-	// TODO: move certs to config file
+	// TODO: move cert locations to config file
 	log.Println("Listening on", s.Addr)
 	err = s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
 	if err != nil {
@@ -56,19 +61,23 @@ func main() {
 	}
 }
 
-func serveFileHandler(file string) http.HandlerFunc {
+// ServeFileHandler is a simple http.ServeFile wrapper.
+func ServeFileHandler(file string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, file)
 	}
 }
 
-// logRequestHandler is middleware that logs all HTTP requests and then calls the next HTTP handler specified.
-type logRequestHandler struct {
+// LogRequestHandler is middleware that logs all HTTP requests and
+// then calls the next HTTP handler specified.
+type LogRequestHandler struct {
 	next http.Handler
 }
 
-// ServerHTTP for logRequestHandler log the HTTP request and then calls the next HTTP handler specified.
-func (l *logRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// ServerHTTP for logRequestHandler log the HTTP request and then
+// calls the next HTTP handler specified.
+func (l *LogRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// get real IP address if using Cloudflare or similar service
 	var ip string
 	ip = r.Header.Get("X-Real-IP")
 	if ip == "" {
@@ -76,5 +85,6 @@ func (l *logRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println(ip, r.Method, r.RequestURI)
+
 	l.next.ServeHTTP(w, r)
 }

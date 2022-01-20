@@ -2,16 +2,12 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
-)
-
-var (
-	ErrNoSuchUser      = errors.New("no such user")
-	ErrInternalFailure = errors.New("login failed due to internal error")
 )
 
 // LoginHandler handles /login requests.
@@ -70,6 +66,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// attempt to login the given userName with the given password
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
+		log.Printf("failed login for %q: %v", userName, err)
 		err := RenderTemplate(app.tmpls, w, "login.html", MsgLoginFailed)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
@@ -79,13 +76,14 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// login successful, so create a cookie for the session Token
+	log.Printf("successful login for %q", userName)
 	http.SetCookie(w, &http.Cookie{
 		Name:    "sessionToken",
 		Value:   token.Value,
 		Expires: token.Expires,
 	})
-	log.Printf("valid login for %q", userName)
 
+	// redirect from login page
 	http.Redirect(w, r, "/hello", http.StatusSeeOther)
 }
 
@@ -93,15 +91,14 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 func (app *App) LoginUser(userName, password string) (Token, error) {
 	err := CompareUserPassword(app.db, userName, password)
 	if err != nil {
-		log.Printf("invalid password for %q: %v", userName, err)
-		return Token{}, err
+		return Token{}, errors.New("invalid password")
 	}
 
 	// create and save a new session token
 	token, err := SaveNewToken(app.db, "session", userName, 32, app.config.SessionExpiresHours)
 	if err != nil {
 		log.Printf("unable to save session token: %v", err)
-		return Token{}, ErrInternalFailure
+		return Token{}, fmt.Errorf("unable to save token: %w", err)
 	}
 
 	return token, nil

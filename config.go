@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"os"
 )
 
@@ -26,20 +26,24 @@ type Config struct {
 
 // NewConfigFromFile returns a Config from the given fileName.
 func NewConfigFromFile(fileName string) (Config, error) {
-	log.Printf("INFO - reading %q", fileName)
-
+	// open config file
 	configFile, err := os.Open(fileName)
 	if err != nil {
-		return Config{}, err
+		return Config{}, fmt.Errorf("NewConfigFromFile: %w", err)
 	}
 	defer configFile.Close()
 
+	// decode json from config
 	var config Config
 	err = json.NewDecoder(configFile).Decode(&config)
+	if err != nil {
+		return Config{}, fmt.Errorf("NewConfigFromFile: %w", err)
+	}
 
-	return config, err
+	return config, nil
 }
 
+// appendifEmpty appends msg to missing if str is empty.
 func appendIfEmpty(missing []string, str, msg string) []string {
 	if str == "" {
 		missing = append(missing, msg)
@@ -57,6 +61,10 @@ func (c Config) IsValid() (bool, []string) {
 	missing = appendIfEmpty(missing, c.SQLDriverName, "SQLDriverName")
 	missing = appendIfEmpty(missing, c.SQLDataSourceName, "DataSourceName")
 	missing = appendIfEmpty(missing, c.ParseGlobPattern, "ParseGlobPattern")
+	missing = appendIfEmpty(missing, c.SMTPHost, "SMTPHost")
+	missing = appendIfEmpty(missing, c.SMTPPort, "SMTPPort")
+	missing = appendIfEmpty(missing, c.SMTPUser, "SMTPUser")
+	missing = appendIfEmpty(missing, c.SMTPPassword, "SMTPPassword")
 
 	return missing == nil, missing
 }

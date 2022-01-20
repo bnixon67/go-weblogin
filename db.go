@@ -2,18 +2,16 @@ package main
 
 import (
 	"database/sql"
-	"log"
+	"fmt"
 	"time"
 )
 
 // InitDB initializes a connection to the database.
 func InitDB(driverName, dataSourceName string) (*sql.DB, error) {
-	log.Println("initialize database connection")
-
 	// open connection to database
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("InitDB: %w", err)
 	}
 
 	// set desire connection parameters
@@ -25,7 +23,7 @@ func InitDB(driverName, dataSourceName string) (*sql.DB, error) {
 	// ping database to confirm connection
 	err = db.Ping()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("InitDB: %w", err)
 	}
 
 	return db, err
