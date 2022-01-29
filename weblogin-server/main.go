@@ -63,8 +63,8 @@ func main() {
 	http.HandleFunc("/reset", app.ResetHandler)
 	http.HandleFunc("/hello", app.HelloHandler)
 	// TODO: define base html directory in config
-	http.HandleFunc("/w3.css", weblogin.ServeFileHandler("../../html/w3.css"))
-	http.HandleFunc("/favicon.ico", weblogin.ServeFileHandler("../../html/favicon.ico"))
+	http.HandleFunc("/w3.css", weblogin.ServeFileHandler("../html/w3.css"))
+	http.HandleFunc("/favicon.ico", weblogin.ServeFileHandler("../html/favicon.ico"))
 	http.Handle("/",
 		http.RedirectHandler("/hello", http.StatusMovedPermanently))
 
