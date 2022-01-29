@@ -7,3 +7,4 @@ cover.out
 coverage.*
 nohup.out
 weblogin-server
+test_config.json

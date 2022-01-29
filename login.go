@@ -1,17 +1,14 @@
 /*
-   Copyright 2022 Bill Nixon
+Copyright 2022 Bill Nixon
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License.  You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
 
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+Unless required by applicable law or agreed to in writing, software distributed
+under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+CONDITIONS OF ANY KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations under the License.
 */
 package weblogin
 
@@ -21,8 +18,6 @@ import (
 	"log"
 	"net/http"
 	"strings"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 // LoginHandler handles /login requests.
@@ -102,11 +97,13 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/hello", http.StatusSeeOther)
 }
 
+var ErrInvalidPassword = errors.New("invalid password")
+
 // LoginUser returns a session Token if userName and password is correct.
 func (app *App) LoginUser(userName, password string) (Token, error) {
 	err := CompareUserPassword(app.DB, userName, password)
 	if err != nil {
-		return Token{}, errors.New("invalid password")
+		return Token{}, ErrInvalidPassword
 	}
 
 	// create and save a new session token
