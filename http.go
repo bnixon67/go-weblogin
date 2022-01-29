@@ -2,6 +2,7 @@ package main
 
 import (
 	"html/template"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -44,4 +45,32 @@ func RenderTemplate(t *template.Template, w http.ResponseWriter, name string, da
 	}
 
 	return err
+}
+
+// ServeFileHandler is a simple http.ServeFile wrapper.
+func ServeFileHandler(file string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, file)
+	}
+}
+
+// LogRequestHandler is middleware that logs all HTTP requests and
+// then calls the next HTTP handler specified.
+type LogRequestHandler struct {
+	next http.Handler
+}
+
+// ServerHTTP for logRequestHandler log the HTTP request and then
+// calls the next HTTP handler specified.
+func (l *LogRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// get real IP address if using Cloudflare or similar service
+	var ip string
+	ip = r.Header.Get("X-Real-IP")
+	if ip == "" {
+		ip = r.RemoteAddr
+	}
+
+	log.Println(ip, r.Method, r.RequestURI)
+
+	l.next.ServeHTTP(w, r)
 }
