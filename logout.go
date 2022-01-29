@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin
 
 import (
 	"errors"
@@ -49,7 +49,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	// remove session from database
 	// TODO: consider removing all sessions for user
 	if sessionTokenValue != "" {
-		err := RemoveToken(app.db, "session", sessionTokenValue)
+		err := RemoveToken(app.DB, "session", sessionTokenValue)
 		if err != nil {
 			log.Printf("remove token failed for %q: %v", sessionTokenValue, err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -58,7 +58,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// display page
-	err = RenderTemplate(app.tmpls, w, "logout.html", nil)
+	err = RenderTemplate(app.Tmpls, w, "logout.html", nil)
 	if err != nil {
 		log.Printf("error executing template: %v", err)
 		return

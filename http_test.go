@@ -13,13 +13,15 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	weblogin "github.com/bnixon67/go-web-login"
 )
 
 func TestStringContains(t *testing.T) {
@@ -38,7 +40,7 @@ func TestStringContains(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		got := StringContains(tc.arr, tc.val)
+		got := weblogin.StringContains(tc.arr, tc.val)
 		if got != tc.expect {
 			t.Errorf("got %v, expected %v, for StringContains(%q, %q)", got, tc.expect, tc.arr, tc.val)
 		}
@@ -102,7 +104,7 @@ func TestCheckMethods(t *testing.T) {
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest(tc.val, "/", nil)
 
-		got := ValidMethod(w, r, tc.arr)
+		got := weblogin.ValidMethod(w, r, tc.arr)
 		body := w.Body.String()
 		allow := w.Header().Get("Allow")
 		if got != tc.expect || w.Code != tc.status || !strings.Contains(body, tc.inBody) || w.Header().Get("Allow") != tc.allow {

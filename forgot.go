@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := RenderTemplate(app.tmpls, w, "forgot.html", nil)
+		err := RenderTemplate(app.Tmpls, w, "forgot.html", nil)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -57,7 +57,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	// check for missing values
 	if email == "" {
 		log.Print("email is empty")
-		err := RenderTemplate(app.tmpls, w, "forgot.html", MsgMissingEmail)
+		err := RenderTemplate(app.Tmpls, w, "forgot.html", MsgMissingEmail)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -67,10 +67,10 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 
 	// get userName for email provided on the form
 	// TODO: send email rather than exposing no user for email
-	userName, err := GetUserNameForEmail(app.db, email)
+	userName, err := GetUserNameForEmail(app.DB, email)
 	if err != nil || userName == "" {
 		log.Printf("failed to GetUserNameForEmail %q: %v", email, err)
-		err := RenderTemplate(app.tmpls, w, "forgot.html", MsgNoSuchUser)
+		err := RenderTemplate(app.Tmpls, w, "forgot.html", MsgNoSuchUser)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -80,22 +80,22 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 
 	// create and save a new session token
 	// TODO: use config value for ResetExpiresHours
-	resetToken, err := SaveNewToken(app.db, "reset", userName, 12, 1)
+	resetToken, err := SaveNewToken(app.DB, "reset", userName, 12, 1)
 	if err != nil {
 		log.Printf("unable to save reset token: %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	resetURL := fmt.Sprintf("https://%s:%s/reset?rtoken=%s", app.config.ServerHost, app.config.ServerPort, resetToken.Value)
-	err = SendEmail(app.config.SMTPUser, app.config.SMTPPassword, app.config.SMTPHost, app.config.SMTPPort, email, "Reset Pasword", resetURL)
+	resetURL := fmt.Sprintf("https://%s:%s/reset?rtoken=%s", app.Config.ServerHost, app.Config.ServerPort, resetToken.Value)
+	err = SendEmail(app.Config.SMTPUser, app.Config.SMTPPassword, app.Config.SMTPHost, app.Config.SMTPPort, email, "Reset Pasword", resetURL)
 	if err != nil {
 		log.Printf("unable to SendEmail: %v", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	err = RenderTemplate(app.tmpls, w, "forgot_sent.html", nil)
+	err = RenderTemplate(app.Tmpls, w, "forgot_sent.html", nil)
 	if err != nil {
 		log.Printf("error executing template: %v", err)
 		return

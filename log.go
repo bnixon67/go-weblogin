@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin
 
 import (
 	"fmt"
@@ -64,11 +64,11 @@ func NewLogWriter(filename string) (LogWriter, error) {
 
 // Write satisfies io.Writer interface to output with prefixed as noted above.
 func (lw LogWriter) Write(data []byte) (int, error) {
-	return fmt.Fprint(lw.w, time.Now().Format(timeFormat), funcName(4), ": ", string(data))
+	return fmt.Fprint(lw.w, time.Now().Format(timeFormat), FuncName(4), ": ", string(data))
 }
 
-// funcName returns the function name at the depth provided.
-func funcName(depth int) string {
+// FuncName returns the function name at the depth provided.
+func FuncName(depth int) string {
 	// get program counter
 	pc, _, _, ok := runtime.Caller(depth)
 

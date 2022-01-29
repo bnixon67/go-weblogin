@@ -13,20 +13,22 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin_test
 
 import (
 	"testing"
+
+	weblogin "github.com/bnixon67/go-web-login"
 )
 
 // global to provide a singleton app.
-var app *App //nolint
+var app *weblogin.App //nolint
 
 // AppForTest is a helper function that returns an App used for testing.
-func AppForTest(t *testing.T) *App {
+func AppForTest(t *testing.T) *weblogin.App {
 	if app == nil {
 		var err error
-		app, err = NewApp("config.json", TestLogFile)
+		app, err = weblogin.NewApp("config.json", TestLogFile)
 		if err != nil {
 			app = nil
 
@@ -78,7 +80,7 @@ func TestNewApp(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(*testing.T) {
-			app, err := NewApp(c.configFileName, c.logFileName)
+			app, err := weblogin.NewApp(c.configFileName, c.logFileName)
 			if c.errExpected && err == nil {
 				t.Errorf("expected error, got err==nil for NewApp(%q, %q)", c.configFileName, c.logFileName)
 			}

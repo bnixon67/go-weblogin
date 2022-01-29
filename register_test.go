@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin_test
 
 import (
 	"net/http"
@@ -21,6 +21,8 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+
+	weblogin "github.com/bnixon67/go-web-login"
 )
 
 func TestRegisterHandlerInvalidMethod(t *testing.T) {
@@ -75,7 +77,7 @@ func TestRegisterHandlerPostMissingValues(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgMissingRequired
+	expectedInBody := weblogin.MsgMissingRequired
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -109,7 +111,7 @@ func TestRegisterHandlerPostExistingUser(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgUserNameExists
+	expectedInBody := weblogin.MsgUserNameExists
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -122,7 +124,7 @@ func TestRegisterHandlerPostExistingUser(t *testing.T) {
 }
 
 func TestRegisterHandlerPostExistingEmail(t *testing.T) {
-	randomUserName, err := GenerateRandomString(8)
+	randomUserName, err := weblogin.GenerateRandomString(8)
 	if err != nil {
 		t.Errorf("could not GenerateRandomString")
 	}
@@ -147,7 +149,7 @@ func TestRegisterHandlerPostExistingEmail(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgEmailExists
+	expectedInBody := weblogin.MsgEmailExists
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -160,7 +162,7 @@ func TestRegisterHandlerPostExistingEmail(t *testing.T) {
 }
 
 func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
-	randomUserName, err := GenerateRandomString(8)
+	randomUserName, err := weblogin.GenerateRandomString(8)
 	if err != nil {
 		t.Errorf("could not GenerateRandomString")
 	}
@@ -185,7 +187,7 @@ func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgPasswordsDifferent
+	expectedInBody := weblogin.MsgPasswordsDifferent
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -198,7 +200,7 @@ func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
 }
 
 func TestRegisterHandlerPostValid(t *testing.T) {
-	randomUserName, err := GenerateRandomString(8)
+	randomUserName, err := weblogin.GenerateRandomString(8)
 	if err != nil {
 		t.Errorf("could not GenerateRandomString")
 	}

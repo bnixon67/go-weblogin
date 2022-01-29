@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin
 
 import (
 	"errors"
@@ -50,7 +50,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	// get user for sessionToken
 	var currentUser User
 	if sessionToken != "" {
-		currentUser, err = GetUserForSessionToken(app.db, sessionToken)
+		currentUser, err = GetUserForSessionToken(app.DB, sessionToken)
 		if err != nil {
 			log.Printf("failed to get user for session %q: %v", sessionToken, err)
 			currentUser = User{}
@@ -62,7 +62,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// display page
-	err = RenderTemplate(app.tmpls, w, "hello.html", HelloPageData{Message: "", User: currentUser})
+	err = RenderTemplate(app.Tmpls, w, "hello.html", HelloPageData{Message: "", User: currentUser})
 	if err != nil {
 		log.Printf("error executing template: %v", err)
 		return

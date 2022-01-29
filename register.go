@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin
 
 import (
 	"log"
@@ -37,7 +37,7 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := RenderTemplate(app.tmpls, w, "register.html", nil)
+		err := RenderTemplate(app.Tmpls, w, "register.html", nil)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -73,7 +73,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	if IsEmpty(userName, fullName, email, password1, password2) {
 		msg := MsgMissingRequired
 		log.Println(msg, "for", userName)
-		err := RenderTemplate(app.tmpls, w, "register.html", msg)
+		err := RenderTemplate(app.Tmpls, w, "register.html", msg)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -86,7 +86,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
 		log.Println(msg, "for", userName)
-		err := RenderTemplate(app.tmpls, w, "register.html", msg)
+		err := RenderTemplate(app.Tmpls, w, "register.html", msg)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -95,7 +95,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that userName doesn't already exist
-	userExists, err := UserExists(app.db, userName)
+	userExists, err := UserExists(app.DB, userName)
 	if err != nil {
 		log.Printf("error in UserExists for %q: %v", userName, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -103,7 +103,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if userExists {
 		log.Printf("userName %q already exists", userName)
-		err := RenderTemplate(app.tmpls, w, "register.html", MsgUserNameExists)
+		err := RenderTemplate(app.Tmpls, w, "register.html", MsgUserNameExists)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -112,7 +112,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that email doesn't already exist
-	emailExists, err := EmailExists(app.db, email)
+	emailExists, err := EmailExists(app.DB, email)
 	if err != nil {
 		log.Printf("error in EmailExists for %q: %v", email, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -120,7 +120,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if emailExists {
 		log.Printf("email %q already exists", email)
-		err := RenderTemplate(app.tmpls, w, "register.html", MsgEmailExists)
+		err := RenderTemplate(app.Tmpls, w, "register.html", MsgEmailExists)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -129,10 +129,10 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Register User
-	err = RegisterUser(app.db, userName, fullName, email, password1)
+	err = RegisterUser(app.DB, userName, fullName, email, password1)
 	if err != nil {
 		log.Printf("unable to RegisterUser %q: %v", userName, err)
-		err := RenderTemplate(app.tmpls, w, "register.html", "Unable to Register User")
+		err := RenderTemplate(app.Tmpls, w, "register.html", "Unable to Register User")
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return

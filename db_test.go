@@ -13,16 +13,18 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin_test
 
 import (
 	"testing"
+
+	weblogin "github.com/bnixon67/go-web-login"
 )
 
 func TestInitDB(t *testing.T) {
 	// TODO: test valid
 	// test invalid
-	db, err := InitDB("", "")
+	db, err := weblogin.InitDB("", "")
 	if err == nil {
 		t.Errorf("initDB returned nil err for empty values")
 	}

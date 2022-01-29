@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin
 
 import (
 	"errors"
@@ -34,7 +34,7 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := RenderTemplate(app.tmpls, w, "login.html", nil)
+		err := RenderTemplate(app.Tmpls, w, "login.html", nil)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -70,7 +70,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if msg != "" {
 		log.Println(msg)
-		err := RenderTemplate(app.tmpls, w, "login.html", msg)
+		err := RenderTemplate(app.Tmpls, w, "login.html", msg)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -82,7 +82,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
 		log.Printf("failed login for %q: %v", userName, err)
-		err := RenderTemplate(app.tmpls, w, "login.html", MsgLoginFailed)
+		err := RenderTemplate(app.Tmpls, w, "login.html", MsgLoginFailed)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -104,13 +104,13 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 
 // LoginUser returns a session Token if userName and password is correct.
 func (app *App) LoginUser(userName, password string) (Token, error) {
-	err := CompareUserPassword(app.db, userName, password)
+	err := CompareUserPassword(app.DB, userName, password)
 	if err != nil {
 		return Token{}, errors.New("invalid password")
 	}
 
 	// create and save a new session token
-	token, err := SaveNewToken(app.db, "session", userName, 32, app.config.SessionExpiresHours)
+	token, err := SaveNewToken(app.DB, "session", userName, 32, app.Config.SessionExpiresHours)
 	if err != nil {
 		log.Printf("unable to save session token: %v", err)
 		return Token{}, fmt.Errorf("unable to save token: %w", err)

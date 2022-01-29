@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin
 
 import (
 	"log"
@@ -37,7 +37,7 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := RenderTemplate(app.tmpls, w, "reset.html", ResetData{ResetToken: r.URL.Query().Get("rtoken")})
+		err := RenderTemplate(app.Tmpls, w, "reset.html", ResetData{ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -60,7 +60,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if resetToken == "" || password1 == "" || password2 == "" {
 		msg := MsgMissingRequired
 		log.Println(msg)
-		err := RenderTemplate(app.tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := RenderTemplate(app.Tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -73,7 +73,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
 		log.Println(msg)
-		err := RenderTemplate(app.tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := RenderTemplate(app.Tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -81,11 +81,11 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 		return
 	}
 
-	userName, err := GetUserNameForResetToken(app.db, resetToken)
+	userName, err := GetUserNameForResetToken(app.DB, resetToken)
 	if err != nil {
 		log.Printf("invalid reset token: %v", err)
 		msg := "Please provide a valid Reset Token"
-		err := RenderTemplate(app.tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := RenderTemplate(app.Tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -98,7 +98,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if err != nil {
 		msg := "Cannot hash password"
 		log.Println(msg, "for", userName)
-		err := RenderTemplate(app.tmpls, w, tmplFileName, msg)
+		err := RenderTemplate(app.Tmpls, w, tmplFileName, msg)
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -107,7 +107,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	}
 
 	// store the user and hashed password
-	_, err = app.db.Exec("UPDATE users SET hashedPassword = ? WHERE username = ?", string(hashedPassword), userName)
+	_, err = app.DB.Exec("UPDATE users SET hashedPassword = ? WHERE username = ?", string(hashedPassword), userName)
 	if err != nil {
 		log.Printf("update password failed for %q: %v", userName, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

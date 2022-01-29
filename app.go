@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin
 
 import (
 	"database/sql"
@@ -24,9 +24,9 @@ import (
 
 // App contains common variables to reuse to eliminate global variables.
 type App struct {
-	db     *sql.DB
-	tmpls  *template.Template
-	config Config
+	DB     *sql.DB
+	Tmpls  *template.Template
+	Config Config
 }
 
 // NewApp returns a new App based on the config and log filenames provided.
@@ -41,13 +41,13 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	}
 
 	// read config file
-	app.config, err = NewConfigFromFile(configFileName)
+	app.Config, err = NewConfigFromFile(configFileName)
 	if err != nil {
 		return nil, fmt.Errorf("NewApp: %w", err)
 	}
 
 	// ensure required config values have been provided
-	isValid, missing := app.config.IsValid()
+	isValid, missing := app.Config.IsValid()
 	if !isValid {
 		return nil,
 			fmt.Errorf("NewApp: invalid config: missing %s",
@@ -55,19 +55,19 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	}
 
 	// TODO: handle this default value
-	if app.config.SessionExpiresHours == 0 {
-		app.config.SessionExpiresHours = 24
+	if app.Config.SessionExpiresHours == 0 {
+		app.Config.SessionExpiresHours = 24
 	}
 
 	// init database connection
-	app.db, err = InitDB(app.config.SQLDriverName,
-		app.config.SQLDataSourceName)
+	app.DB, err = InitDB(app.Config.SQLDriverName,
+		app.Config.SQLDataSourceName)
 	if err != nil {
 		return nil, fmt.Errorf("NewApp: %w", err)
 	}
 
 	// init HTML templates
-	app.tmpls, err = InitTemplates(app.config.ParseGlobPattern)
+	app.Tmpls, err = InitTemplates(app.Config.ParseGlobPattern)
 	if err != nil {
 		return nil, fmt.Errorf("NewApp: %w", err)
 	}

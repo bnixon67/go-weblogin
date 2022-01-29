@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin_test
 
 import (
 	"net/http"
@@ -21,6 +21,8 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+
+	weblogin "github.com/bnixon67/go-web-login"
 )
 
 func TestLoginHandlerInvalidMethod(t *testing.T) {
@@ -69,7 +71,7 @@ func TestLoginHandlerPostMissingUserNameAndPassword(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgMissingUserNameAndPassword
+	expectedInBody := weblogin.MsgMissingUserNameAndPassword
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -93,7 +95,7 @@ func TestLoginHandlerPostMissingPassword(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgMissingPassword
+	expectedInBody := weblogin.MsgMissingPassword
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -117,7 +119,7 @@ func TestLoginHandlerPostMissingUserName(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgMissingUserName
+	expectedInBody := weblogin.MsgMissingUserName
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -142,7 +144,7 @@ func TestLoginHandlerPostInvalidUserNameAndPassword(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgLoginFailed
+	expectedInBody := weblogin.MsgLoginFailed
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -192,7 +194,7 @@ func TestLoginHandlerPostValidUserNameAndInvalidPassword(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgLoginFailed
+	expectedInBody := weblogin.MsgLoginFailed
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}

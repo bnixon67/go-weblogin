@@ -13,17 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin_test
 
 import (
 	"testing"
+
+	weblogin "github.com/bnixon67/go-web-login"
 )
 
 const TestLogFile = "test.log"
 
 func TestInitLogging(t *testing.T) {
 	// invalid file name
-	err := InitLog("/foo/bar")
+	err := weblogin.InitLog("/foo/bar")
 	if err == nil {
 		t.Errorf("got nil, expected non-nil for InitLogging with invalid file name")
 	}
@@ -31,7 +33,7 @@ func TestInitLogging(t *testing.T) {
 
 func TestFuncName(t *testing.T) {
 	expected := "TestFuncName"
-	name := funcName(1)
+	name := weblogin.FuncName(1)
 	if name != expected {
 		t.Errorf("got %q, expected %q", name, expected)
 	}

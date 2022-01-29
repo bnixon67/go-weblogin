@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin_test
 
 import (
 	"net/http"
@@ -21,6 +21,8 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+
+	weblogin "github.com/bnixon67/go-web-login"
 )
 
 func TestResetHandlerInvalidMethod(t *testing.T) {
@@ -69,7 +71,7 @@ func TestResetHandlerPostMissingValues(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgMissingRequired
+	expectedInBody := weblogin.MsgMissingRequired
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -95,7 +97,7 @@ func TestResetHandlerPostMismatchedPassword(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := MsgPasswordsDifferent
+	expectedInBody := weblogin.MsgPasswordsDifferent
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}

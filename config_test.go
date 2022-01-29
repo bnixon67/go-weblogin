@@ -13,17 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package main
+package weblogin_test
 
 import (
 	"math"
 	"reflect"
 	"testing"
+
+	weblogin "github.com/bnixon67/go-web-login"
 )
 
 func TestNewConfigFromFile(t *testing.T) {
 	// test empty (invaild) file name
-	_, err := NewConfigFromFile("")
+	_, err := weblogin.NewConfigFromFile("")
 	if err == nil {
 		t.Errorf("NewConfigFromFile for empty filename is nil")
 	}
@@ -32,31 +34,31 @@ func TestNewConfigFromFile(t *testing.T) {
 
 	// test with a valid filename and file with empty json
 	fileName = "testdata/empty.json"
-	config, err := NewConfigFromFile(fileName)
+	config, err := weblogin.NewConfigFromFile(fileName)
 	if err != nil {
 		t.Errorf("NewConfigFromFile(%q) failed: %v", fileName, err)
 	}
-	if config != (Config{}) {
-		t.Errorf("got %+v, expected %+v", config, Config{})
+	if config != (weblogin.Config{}) {
+		t.Errorf("got %+v, expected %+v", config, weblogin.Config{})
 	}
 
 	// test with a valid filename and file with invalid json
 	fileName = "testdata/invalid.json"
-	config, err = NewConfigFromFile(fileName)
+	config, err = weblogin.NewConfigFromFile(fileName)
 	if err == nil {
 		t.Errorf("expected NewConfigFromFile(%q) to fail", fileName)
 	}
-	if config != (Config{}) {
-		t.Errorf("got %+v, expected %+v", config, Config{})
+	if config != (weblogin.Config{}) {
+		t.Errorf("got %+v, expected %+v", config, weblogin.Config{})
 	}
 
 	// test with a valid filename and file with valid json
 	fileName = "testdata/valid.json"
-	config, err = NewConfigFromFile(fileName)
+	config, err = weblogin.NewConfigFromFile(fileName)
 	if err != nil {
 		t.Errorf("NewConfigFromFile(%q) failed: %v", fileName, err)
 	}
-	expectedConfig := Config{
+	expectedConfig := weblogin.Config{
 		SQLDriverName:     "testSQLDriverName",
 		SQLDataSourceName: "testSQLDataSourceName",
 		ParseGlobPattern:  "testParseGlobPattern",
@@ -73,7 +75,7 @@ func hasBit(n int, pos uint) bool {
 
 func TestConfigIsValid(t *testing.T) {
 	type tcase struct {
-		config   Config
+		config   weblogin.Config
 		expected bool
 	}
 
@@ -94,7 +96,7 @@ func TestConfigIsValid(t *testing.T) {
 
 	// generate test cases based on required fields by looping thru all the possibilities and using bit logic to set fields
 	for a := 0; a < int(math.Pow(2, float64(len(required)))); a++ {
-		config := Config{}
+		config := weblogin.Config{}
 
 		for n := len(required) - 1; n >= 0; n-- {
 			if hasBit(a, uint(n)) {
