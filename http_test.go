@@ -109,3 +109,17 @@ func TestCheckMethods(t *testing.T) {
 		}
 	}
 }
+
+func TestServeFileHandler(t *testing.T) {
+	// valid file test
+	h := weblogin.ServeFileHandler("http_test.go")
+	if h == nil {
+		t.Error("got nil, expected <http.HandlerFunc>")
+	}
+
+	// invalid file test
+	h = weblogin.ServeFileHandler("invalid_file")
+	if h != nil {
+		t.Error("got <http.HandlerFunc>, expected nil")
+	}
+}

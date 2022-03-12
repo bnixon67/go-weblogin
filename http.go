@@ -16,6 +16,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -61,6 +62,12 @@ func RenderTemplate(t *template.Template, w http.ResponseWriter, name string, da
 
 // ServeFileHandler is a simple http.ServeFile wrapper.
 func ServeFileHandler(file string) http.HandlerFunc {
+	_, err := os.Stat(file)
+	if err != nil {
+		log.Printf("%q does not exist", file)
+		return nil
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, file)
 	}
