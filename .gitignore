@@ -6,5 +6,6 @@ cover.out
 *.log
 coverage.*
 nohup.out
-weblogin-server
+weblogin-server/weblogin-server
+weblogin-server/weblogin-server.service
 test_config.json
