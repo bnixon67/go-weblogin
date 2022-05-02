@@ -23,7 +23,7 @@ func InitDB(driverName, dataSourceName string) (*sql.DB, error) {
 	// open connection to database
 	db, err := sql.Open(driverName, dataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("InitDB: %w", err)
+		return nil, fmt.Errorf("InitDB: sql.Open %w", err)
 	}
 
 	// set desire connection parameters
@@ -35,7 +35,7 @@ func InitDB(driverName, dataSourceName string) (*sql.DB, error) {
 	// ping database to confirm connection
 	err = db.Ping()
 	if err != nil {
-		return nil, fmt.Errorf("InitDB: %w", err)
+		return nil, fmt.Errorf("InitDB: db.Ping %w", err)
 	}
 
 	return db, err
