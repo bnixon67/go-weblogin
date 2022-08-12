@@ -82,7 +82,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resetURL := fmt.Sprintf("https://%s:%s/reset?rtoken=%s", app.Config.ServerHost, app.Config.ServerPort, resetToken.Value)
+	resetURL := fmt.Sprintf("https://%s?rtoken=%s", app.Config.ResetURL, resetToken.Value)
 	err = SendEmail(app.Config.SMTPUser, app.Config.SMTPPassword, app.Config.SMTPHost, app.Config.SMTPPort, email, "Reset Pasword", resetURL)
 	if err != nil {
 		log.Printf("unable to SendEmail: %v", err)

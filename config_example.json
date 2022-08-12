@@ -2,6 +2,8 @@
 	"ServerHost": "host",
 	"ServerPort": "port",
 
+	"ResetURL": "host:port/reset",
+
 	"SqlDriverName": "mysql",
 	"SqlDataSourceName": "user:password@/gologin?parseTime=true",
 	"ParseGlobPattern": "html/*.html",

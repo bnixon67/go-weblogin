@@ -82,6 +82,7 @@ func TestConfigIsValid(t *testing.T) {
 	required := []string{
 		"ServerHost",
 		"ServerPort",
+		"ResetURL",
 		"SQLDriverName",
 		"SQLDataSourceName",
 		"ParseGlobPattern",

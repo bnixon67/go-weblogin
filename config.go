@@ -23,6 +23,8 @@ type Config struct {
 	ServerHost string // host to listen on
 	ServerPort string // port to listen on
 
+	ResetURL string // URL for password reset, e.g., ServerHost:ServerPost:/reset
+
 	SQLDriverName     string // driverName for sql.Open
 	SQLDataSourceName string // dataSourceName for sql.Open
 
@@ -70,6 +72,7 @@ func (c Config) IsValid() (bool, []string) {
 
 	missing = appendIfEmpty(missing, c.ServerHost, "ServerHost")
 	missing = appendIfEmpty(missing, c.ServerPort, "ServerPort")
+	missing = appendIfEmpty(missing, c.ResetURL, "ResetURL")
 	missing = appendIfEmpty(missing, c.SQLDriverName, "SQLDriverName")
 	missing = appendIfEmpty(missing, c.SQLDataSourceName, "DataSourceName")
 	missing = appendIfEmpty(missing, c.ParseGlobPattern, "ParseGlobPattern")
