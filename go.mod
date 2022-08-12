@@ -1,4 +1,4 @@
-module github.com/bnixon67/go-web-login
+module github.com/bnixon67/go-weblogin
 
 go 1.17
 
