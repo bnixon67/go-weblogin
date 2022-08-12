@@ -19,7 +19,7 @@ import (
 	"strings"
 	"testing"
 
-	weblogin "github.com/bnixon67/go-web-login"
+	weblogin "github.com/bnixon67/go-weblogin"
 )
 
 func TestRegisterHandlerInvalidMethod(t *testing.T) {

@@ -17,7 +17,7 @@ import (
 	"reflect"
 	"testing"
 
-	weblogin "github.com/bnixon67/go-web-login"
+	weblogin "github.com/bnixon67/go-weblogin"
 )
 
 func TestNewConfigFromFile(t *testing.T) {

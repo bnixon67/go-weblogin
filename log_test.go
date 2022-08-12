@@ -15,7 +15,7 @@ package weblogin_test
 import (
 	"testing"
 
-	weblogin "github.com/bnixon67/go-web-login"
+	weblogin "github.com/bnixon67/go-weblogin"
 )
 
 const TestLogFile = "test.log"

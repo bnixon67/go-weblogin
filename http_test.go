@@ -18,7 +18,7 @@ import (
 	"strings"
 	"testing"
 
-	weblogin "github.com/bnixon67/go-web-login"
+	weblogin "github.com/bnixon67/go-weblogin"
 )
 
 func TestStringContains(t *testing.T) {
