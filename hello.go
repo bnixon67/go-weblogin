@@ -20,6 +20,7 @@ import (
 
 // HelloPageData contains data passed to the HTML template.
 type HelloPageData struct {
+	Title   string
 	Message string
 	User    User
 }

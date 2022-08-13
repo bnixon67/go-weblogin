@@ -20,8 +20,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type ResetData struct {
-	Msg        string
+// ResetPageData contains data passed to the HTML template.
+type ResetPageData struct {
+	Title      string
+	Message    string
 	ResetToken string
 }
 
@@ -34,7 +36,11 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := RenderTemplate(app.Tmpls, w, "reset.html", ResetData{ResetToken: r.URL.Query().Get("rtoken")})
+		err := RenderTemplate(app.Tmpls, w, "reset.html",
+			ResetPageData{
+				Title:      app.Config.Title,
+				ResetToken: r.URL.Query().Get("rtoken"),
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -57,7 +63,12 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if resetToken == "" || password1 == "" || password2 == "" {
 		msg := MsgMissingRequired
 		log.Println(msg)
-		err := RenderTemplate(app.Tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := RenderTemplate(app.Tmpls, w, tmplFileName,
+			ResetPageData{
+				Title:      app.Config.Title,
+				Message:    msg,
+				ResetToken: r.URL.Query().Get("rtoken"),
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -70,7 +81,12 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
 		log.Println(msg)
-		err := RenderTemplate(app.Tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := RenderTemplate(app.Tmpls, w, tmplFileName,
+			ResetPageData{
+				Title:      app.Config.Title,
+				Message:    msg,
+				ResetToken: r.URL.Query().Get("rtoken"),
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -82,7 +98,12 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if err != nil {
 		log.Printf("invalid reset token: %v", err)
 		msg := "Please provide a valid Reset Token"
-		err := RenderTemplate(app.Tmpls, w, tmplFileName, ResetData{Msg: msg, ResetToken: r.URL.Query().Get("rtoken")})
+		err := RenderTemplate(app.Tmpls, w, tmplFileName,
+			ResetPageData{
+				Title:      app.Config.Title,
+				Message:    msg,
+				ResetToken: r.URL.Query().Get("rtoken"),
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -95,7 +116,8 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	if err != nil {
 		msg := "Cannot hash password"
 		log.Println(msg, "for", userName)
-		err := RenderTemplate(app.Tmpls, w, tmplFileName, msg)
+		err := RenderTemplate(app.Tmpls, w, tmplFileName,
+			ResetPageData{Title: app.Config.Title, Message: msg})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return

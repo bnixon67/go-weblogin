@@ -20,6 +20,12 @@ import (
 	"strings"
 )
 
+// LoginPageData contains data passed to the HTML template.
+type LoginPageData struct {
+	Title   string
+	Message string
+}
+
 // LoginHandler handles /login requests.
 func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
@@ -29,7 +35,8 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := RenderTemplate(app.Tmpls, w, "login.html", nil)
+		err := RenderTemplate(app.Tmpls, w, "login.html",
+			LoginPageData{Title: app.Config.Title})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -65,7 +72,8 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if msg != "" {
 		log.Println(msg)
-		err := RenderTemplate(app.Tmpls, w, "login.html", msg)
+		err := RenderTemplate(app.Tmpls, w, "login.html",
+			LoginPageData{Title: app.Config.Title, Message: msg})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -77,7 +85,11 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
 		log.Printf("failed login for %q: %v", userName, err)
-		err := RenderTemplate(app.Tmpls, w, "login.html", MsgLoginFailed)
+		err := RenderTemplate(app.Tmpls, w, "login.html",
+			LoginPageData{
+				Title:   app.Config.Title,
+				Message: MsgLoginFailed,
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return

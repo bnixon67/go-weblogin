@@ -18,6 +18,12 @@ import (
 	"net/http"
 )
 
+// LogoutPageData contains data passed to the HTML template.
+type LogoutPageData struct {
+	Title   string
+	Message string
+}
+
 // LogoutHandler handles /logout requests.
 func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
@@ -53,7 +59,8 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// display page
-	err = RenderTemplate(app.Tmpls, w, "logout.html", nil)
+	err = RenderTemplate(app.Tmpls, w, "logout.html",
+		LogoutPageData{Title: app.Config.Title})
 	if err != nil {
 		log.Printf("error executing template: %v", err)
 		return

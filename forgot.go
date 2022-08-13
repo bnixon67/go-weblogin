@@ -19,6 +19,7 @@ import (
 	"strings"
 )
 
+// ForgotPageData contains data passed to the HTML template.
 type ForgotPageData struct {
 	Title     string
 	Message   string

@@ -20,10 +20,16 @@ import (
 
 const (
 	MsgMissingRequired    = "Please provide all the required values"
-	MsgUserNameExists     = "Your desired User Name already exists."
-	MsgEmailExists        = "A User Name already exists for this Email Address."
-	MsgPasswordsDifferent = "Password do not match."
+	MsgUserNameExists     = "User Name already exists."
+	MsgEmailExists        = "Email Address already registered."
+	MsgPasswordsDifferent = "Password values do not match."
 )
+
+// RegisterPageData contains data passed to the HTML template.
+type RegisterPageData struct {
+	Title   string
+	Message string
+}
 
 // RegisterHandler handles /register requests.
 func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,7 +40,8 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-		err := RenderTemplate(app.Tmpls, w, "register.html", nil)
+		err := RenderTemplate(app.Tmpls, w, "register.html",
+			RegisterPageData{Title: app.Config.Title})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -70,7 +77,10 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	if IsEmpty(userName, fullName, email, password1, password2) {
 		msg := MsgMissingRequired
 		log.Println(msg, "for", userName)
-		err := RenderTemplate(app.Tmpls, w, "register.html", msg)
+		err := RenderTemplate(app.Tmpls, w, "register.html",
+			RegisterPageData{
+				Title: app.Config.Title, Message: msg,
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -83,7 +93,10 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
 		log.Println(msg, "for", userName)
-		err := RenderTemplate(app.Tmpls, w, "register.html", msg)
+		err := RenderTemplate(app.Tmpls, w, "register.html",
+			RegisterPageData{
+				Title: app.Config.Title, Message: msg,
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -100,7 +113,11 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if userExists {
 		log.Printf("userName %q already exists", userName)
-		err := RenderTemplate(app.Tmpls, w, "register.html", MsgUserNameExists)
+		err := RenderTemplate(app.Tmpls, w, "register.html",
+			RegisterPageData{
+				Title:   app.Config.Title,
+				Message: MsgUserNameExists,
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -117,7 +134,11 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if emailExists {
 		log.Printf("email %q already exists", email)
-		err := RenderTemplate(app.Tmpls, w, "register.html", MsgEmailExists)
+		err := RenderTemplate(app.Tmpls, w, "register.html",
+			RegisterPageData{
+				Title:   app.Config.Title,
+				Message: MsgEmailExists,
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
@@ -129,7 +150,11 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	err = RegisterUser(app.DB, userName, fullName, email, password1)
 	if err != nil {
 		log.Printf("unable to RegisterUser %q: %v", userName, err)
-		err := RenderTemplate(app.Tmpls, w, "register.html", "Unable to Register User")
+		err := RenderTemplate(app.Tmpls, w, "register.html",
+			RegisterPageData{
+				Title:   app.Config.Title,
+				Message: "Unable to Register User",
+			})
 		if err != nil {
 			log.Printf("error executing template: %v", err)
 			return
