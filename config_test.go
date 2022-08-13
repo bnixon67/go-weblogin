@@ -80,6 +80,7 @@ func TestConfigIsValid(t *testing.T) {
 
 	// required fields
 	required := []string{
+		"Title",
 		"ServerHost",
 		"ServerPort",
 		"ResetURL",

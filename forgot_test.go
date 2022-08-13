@@ -58,8 +58,11 @@ func TestForgotHandlerGet(t *testing.T) {
 func TestForgotHandlerPostMissingEmail(t *testing.T) {
 	app := AppForTest(t)
 
+	d := url.Values{"action": {"user"}}
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodPost, "/forgot", nil)
+	r := httptest.NewRequest(http.MethodPost, "/forgot",
+		strings.NewReader(d.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	app.ForgotHandler(w, r)
 
@@ -74,13 +77,13 @@ func TestForgotHandlerPostMissingEmail(t *testing.T) {
 	}
 }
 
-func TestForgotHandlerPostInvalidEmail(t *testing.T) {
-	data := url.Values{"email": {"bad email"}}
-
+func TestForgotHandlerPostValidEmail(t *testing.T) {
 	app := AppForTest(t)
 
+	d := url.Values{"email": {"test@email"}, "action": {"user"}}
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodPost, "/forgot", strings.NewReader(data.Encode()))
+	r := httptest.NewRequest(http.MethodPost, "/forgot",
+		strings.NewReader(d.Encode()))
 	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	app.ForgotHandler(w, r)
@@ -90,19 +93,19 @@ func TestForgotHandlerPostInvalidEmail(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := weblogin.MsgNoSuchUser
+	expectedInBody := "Please check your email"
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
 }
 
-func TestForgotHandlerPostValidEmail(t *testing.T) {
-	data := url.Values{"email": {"test@email"}}
-
+func TestForgotHandlerPostMissingAction(t *testing.T) {
 	app := AppForTest(t)
 
+	d := url.Values{"email": {"test@email"}}
 	w := httptest.NewRecorder()
-	r := httptest.NewRequest(http.MethodPost, "/forgot", strings.NewReader(data.Encode()))
+	r := httptest.NewRequest(http.MethodPost, "/forgot",
+		strings.NewReader(d.Encode()))
 	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 	app.ForgotHandler(w, r)
@@ -112,7 +115,29 @@ func TestForgotHandlerPostValidEmail(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := "If you provided a valid email"
+	expectedInBody := weblogin.MsgMissingAction
+	if !strings.Contains(w.Body.String(), expectedInBody) {
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
+	}
+}
+
+func TestForgotHandlerPostInvalidAction(t *testing.T) {
+	app := AppForTest(t)
+
+	d := url.Values{"email": {"test@email"}, "action": {"invalid"}}
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPost, "/forgot",
+		strings.NewReader(d.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	app.ForgotHandler(w, r)
+
+	expectedStatus := http.StatusOK
+	if w.Code != expectedStatus {
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+	}
+
+	expectedInBody := weblogin.MsgInvalidAction
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}

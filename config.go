@@ -20,22 +20,18 @@ import (
 
 // Config represents the configuration values.
 type Config struct {
-	ServerHost string // host to listen on
-	ServerPort string // port to listen on
-
-	ResetURL string // URL for password reset, e.g., ServerHost:ServerPost:/reset
-
-	SQLDriverName     string // driverName for sql.Open
-	SQLDataSourceName string // dataSourceName for sql.Open
-
-	ParseGlobPattern string // pattern to use with template.ParseGlob
-
-	SessionExpiresHours int // number of hours session is valid
-
-	SMTPHost     string // SMTP host to send email
-	SMTPPort     string // SMTP port to send email
-	SMTPUser     string // SMTP user to send email
-	SMTPPassword string // SMTP password to send email
+	Title               string // title of the application
+	ServerHost          string // host to listen on
+	ServerPort          string // port to listen on
+	ResetURL            string // URL for password reset, e.g., ServerHost:ServerPost:/reset
+	SQLDriverName       string // driverName for sql.Open
+	SQLDataSourceName   string // dataSourceName for sql.Open
+	ParseGlobPattern    string // pattern to use with template.ParseGlob
+	SessionExpiresHours int    // number of hours session is valid
+	SMTPHost            string // SMTP host to send email
+	SMTPPort            string // SMTP port to send email
+	SMTPUser            string // SMTP user to send email
+	SMTPPassword        string // SMTP password to send email
 }
 
 // NewConfigFromFile returns a Config from the given fileName.
@@ -70,6 +66,7 @@ func appendIfEmpty(missing []string, str, msg string) []string {
 func (c Config) IsValid() (bool, []string) {
 	var missing []string
 
+	missing = appendIfEmpty(missing, c.Title, "Title")
 	missing = appendIfEmpty(missing, c.ServerHost, "ServerHost")
 	missing = appendIfEmpty(missing, c.ServerPort, "ServerPort")
 	missing = appendIfEmpty(missing, c.ResetURL, "ResetURL")

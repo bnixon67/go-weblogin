@@ -1,17 +1,19 @@
 {
-	"ServerHost": "host",
-	"ServerPort": "port",
+  "Title": "Go Weblogin",
 
-	"ResetURL": "host:port/reset",
+  "ServerHost": "host",
+  "ServerPort": "port",
 
-	"SqlDriverName": "mysql",
-	"SqlDataSourceName": "user:password@/gologin?parseTime=true",
-	"ParseGlobPattern": "html/*.html",
+  "ResetURL": "host:port/reset",
 
-	"SessionExpiresHours": 48,
+  "SqlDriverName": "mysql",
+  "SqlDataSourceName": "user:password@/gologin?parseTime=true",
+  "ParseGlobPattern": "html/*.html",
 
-	"SmtpHost": "smtp.gmail.com",
-	"SmtpPort": "587",
-	"SmtpUser": "user@gmail.com",
-	"SmtpPassword": "password"
+  "SessionExpiresHours": 48,
+
+  "SmtpHost": "smtp.gmail.com",
+  "SmtpPort": "587",
+  "SmtpUser": "user@gmail.com",
+  "SmtpPassword": "password"
 }
