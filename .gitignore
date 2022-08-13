@@ -4,6 +4,7 @@ cover.html
 cover.out
 *.swp
 *.log
+*.nex
 coverage.*
 nohup.out
 weblogin-server/weblogin-server
