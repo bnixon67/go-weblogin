@@ -63,7 +63,7 @@ func appendIfEmpty(missing []string, str, msg string) []string {
 }
 
 // IsValid returns true if the config has all the required values.
-func (c Config) IsValid() (bool, []string) {
+func (c *Config) IsValid() (bool, []string) {
 	var missing []string
 
 	missing = appendIfEmpty(missing, c.Title, "Title")
