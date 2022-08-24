@@ -66,7 +66,7 @@ func GetUserForName(db *sql.DB, userName string) (User, error) {
 	var user User
 
 	qry := `SELECT userName, fullName, email FROM users WHERE userName = ?`
-	result := db.QueryRow(qry)
+	result := db.QueryRow(qry, userName)
 	err := result.Scan(&user.UserName, &user.FullName, &user.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
