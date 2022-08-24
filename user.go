@@ -29,6 +29,7 @@ type User struct {
 
 var (
 	ErrSessionNotFound     = errors.New("session not found")
+	ErrUserNotFound        = errors.New("user not found")
 	ErrNoUserForEmail      = errors.New("no username for email")
 	ErrNoUserForResetToken = errors.New("no username for resetToken")
 	ErrSessionExpired      = errors.New("session expired")
@@ -55,6 +56,23 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 
 	if expires.Before(time.Now()) {
 		return User{}, ErrSessionExpired
+	}
+
+	return user, err
+}
+
+// GetUserForName returns a user for the given userName.
+func GetUserForName(db *sql.DB, userName string) (User, error) {
+	var user User
+
+	qry := `SELECT userName, fullName, email FROM users WHERE userName = ?`
+	result := db.QueryRow(qry)
+	err := result.Scan(&user.UserName, &user.FullName, &user.Email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return User{}, ErrUserNotFound
+		}
+		return User{}, err
 	}
 
 	return user, err
