@@ -14,9 +14,9 @@ package weblogin
 
 import (
 	"bytes"
-	"html/template"
 	"log"
 	"net/smtp"
+	"text/template"
 )
 
 const emailTmpl = `From: {{ .From }}
