@@ -4,7 +4,7 @@
   "ServerHost": "host",
   "ServerPort": "port",
 
-  "ResetURL": "host:port/reset",
+  "BaseURL": "https://host:port",
 
   "SqlDriverName": "mysql",
   "SqlDataSourceName": "user:password@/gologin?parseTime=true",

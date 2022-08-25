@@ -83,7 +83,7 @@ func TestConfigIsValid(t *testing.T) {
 		"Title",
 		"ServerHost",
 		"ServerPort",
-		"ResetURL",
+		"BaseURL",
 		"SQLDriverName",
 		"SQLDataSourceName",
 		"ParseGlobPattern",

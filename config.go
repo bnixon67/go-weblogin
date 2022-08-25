@@ -23,7 +23,7 @@ type Config struct {
 	Title               string // title of the application
 	ServerHost          string // host to listen on
 	ServerPort          string // port to listen on
-	ResetURL            string // URL for password reset, e.g., ServerHost:ServerPost:/reset
+	BaseURL             string // URL for password reset, e.g., https://host:port
 	SQLDriverName       string // driverName for sql.Open
 	SQLDataSourceName   string // dataSourceName for sql.Open
 	ParseGlobPattern    string // pattern to use with template.ParseGlob
@@ -69,7 +69,7 @@ func (c *Config) IsValid() (bool, []string) {
 	missing = appendIfEmpty(missing, c.Title, "Title")
 	missing = appendIfEmpty(missing, c.ServerHost, "ServerHost")
 	missing = appendIfEmpty(missing, c.ServerPort, "ServerPort")
-	missing = appendIfEmpty(missing, c.ResetURL, "ResetURL")
+	missing = appendIfEmpty(missing, c.BaseURL, "BaseURL")
 	missing = appendIfEmpty(missing, c.SQLDriverName, "SQLDriverName")
 	missing = appendIfEmpty(missing, c.SQLDataSourceName, "DataSourceName")
 	missing = appendIfEmpty(missing, c.ParseGlobPattern, "ParseGlobPattern")

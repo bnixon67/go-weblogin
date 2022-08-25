@@ -121,7 +121,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		emailText = fmt.Sprintf("Please vist https://%s?rtoken=%s to reset your password for %s", app.Config.ResetURL, resetToken.Value, app.Config.Title)
+		emailText = fmt.Sprintf("Please vist https://%s/reset?rtoken=%s to reset your password for %s", app.Config.BaseURL, resetToken.Value, app.Config.Title)
 
 	case action == "user":
 		emailText = fmt.Sprintf("Your User Name is %s for %s", userName, app.Config.Title)
