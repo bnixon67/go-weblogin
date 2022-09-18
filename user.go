@@ -25,6 +25,7 @@ type User struct {
 	UserName string
 	FullName string
 	Email    string
+	Admin    bool
 }
 
 var (
@@ -44,9 +45,9 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 
 	hashedValue := hash(sessionToken)
 
-	qry := `SELECT users.userName, fullName, email, expires FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND hashedValue=?`
+	qry := `SELECT users.userName, fullName, email, expires, admin FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND hashedValue=?`
 	result := db.QueryRow(qry, hashedValue)
-	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &expires)
+	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &expires, &user.Admin)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return User{}, ErrSessionNotFound
@@ -65,9 +66,9 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 func GetUserForName(db *sql.DB, userName string) (User, error) {
 	var user User
 
-	qry := `SELECT userName, fullName, email FROM users WHERE userName=?`
+	qry := `SELECT userName, fullName, email, admin FROM users WHERE userName=?`
 	result := db.QueryRow(qry, userName)
-	err := result.Scan(&user.UserName, &user.FullName, &user.Email)
+	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &user.Admin)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return User{}, ErrUserNotFound
