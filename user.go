@@ -26,6 +26,7 @@ type User struct {
 	FullName string
 	Email    string
 	Admin    bool
+	Created  time.Time
 }
 
 var (
