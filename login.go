@@ -105,8 +105,14 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 		Expires: token.Expires,
 	})
 
+	redirect := r.URL.Query().Get("r")
+	log.Printf("redirect %q", redirect)
+	if redirect == "" {
+		redirect = "/"
+	}
+
 	// redirect from login page
-	http.Redirect(w, r, "/hello", http.StatusSeeOther)
+	http.Redirect(w, r, redirect, http.StatusSeeOther)
 }
 
 var ErrInvalidPassword = errors.New("invalid password")
