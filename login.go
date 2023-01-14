@@ -100,9 +100,12 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// login successful, so create a cookie for the session Token
 	log.Printf("login successful for %q", userName)
 	http.SetCookie(w, &http.Cookie{
-		Name:    "sessionToken",
-		Value:   token.Value,
-		Expires: token.Expires,
+		Name:     "sessionToken",
+		Value:    token.Value,
+		Expires:  token.Expires,
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
 	})
 
 	redirect := r.URL.Query().Get("r")
