@@ -14,7 +14,10 @@ package weblogin
 
 import (
 	"crypto/rand"
+	"database/sql"
 	"encoding/base64"
+	"errors"
+	"net/http"
 )
 
 // GenerateRandomString returns n bytes encoded in URL friendly base64.
@@ -30,4 +33,52 @@ func GenerateRandomString(n int) (string, error) {
 
 	// convert to URL friendly base64
 	return base64.URLEncoding.EncodeToString(b), err
+}
+
+var ErrNoRequest = errors.New("request is nil")
+
+// GetCookieValue returns the Value for the named cookie or empty string if not found or other error.
+func GetCookieValue(r *http.Request, name string) (string, error) {
+	var value string
+	if r == nil {
+		return value, ErrNoRequest
+	}
+
+	cookie, err := r.Cookie(name)
+	if err != nil {
+		// ignore ErrNoCookie
+		if !errors.Is(err, http.ErrNoCookie) {
+			return value, err
+		}
+	} else {
+		value = cookie.Value
+	}
+
+	return value, nil
+}
+
+// GetUser returns the current User or empty User if the session is not found.
+func GetUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (User, error) {
+	var user User
+
+	// get sessionToken from cookie, if it exists
+	sessionToken, err := GetCookieValue(r, "sessionToken")
+	if err != nil {
+		return user, err
+	}
+
+	// get user if there is a sessionToken
+	if sessionToken != "" {
+		user, err = GetUserForSessionToken(db, sessionToken)
+		if err != nil {
+			// delete invalid token to prevent session fixation
+			http.SetCookie(w, &http.Cookie{Name: "sessionToken", Value: "", MaxAge: -1})
+		}
+		// ignore session not found errors
+		if errors.Is(err, ErrSessionNotFound) {
+			err = nil
+		}
+	}
+
+	return user, err
 }

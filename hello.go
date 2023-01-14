@@ -13,7 +13,6 @@ specific language governing permissions and limitations under the License.
 package weblogin
 
 import (
-	"errors"
 	"log"
 	"net/http"
 )
@@ -32,31 +31,11 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get sessionToken from cookie, if it exists
-	var sessionToken string
-	c, err := r.Cookie("sessionToken")
+	currentUser, err := GetUser(w, r, app.DB)
 	if err != nil {
-		if !errors.Is(err, http.ErrNoCookie) {
-			log.Println("error getting cookie", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-	} else {
-		sessionToken = c.Value
-	}
-
-	// get user for sessionToken
-	var currentUser User
-	if sessionToken != "" {
-		currentUser, err = GetUserForSessionToken(app.DB, sessionToken)
-		if err != nil {
-			log.Printf("failed to get user for session %q: %v", sessionToken, err)
-			currentUser = User{}
-			// delete invalid sessionToken to prevent session fixation
-			http.SetCookie(w, &http.Cookie{Name: "sessionToken", Value: "", MaxAge: -1})
-		} else {
-			log.Println("UserName =", currentUser.UserName)
-		}
+		log.Printf("error getting user: %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
 
 	// display page
