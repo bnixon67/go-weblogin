@@ -100,7 +100,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// login successful, so create a cookie for the session Token
 	log.Printf("login successful for %q", userName)
 	http.SetCookie(w, &http.Cookie{
-		Name:     "sessionToken",
+		Name:     SessionTokenCookieName,
 		Value:    token.Value,
 		Expires:  token.Expires,
 		Secure:   true,
