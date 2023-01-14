@@ -13,7 +13,6 @@ specific language governing permissions and limitations under the License.
 package weblogin
 
 import (
-	"errors"
 	"log"
 	"net/http"
 )
@@ -31,17 +30,11 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get sessionTokenValue from cookie, if it exists
-	var sessionTokenValue string
-	c, err := r.Cookie("sessionToken")
+	sessionTokenValue, err := GetCookieValue(r, "sessionToken")
 	if err != nil {
-		if !errors.Is(err, http.ErrNoCookie) {
-			log.Println("error getting cookie", err)
-			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-			return
-		}
-	} else {
-		sessionTokenValue = c.Value
+		log.Println("error getting session token cookie", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
 	}
 
 	// create an empty sessionToken cookie with negative MaxAge to delete
@@ -53,6 +46,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		err := RemoveToken(app.DB, "session", sessionTokenValue)
 		if err != nil {
 			log.Printf("remove token failed for %q: %v", sessionTokenValue, err)
+			// TODO: display error or just continue?
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}

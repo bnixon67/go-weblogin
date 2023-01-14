@@ -46,7 +46,7 @@ func TestHelloHandlerWithoutCookie(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := "You must <a href=\"/login\">Login</a>"
+	expectedInBody := `You must <a href="/login?r=/hello">Login</a>`
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}
@@ -66,7 +66,7 @@ func TestHelloHandlerWithBadSessionToken(t *testing.T) {
 		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
-	expectedInBody := "You must <a href=\"/login\">Login</a>"
+	expectedInBody := `You must <a href="/login?r=/hello">Login</a>`
 	if !strings.Contains(w.Body.String(), expectedInBody) {
 		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
 	}

@@ -27,7 +27,7 @@ type ResetPageData struct {
 	ResetToken string
 }
 
-// ResetHandler handles /rest requests.
+// ResetHandler handles /reset requests.
 func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
 		log.Println("invalid method", r.Method)
