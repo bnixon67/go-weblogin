@@ -19,7 +19,7 @@ import (
 	"strings"
 )
 
-// App contains common variables to reuse to eliminate global variables.
+// App contains common variables to avoid using global variables.
 type App struct {
 	DB     *sql.DB
 	Tmpls  *template.Template

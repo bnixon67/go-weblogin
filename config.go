@@ -53,7 +53,7 @@ func NewConfigFromFile(fileName string) (Config, error) {
 	return config, nil
 }
 
-// appendifEmpty appends msg to missing if str is empty.
+// appendIfEmpty appends msg to missing if str is empty.
 func appendIfEmpty(missing []string, str, msg string) []string {
 	if str == "" {
 		missing = append(missing, msg)
