@@ -27,6 +27,7 @@ type Token struct {
 }
 
 // hash returns a hex encoded sha256 hash of the given string.
+// TODO: should this be a salted hash to be more secure?
 func hash(s string) string {
 	h := sha256.New()
 	h.Write([]byte(s))

@@ -17,6 +17,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	weblogin "github.com/bnixon67/go-weblogin"
 )
 
 func TestHelloHandlerInvalidMethod(t *testing.T) {
@@ -57,7 +59,7 @@ func TestHelloHandlerWithBadSessionToken(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/hello", nil)
-	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: "foo"})
+	r.AddCookie(&http.Cookie{Name: weblogin.SessionTokenCookieName, Value: "foo"})
 
 	app.HelloHandler(w, r)
 
@@ -83,7 +85,7 @@ func TestHelloHandlerWithGoodSessionToken(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/hello", nil)
-	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: token.Value})
+	r.AddCookie(&http.Cookie{Name: weblogin.SessionTokenCookieName, Value: token.Value})
 
 	app.HelloHandler(w, r)
 

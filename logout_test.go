@@ -17,6 +17,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	weblogin "github.com/bnixon67/go-weblogin"
 )
 
 func TestLogoutHandlerInvalidMethod(t *testing.T) {
@@ -29,7 +31,8 @@ func TestLogoutHandlerInvalidMethod(t *testing.T) {
 
 	expectedStatus := http.StatusMethodNotAllowed
 	if w.Code != expectedStatus {
-		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q",
+			w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 }
 
@@ -52,15 +55,17 @@ func TestLogoutHandlerGetNoSessionToken(t *testing.T) {
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q",
+			w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "You have been logged out."
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body",
+			w.Body, expectedInBody)
 	}
 
-	c, err := getCookie("sessionToken", w.Result().Cookies())
+	c, err := getCookie(weblogin.SessionTokenCookieName, w.Result().Cookies())
 	if err != nil {
 		t.Errorf("sessionToken cookie missing")
 	}
@@ -83,21 +88,25 @@ func TestLogoutHandlerGetWithGoodSessionToken(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest(http.MethodGet, "/logout", nil)
-	r.AddCookie(&http.Cookie{Name: "sessionToken", Value: token.Value})
+	r.AddCookie(&http.Cookie{
+		Name: weblogin.SessionTokenCookieName, Value: token.Value,
+	})
 
 	app.LogoutHandler(w, r)
 
 	expectedStatus := http.StatusOK
 	if w.Code != expectedStatus {
-		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+		t.Errorf("got status %d %q, expected %d %q",
+			w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
 	}
 
 	expectedInBody := "You have been logged out."
 	if !strings.Contains(w.Body.String(), expectedInBody) {
-		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
+		t.Errorf("got body %q, expected %q in body",
+			w.Body, expectedInBody)
 	}
 
-	c, err := getCookie("sessionToken", w.Result().Cookies())
+	c, err := getCookie(weblogin.SessionTokenCookieName, w.Result().Cookies())
 	if err != nil {
 		t.Errorf("sessionToken cookie missing")
 	}

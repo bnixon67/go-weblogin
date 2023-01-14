@@ -57,12 +57,14 @@ func GetCookieValue(r *http.Request, name string) (string, error) {
 	return value, nil
 }
 
+const SessionTokenCookieName = "session"
+
 // GetUser returns the current User or empty User if the session is not found.
 func GetUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (User, error) {
 	var user User
 
 	// get sessionToken from cookie, if it exists
-	sessionToken, err := GetCookieValue(r, "sessionToken")
+	sessionToken, err := GetCookieValue(r, SessionTokenCookieName)
 	if err != nil {
 		return user, err
 	}
@@ -72,7 +74,12 @@ func GetUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (User, error) {
 		user, err = GetUserForSessionToken(db, sessionToken)
 		if err != nil {
 			// delete invalid token to prevent session fixation
-			http.SetCookie(w, &http.Cookie{Name: "sessionToken", Value: "", MaxAge: -1})
+			http.SetCookie(w,
+				&http.Cookie{
+					Name:   SessionTokenCookieName,
+					Value:  "",
+					MaxAge: -1,
+				})
 		}
 		// ignore session not found errors
 		if errors.Is(err, ErrSessionNotFound) {
