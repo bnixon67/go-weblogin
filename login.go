@@ -84,7 +84,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// attempt to login the given userName with the given password
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
-		log.Printf("failed login for %q: %v", userName, err)
+		log.Printf("login failed for %q: %v", userName, err)
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{
 				Title:   app.Config.Title,
@@ -98,7 +98,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// login successful, so create a cookie for the session Token
-	log.Printf("successful login for %q", userName)
+	log.Printf("login successful for %q", userName)
 	http.SetCookie(w, &http.Cookie{
 		Name:    "sessionToken",
 		Value:   token.Value,
@@ -106,7 +106,6 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	})
 
 	redirect := r.URL.Query().Get("r")
-	log.Printf("redirect %q", redirect)
 	if redirect == "" {
 		redirect = "/"
 	}

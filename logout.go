@@ -30,6 +30,14 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	currentUser, err := GetUser(w, r, app.DB)
+	if err != nil {
+		log.Printf("error getting user: %v", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("logout %q", currentUser.UserName)
+
 	sessionTokenValue, err := GetCookieValue(r, "sessionToken")
 	if err != nil {
 		log.Println("error getting session token cookie", err)
