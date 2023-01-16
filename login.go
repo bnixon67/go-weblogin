@@ -13,7 +13,6 @@ specific language governing permissions and limitations under the License.
 package weblogin
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -41,7 +40,6 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("error executing template: %v", err)
 			return
 		}
-
 	case http.MethodPost:
 		app.loginPost(w, r)
 	}
@@ -117,21 +115,22 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
 }
 
-var ErrInvalidPassword = errors.New("invalid password")
-
 // LoginUser returns a session Token if userName and password is correct.
 func (app *App) LoginUser(userName, password string) (Token, error) {
 	err := CompareUserPassword(app.DB, userName, password)
 	if err != nil {
-		return Token{}, ErrInvalidPassword
+		WriteEvent(app.DB, Event{UserName: userName, Action: ActionLogin, Result: false, Message: err.Error()})
+		return Token{}, err
 	}
 
 	// create and save a new session token
 	token, err := SaveNewToken(app.DB, "session", userName, 32, app.Config.SessionExpiresHours)
 	if err != nil {
+		WriteEvent(app.DB, Event{UserName: userName, Action: ActionSaveToken, Result: false})
 		log.Printf("unable to save session token: %v", err)
 		return Token{}, fmt.Errorf("unable to save token: %w", err)
 	}
 
+	WriteEvent(app.DB, Event{UserName: userName, Action: ActionLogin, Result: true})
 	return token, nil
 }

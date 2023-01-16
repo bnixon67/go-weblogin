@@ -24,6 +24,10 @@
       <li><b>Full Name:</b> {{ .User.FullName }}</li>
       <li><b>Email:</b> {{ .User.Email }}</li>
       <li><b>Admin:</b> {{ .User.Admin }}</li>
+      <li><b>Last Login:</b>
+        {{ .User.LastLoginResult }} at 
+        {{ .User.LastLoginTime.Format "2006-01-02 03:04 PM" }}
+      </li>
     </ul>
     {{ else }}
     <div class="w3-panel w3-pale-red">
