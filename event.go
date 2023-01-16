@@ -30,6 +30,4 @@ func WriteEvent(db *sql.DB, event Event) {
 		log.Printf("could not WriteEvent(db, %q, %q, %v, %q): %v",
 			event.UserName, event.Action, event.Result, event.Message, err)
 	}
-
-	return
 }
