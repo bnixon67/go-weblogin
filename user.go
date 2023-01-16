@@ -15,6 +15,7 @@ package weblogin
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -22,11 +23,13 @@ import (
 
 // User represents a user stored in the database.
 type User struct {
-	UserName string
-	FullName string
-	Email    string
-	Admin    bool
-	Created  time.Time
+	UserName        string
+	FullName        string
+	Email           string
+	Admin           bool
+	Created         time.Time
+	LastLoginTime   time.Time
+	LastLoginResult string
 }
 
 var (
@@ -35,6 +38,7 @@ var (
 	ErrNoUserForEmail      = errors.New("no username for email")
 	ErrNoUserForResetToken = errors.New("no username for resetToken")
 	ErrSessionExpired      = errors.New("session expired")
+	ErrGetLastLoginFailed  = errors.New("failed to get last login")
 )
 
 // GetUserForSessionToken returns a user for the given sessionToken.
@@ -46,7 +50,7 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 
 	hashedValue := hash(sessionToken)
 
-	qry := `SELECT users.userName, fullName, email, expires, admin FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND hashedValue=?`
+	qry := `SELECT users.userName, fullName, email, expires, admin FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND hashedValue=? LIMIT 1`
 	result := db.QueryRow(qry, hashedValue)
 	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &expires, &user.Admin)
 	if err != nil {
@@ -60,6 +64,11 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 		return User{}, ErrSessionExpired
 	}
 
+	user.LastLoginTime, user.LastLoginResult, err = LastLoginForUser(db, user.UserName)
+	if err != nil {
+		return user, fmt.Errorf("%w: %v", ErrGetLastLoginFailed, err)
+	}
+
 	return user, err
 }
 
@@ -67,7 +76,7 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 func GetUserForName(db *sql.DB, userName string) (User, error) {
 	var user User
 
-	qry := `SELECT userName, fullName, email, admin FROM users WHERE userName=?`
+	qry := `SELECT userName, fullName, email, admin FROM users WHERE userName=? LIMIT 1`
 	result := db.QueryRow(qry, userName)
 	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &user.Admin)
 	if err != nil {
@@ -98,12 +107,12 @@ func RowExists(db *sql.DB, qry string, args ...interface{}) (bool, error) {
 
 // UserExists returns true if the given userName already exists in db.
 func UserExists(db *sql.DB, userName string) (bool, error) {
-	return RowExists(db, "SELECT 1 FROM users WHERE userName=?", userName)
+	return RowExists(db, "SELECT 1 FROM users WHERE userName=? LIMIT 1", userName)
 }
 
 // EmailExists returns true if the given email already exists.
 func EmailExists(db *sql.DB, email string) (bool, error) {
-	return RowExists(db, "SELECT 1 FROM users WHERE email=?", email)
+	return RowExists(db, "SELECT 1 FROM users WHERE email=? LIMIT 1", email)
 }
 
 // GetUserNameForEmail returns the userName for a given email.
@@ -146,7 +155,7 @@ var ErrNoSuchUser = errors.New("no such user")
 // Returns nil on success or an error on failure.
 func CompareUserPassword(db *sql.DB, userName, password string) error {
 	// get hashed password for the given user
-	qry := `SELECT hashedPassword FROM users WHERE username=?`
+	qry := `SELECT hashedPassword FROM users WHERE username=? LIMIT 1`
 	result := db.QueryRow(qry, userName)
 
 	var hashedPassword string
@@ -184,4 +193,24 @@ func RegisterUser(db *sql.DB, userName, fullName, email, password string) error 
 	}
 
 	return nil
+}
+
+func LastLoginForUser(db *sql.DB, userName string) (time.Time, string, error) {
+	var lastLogin time.Time
+	var result string
+
+	// get the second row, if it exists, since first row is current login
+	qry := `SELECT created, result FROM events WHERE userName = ? AND action = ? ORDER BY created DESC LIMIT 1,1`
+
+	row := db.QueryRow(qry, userName, ActionLogin)
+	err := row.Scan(&lastLogin, &result)
+	if err != nil {
+		// ignore ErrNoRows since there may not be a last login
+		if errors.Is(err, sql.ErrNoRows) {
+			return lastLogin, result, nil
+		}
+		return lastLogin, result, err
+	}
+
+	return lastLogin, result, err
 }

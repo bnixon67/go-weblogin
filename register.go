@@ -73,10 +73,10 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	password2 := strings.TrimSpace(r.PostFormValue("password2"))
 
 	// check for missing values
-	// redundant given client side required fields, but good practice
 	if IsEmpty(userName, fullName, email, password1, password2) {
 		msg := MsgMissingRequired
-		log.Println(msg, "for", userName)
+		log.Printf("missing values: %q %q %q %q %q",
+			userName, fullName, email, password1, password2)
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
 				Title: app.Config.Title, Message: msg,
@@ -89,10 +89,9 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check that password fields match
-	// may be redundant if done client side, but good practice
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
-		log.Println(msg, "for", userName)
+		log.Printf("password fields do not match for %q", userName)
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
 				Title: app.Config.Title, Message: msg,
@@ -107,12 +106,13 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// check that userName doesn't already exist
 	userExists, err := UserExists(app.DB, userName)
 	if err != nil {
-		log.Printf("error in UserExists for %q: %v", userName, err)
+		log.Printf("error UserExists(db, %q): %v", userName, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if userExists {
-		log.Printf("userName %q already exists", userName)
+		log.Printf("user %q already exists", userName)
+		WriteEvent(app.DB, Event{UserName: userName, Action: ActionRegister, Result: false, Message: "user exists"})
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
 				Title:   app.Config.Title,
@@ -128,7 +128,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// check that email doesn't already exist
 	emailExists, err := EmailExists(app.DB, email)
 	if err != nil {
-		log.Printf("error in EmailExists for %q: %v", email, err)
+		log.Printf("error EmailExists(db, %q): %v", email, err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -149,7 +149,8 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// Register User
 	err = RegisterUser(app.DB, userName, fullName, email, password1)
 	if err != nil {
-		log.Printf("unable to RegisterUser %q: %v", userName, err)
+		log.Printf("register %q error: %v", userName, err)
+		WriteEvent(app.DB, Event{UserName: userName, Action: ActionRegister, Result: false, Message: err.Error()})
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
 				Title:   app.Config.Title,
@@ -163,6 +164,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// registration successful
-	log.Printf("Username %q registered", userName)
+	log.Printf("register %q success", userName)
+	WriteEvent(app.DB, Event{UserName: userName, Action: ActionRegister, Result: true})
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
