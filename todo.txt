@@ -1,0 +1,29 @@
+Implement CSRF tokens
+
+Add additional event logging
+
+Refactor common code
+
+Validate email upon registration
+
+Enforce password complexity
+
+Restrict password reset to password greater thana day old
+
+Disable account after an established number of invalid login attempts
+
+Implement password expiration
+
+Show events as user and admin
+
+Encrypt passwords in config file
+
+Implement cache control where needed
+  w.Header().Set("Cache-Control", "no-cache, no-store")
+  w.Header().Set("Pragma", "no-cache")
+
+Enforce HTTP Strict Transport Security
+  w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
+
+Set character encoding
+  w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
