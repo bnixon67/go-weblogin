@@ -13,10 +13,13 @@ specific language governing permissions and limitations under the License.
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"time"
 
 	weblogin "github.com/bnixon67/go-weblogin"
@@ -45,7 +48,7 @@ func main() {
 
 	// define HTTP server
 	// TODO: add values to config file
-	s := &http.Server{
+	srv := &http.Server{
 		Addr:              ":" + app.Config.ServerPort,
 		Handler:           &weblogin.LogRequestHandler{Next: mux},
 		ReadTimeout:       10 * time.Second,
@@ -69,11 +72,32 @@ func main() {
 	mux.Handle("/",
 		http.RedirectHandler("/hello", http.StatusMovedPermanently))
 
-	// run server
-	// TODO: move cert locations to config file
-	log.Println("Listening on", s.Addr)
-	err = s.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
+	// create a channel to receive interrupt signals
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+
+	// start the server in a goroutine
+	go func() {
+		log.Println("Listening on", srv.Addr)
+		// TODO: move cert locations to config file
+		err = srv.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Printf("ListandServeTLS failed: %v", err)
+		}
+	}()
+
+	// wait for an interrupt signal
+	<-interrupt
+
+	// create a context with a timeout for shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	// initiate the shutdown process
+	err = srv.Shutdown(ctx)
 	if err != nil {
-		log.Printf("ListandServeTLS failed: %v", err)
+		log.Println("server shutdown error", "err", err)
 	}
+
+	log.Println("server closed")
 }
