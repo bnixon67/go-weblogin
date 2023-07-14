@@ -41,13 +41,13 @@ func main() {
 	log.Printf("created app using config %q and log %q",
 		configFileName, logFileName)
 
+	mux := http.NewServeMux()
+
 	// define HTTP server
 	// TODO: add values to config file
 	s := &http.Server{
-		Addr: ":" + app.Config.ServerPort,
-		Handler: &weblogin.LogRequestHandler{
-			Next: http.DefaultServeMux,
-		},
+		Addr:              ":" + app.Config.ServerPort,
+		Handler:           &weblogin.LogRequestHandler{Next: mux},
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       30 * time.Second,
@@ -56,17 +56,17 @@ func main() {
 	}
 
 	// register handlers
-	http.HandleFunc("/login", app.LoginHandler)
-	http.HandleFunc("/register", app.RegisterHandler)
-	http.HandleFunc("/logout", app.LogoutHandler)
-	http.HandleFunc("/forgot", app.ForgotHandler)
-	http.HandleFunc("/reset", app.ResetHandler)
-	http.HandleFunc("/hello", app.HelloHandler)
-	http.HandleFunc("/users", app.UsersHandler)
+	mux.HandleFunc("/login", app.LoginHandler)
+	mux.HandleFunc("/register", app.RegisterHandler)
+	mux.HandleFunc("/logout", app.LogoutHandler)
+	mux.HandleFunc("/forgot", app.ForgotHandler)
+	mux.HandleFunc("/reset", app.ResetHandler)
+	mux.HandleFunc("/hello", app.HelloHandler)
+	mux.HandleFunc("/users", app.UsersHandler)
 	// TODO: define base html directory in config
-	http.HandleFunc("/w3.css", weblogin.ServeFileHandler("../html/w3.css"))
-	http.HandleFunc("/favicon.ico", weblogin.ServeFileHandler("../html/favicon.ico"))
-	http.Handle("/",
+	mux.HandleFunc("/w3.css", weblogin.ServeFileHandler("../html/w3.css"))
+	mux.HandleFunc("/favicon.ico", weblogin.ServeFileHandler("../html/favicon.ico"))
+	mux.Handle("/",
 		http.RedirectHandler("/hello", http.StatusMovedPermanently))
 
 	// run server
