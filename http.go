@@ -14,10 +14,11 @@ package weblogin
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"golang.org/x/exp/slog"
 )
 
 // StringContains reports whether val is within arr.
@@ -64,7 +65,7 @@ func RenderTemplate(t *template.Template, w http.ResponseWriter, name string, da
 func ServeFileHandler(file string) http.HandlerFunc {
 	_, err := os.Stat(file)
 	if err != nil {
-		log.Printf("%q does not exist", file)
+		slog.Error("does not exist", "file", file)
 		return nil
 	}
 
@@ -89,7 +90,7 @@ func (l *LogRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ip = r.RemoteAddr
 	}
 
-	log.Println(ip, r.Method, r.RequestURI)
+	slog.Info("request", "ip", ip, "method", r.Method, "url", r.RequestURI)
 
 	l.Next.ServeHTTP(w, r)
 }

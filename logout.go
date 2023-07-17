@@ -13,8 +13,9 @@ specific language governing permissions and limitations under the License.
 package weblogin
 
 import (
-	"log"
 	"net/http"
+
+	"golang.org/x/exp/slog"
 )
 
 // LogoutPageData contains data passed to the HTML template.
@@ -26,24 +27,24 @@ type LogoutPageData struct {
 // LogoutHandler handles /logout requests.
 func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
-		log.Println("invalid method", r.Method)
+		slog.Warn("invalid", "method", r.Method)
 		return
 	}
 
 	currentUser, err := GetUser(w, r, app.DB)
 	if err != nil {
-		log.Printf("error getting user: %v", err)
+		slog.Error("failed to GetUser", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	log.Printf("logout %q", currentUser.UserName)
+	slog.Info("logout", "UserName", currentUser.UserName)
 	if currentUser.UserName != "" {
 		WriteEvent(app.DB, Event{UserName: currentUser.UserName, Action: ActionLogout, Result: true})
 	}
 
 	sessionTokenValue, err := GetCookieValue(r, SessionTokenCookieName)
 	if err != nil {
-		log.Println("error getting session token cookie", err)
+		slog.Error("failed to GetCookieValue", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -59,7 +60,9 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if sessionTokenValue != "" {
 		err := RemoveToken(app.DB, "session", sessionTokenValue)
 		if err != nil {
-			log.Printf("remove token failed for %q: %v", sessionTokenValue, err)
+			slog.Error("filed to RemoveToken",
+				"sessionTokenValue", sessionTokenValue,
+				"err", err)
 			// TODO: display error or just continue?
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
@@ -70,7 +73,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err = RenderTemplate(app.Tmpls, w, "logout.html",
 		LogoutPageData{Title: app.Config.Title})
 	if err != nil {
-		log.Printf("error executing template: %v", err)
+		slog.Error("failed to RenderTemplate", "err", err)
 		return
 	}
 }

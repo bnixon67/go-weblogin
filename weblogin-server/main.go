@@ -16,7 +16,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -24,6 +23,7 @@ import (
 
 	weblogin "github.com/bnixon67/go-weblogin"
 	_ "github.com/go-sql-driver/mysql"
+	"golang.org/x/exp/slog"
 )
 
 func main() {
@@ -38,11 +38,10 @@ func main() {
 	logFileName := ""
 	app, err := weblogin.NewApp(configFileName, logFileName)
 	if err != nil {
-		log.Printf("failed to create app: %v", err)
+		slog.Error("failed to create app", "err", err)
 		return
 	}
-	log.Printf("created app using config %q and log %q",
-		configFileName, logFileName)
+	slog.Info("created app", "config", configFileName, "log", logFileName)
 
 	mux := http.NewServeMux()
 
@@ -78,11 +77,12 @@ func main() {
 
 	// start the server in a goroutine
 	go func() {
-		log.Println("Listening on", srv.Addr)
+		slog.Info("server", "addr", srv.Addr)
 		// TODO: move cert locations to config file
 		err = srv.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Printf("ListandServeTLS failed: %v", err)
+			slog.Error("server failed", "err", err)
+			os.Exit(1)
 		}
 	}()
 
@@ -96,8 +96,8 @@ func main() {
 	// initiate the shutdown process
 	err = srv.Shutdown(ctx)
 	if err != nil {
-		log.Println("server shutdown error", "err", err)
+		slog.Error("server shutdown error", "err", err)
 	}
 
-	log.Println("server closed")
+	slog.Info("server closed")
 }

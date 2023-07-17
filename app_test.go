@@ -22,6 +22,8 @@ import (
 // global to provide a singleton app.
 var app *weblogin.App //nolint
 
+const TestLogFile = "test.log"
+
 // AppForTest is a helper function that returns an App used for testing.
 func AppForTest(t *testing.T) *weblogin.App {
 	if app == nil {

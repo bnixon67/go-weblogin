@@ -16,7 +16,11 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"io"
+	"os"
 	"strings"
+
+	"golang.org/x/exp/slog"
 )
 
 // App contains common variables to avoid using global variables.
@@ -31,11 +35,27 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	var app App
 	var err error
 
-	// init logging
-	err = InitLog(logFileName)
-	if err != nil {
-		return nil, fmt.Errorf("NewApp: %w", err)
+	// configure logger
+	opts := &slog.HandlerOptions{} // AddSource: true}
+
+	var w io.Writer
+	if logFileName == "" {
+		w = os.Stderr
+	} else {
+		w, err = os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	logger := slog.New(slog.NewTextHandler(w, opts))
+	slog.SetDefault(logger)
+	/*
+		err = InitLog(logFileName)
+		if err != nil {
+			return nil, fmt.Errorf("NewApp: %w", err)
+		}
+	*/
 
 	// read config file
 	app.Config, err = NewConfigFromFile(configFileName)

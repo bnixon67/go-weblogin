@@ -11,3 +11,4 @@ nohup.out
 test_config.json
 weblogin-server/weblogin-server
 weblogin-server/weblogin-server.service
+*.old
