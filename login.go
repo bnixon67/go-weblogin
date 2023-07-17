@@ -14,9 +14,10 @@ package weblogin
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
+
+	"golang.org/x/exp/slog"
 )
 
 // LoginPageData contains data passed to the HTML template.
@@ -28,7 +29,7 @@ type LoginPageData struct {
 // LoginHandler handles /login requests.
 func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		log.Println("invalid method", r.Method)
+		slog.Warn("invalid", "method", r.Method)
 		return
 	}
 
@@ -37,7 +38,7 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{Title: app.Config.Title})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unabel to RenderTemplate", "err", err)
 			return
 		}
 	case http.MethodPost:
@@ -69,11 +70,11 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 		msg = MsgMissingPassword
 	}
 	if msg != "" {
-		log.Println(msg)
+		slog.Info("error", "msg", msg)
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{Title: app.Config.Title, Message: msg})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("uanble to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -82,21 +83,21 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// attempt to login the given userName with the given password
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
-		log.Printf("login failed for %q: %v", userName, err)
+		slog.Error("failed to LoginUser", "userName", userName, "err", err)
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{
 				Title:   app.Config.Title,
 				Message: MsgLoginFailed,
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
 	}
 
 	// login successful, so create a cookie for the session Token
-	log.Printf("login successful for %q", userName)
+	slog.Info("successful login", "userName", userName)
 	http.SetCookie(w, &http.Cookie{
 		Name:     SessionTokenCookieName,
 		Value:    token.Value,
@@ -127,7 +128,7 @@ func (app *App) LoginUser(userName, password string) (Token, error) {
 	token, err := SaveNewToken(app.DB, "session", userName, 32, app.Config.SessionExpiresHours)
 	if err != nil {
 		WriteEvent(app.DB, Event{UserName: userName, Action: ActionSaveToken, Result: false})
-		log.Printf("unable to save session token: %v", err)
+		slog.Error("unable to SaveNewToken", "err", err)
 		return Token{}, fmt.Errorf("unable to save token: %w", err)
 	}
 

@@ -13,8 +13,9 @@ specific language governing permissions and limitations under the License.
 package weblogin
 
 import (
-	"log"
 	"net/http"
+
+	"golang.org/x/exp/slog"
 )
 
 // HelloPageData contains data passed to the HTML template.
@@ -27,13 +28,13 @@ type HelloPageData struct {
 // HelloHandler prints a simple hello message.
 func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
-		log.Println("invalid method", r.Method)
+		slog.Warn("invalid", "method", r.Method)
 		return
 	}
 
 	currentUser, err := GetUser(w, r, app.DB)
 	if err != nil {
-		log.Printf("error getting user: %v", err)
+		slog.Error("failed to GetUser", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -41,7 +42,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	// display page
 	err = RenderTemplate(app.Tmpls, w, "hello.html", HelloPageData{Message: "", User: currentUser})
 	if err != nil {
-		log.Printf("error executing template: %v", err)
+		slog.Error("unable to RenderTemplate", "err", err)
 		return
 	}
 }

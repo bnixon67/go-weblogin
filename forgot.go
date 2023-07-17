@@ -14,9 +14,10 @@ package weblogin
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
+
+	"golang.org/x/exp/slog"
 )
 
 // ForgotPageData contains data passed to the HTML template.
@@ -30,7 +31,7 @@ type ForgotPageData struct {
 func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 	// only allow valid methods
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		log.Println("invalid method", r.Method)
+		slog.Warn("invalid", "method", r.Method)
 		return
 	}
 
@@ -41,7 +42,7 @@ func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 		err := RenderTemplate(app.Tmpls, w, "forgot.html",
 			ForgotPageData{Title: app.Config.Title})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to execute template", "err", err)
 			return
 		}
 
@@ -83,13 +84,13 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 
 	// if error msg, display and return
 	if msg != "" {
-		log.Println(msg)
+		slog.Info("error", "msg", msg)
 		pageData := ForgotPageData{
 			Title: app.Config.Title, Message: msg,
 		}
 		err := RenderTemplate(app.Tmpls, w, "forgot.html", pageData)
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -101,8 +102,9 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		var err error
 		userName, err = GetUserNameForEmail(app.DB, email)
 		if err != nil || userName == "" {
-			log.Printf("failed to GetUserNameForEmail %q: %v",
-				email, err)
+			slog.Error("failed to GetUserNameForEmail",
+				"email", email,
+				"err", err)
 			msg = MsgNoSuchUser
 		}
 	}
@@ -117,7 +119,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		// TODO: use config value for ResetExpiresHours
 		resetToken, err := SaveNewToken(app.DB, "reset", userName, 12, 1)
 		if err != nil {
-			log.Printf("unable to save reset token: %v", err)
+			slog.Error("unable to save reset token", "err", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -131,7 +133,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		app.Config.SMTPHost, app.Config.SMTPPort, email,
 		app.Config.Title, emailText)
 	if err != nil {
-		log.Printf("unable to SendEmail: %v", err)
+		slog.Error("unable to SendEmail", "err", err)
 		http.Error(w,
 			http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
@@ -144,7 +146,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 			EmailFrom: app.Config.SMTPUser,
 		})
 	if err != nil {
-		log.Printf("error executing template: %v", err)
+		slog.Error("unable to RenderTemplate", "err", err)
 		return
 	}
 }

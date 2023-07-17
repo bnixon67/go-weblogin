@@ -2,8 +2,9 @@ package weblogin
 
 import (
 	"database/sql"
-	"log"
 	"time"
+
+	"golang.org/x/exp/slog"
 )
 
 const (
@@ -27,7 +28,11 @@ func WriteEvent(db *sql.DB, event Event) {
 	_, err := db.Exec(qry,
 		event.UserName, event.Action, event.Result, event.Message)
 	if err != nil {
-		log.Printf("could not WriteEvent(db, %q, %q, %v, %q): %v",
-			event.UserName, event.Action, event.Result, event.Message, err)
+		slog.Error("could not WriteEvent",
+			"UserName", event.UserName,
+			"Action", event.Action,
+			"Result", event.Result,
+			"Message", event.Message,
+			"err", err)
 	}
 }
