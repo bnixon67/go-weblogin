@@ -70,7 +70,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 		msg = MsgMissingPassword
 	}
 	if msg != "" {
-		slog.Info("error", "msg", msg)
+		slog.Info("error", "display", msg)
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{Title: app.Config.Title, Message: msg})
 		if err != nil {

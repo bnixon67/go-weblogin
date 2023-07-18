@@ -15,8 +15,9 @@ package weblogin
 import (
 	"database/sql"
 	"errors"
-	"log"
 	"net/http"
+
+	"golang.org/x/exp/slog"
 )
 
 // UsersPageData contains data passed to the HTML template.
@@ -30,27 +31,27 @@ type UsersPageData struct {
 // UsersHandler prints a simple hello message.
 func (app *App) UsersHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
-		log.Println("invalid method", r.Method)
+		slog.Warn("invalid", "method", r.Method)
 		return
 	}
 
 	currentUser, err := GetUser(w, r, app.DB)
 	if err != nil {
-		log.Printf("error getting user: %v", err)
+		slog.Error("failed GetUser", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
 	users, err := GetUsers(app.DB)
 	if err != nil {
-		log.Printf("failed to GetUsers: %v", err)
+		slog.Error("failed GetUsers", "err", err)
 	}
 
 	// display page
 	err = RenderTemplate(app.Tmpls, w, "users.html",
 		UsersPageData{Message: "", User: currentUser, Users: users})
 	if err != nil {
-		log.Printf("error executing template: %v", err)
+		slog.Error("failed to RenderTemplate", "err", err)
 		return
 	}
 }
@@ -61,7 +62,7 @@ func GetUsers(db *sql.DB) ([]User, error) {
 	var err error
 
 	if db == nil {
-		log.Print("db is nil")
+		slog.Error("db is nil")
 		return users, errors.New("invdalid db")
 	}
 
@@ -69,7 +70,7 @@ func GetUsers(db *sql.DB) ([]User, error) {
 
 	rows, err := db.Query(qry)
 	if err != nil {
-		log.Printf("query for users failed, %v", err)
+		slog.Error("query for users failed", "err", err)
 		return users, err
 
 	}
@@ -80,14 +81,14 @@ func GetUsers(db *sql.DB) ([]User, error) {
 
 		err = rows.Scan(&user.UserName, &user.FullName, &user.Email, &user.Admin, &user.Created)
 		if err != nil {
-			log.Printf("rows.Scan failed, %v", err)
+			slog.Error("failed rows.Scan", "err", err)
 		}
 
 		users = append(users, user)
 	}
 	err = rows.Err()
 	if err != nil {
-		log.Printf("rows.Err failed, %v", err)
+		slog.Error("failed rows.Err", "err", err)
 	}
 
 	return users, err

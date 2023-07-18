@@ -36,7 +36,7 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	var err error
 
 	// configure logger
-	opts := &slog.HandlerOptions{} // AddSource: true}
+	opts := &slog.HandlerOptions{AddSource: true}
 
 	var w io.Writer
 	if logFileName == "" {
