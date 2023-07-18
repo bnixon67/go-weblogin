@@ -13,11 +13,11 @@ specific language governing permissions and limitations under the License.
 package weblogin
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/exp/slog"
 )
 
 // ResetPageData contains data passed to the HTML template.
@@ -30,7 +30,7 @@ type ResetPageData struct {
 // ResetHandler handles /reset requests.
 func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		log.Println("invalid method", r.Method)
+		slog.Warn("invalid", "method", r.Method)
 		return
 	}
 
@@ -42,7 +42,7 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 
@@ -62,7 +62,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	// redundant given client side required fields, but good practice
 	if resetToken == "" || password1 == "" || password2 == "" {
 		msg := MsgMissingRequired
-		log.Println(msg)
+		slog.Warn("resetPost", "display", msg)
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{
 				Title:      app.Config.Title,
@@ -70,7 +70,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -80,7 +80,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	// may be redundant if done client side, but good practice
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
-		log.Println(msg)
+		slog.Warn("resetPost", "display", msg)
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{
 				Title:      app.Config.Title,
@@ -88,7 +88,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -96,7 +96,9 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 
 	userName, err := GetUserNameForResetToken(app.DB, resetToken)
 	if err != nil {
-		log.Printf("invalid reset token: %v", err)
+		slog.Error("failed GetUserNameForResetToken",
+			"resetToken", resetToken,
+			"err", err)
 		msg := "Please provide a valid Reset Token"
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{
@@ -105,7 +107,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("failed to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -115,11 +117,12 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password1), bcrypt.DefaultCost)
 	if err != nil {
 		msg := "Cannot hash password"
-		log.Println(msg, "for", userName)
+		slog.Error("failed bcrypt.GenerateFromPassword",
+			"userName", userName, "err", err)
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{Title: app.Config.Title, Message: msg})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -128,12 +131,13 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	// store the user and hashed password
 	_, err = app.DB.Exec("UPDATE users SET hashedPassword = ? WHERE username = ?", string(hashedPassword), userName)
 	if err != nil {
-		log.Printf("update password failed for %q: %v", userName, err)
+		slog.Error("update password failed",
+			"userName", userName, "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
 	// register successful
-	log.Printf("Password reset for %q", userName)
+	slog.Info("successful password reset", "userName", userName)
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

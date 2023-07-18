@@ -13,9 +13,10 @@ specific language governing permissions and limitations under the License.
 package weblogin
 
 import (
-	"log"
 	"net/http"
 	"strings"
+
+	"golang.org/x/exp/slog"
 )
 
 const (
@@ -34,7 +35,7 @@ type RegisterPageData struct {
 // RegisterHandler handles /register requests.
 func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		log.Println("invalid method", r.Method)
+		slog.Warn("invalid", "method", r.Method)
 		return
 	}
 
@@ -43,7 +44,7 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{Title: app.Config.Title})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to parse template", "err", err)
 			return
 		}
 
@@ -75,14 +76,18 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// check for missing values
 	if IsEmpty(userName, fullName, email, password1, password2) {
 		msg := MsgMissingRequired
-		log.Printf("missing values: %q %q %q %q %q",
-			userName, fullName, email, password1, password2)
+		slog.Warn("register missing values",
+			"userName", userName,
+			"fullName", fullName,
+			"email", email,
+			"password1 empty", password1 == "",
+			"password2 empty", password2 == "")
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
 				Title: app.Config.Title, Message: msg,
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to execute template", "err", err)
 			return
 		}
 		return
@@ -91,13 +96,13 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// check that password fields match
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
-		log.Printf("password fields do not match for %q", userName)
+		slog.Warn("passwords do not match", "userName", userName)
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
 				Title: app.Config.Title, Message: msg,
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to execute template", "err", err)
 			return
 		}
 		return
@@ -106,12 +111,13 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// check that userName doesn't already exist
 	userExists, err := UserExists(app.DB, userName)
 	if err != nil {
-		log.Printf("error UserExists(db, %q): %v", userName, err)
+		slog.Error("UserExists failed",
+			"userName", userName, "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if userExists {
-		log.Printf("user %q already exists", userName)
+		slog.Warn("user exists", "userName", userName)
 		WriteEvent(app.DB, Event{UserName: userName, Action: ActionRegister, Result: false, Message: "user exists"})
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
@@ -119,7 +125,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 				Message: MsgUserNameExists,
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to execute template", "err", err)
 			return
 		}
 		return
@@ -128,19 +134,19 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// check that email doesn't already exist
 	emailExists, err := EmailExists(app.DB, email)
 	if err != nil {
-		log.Printf("error EmailExists(db, %q): %v", email, err)
+		slog.Error("EmailExists failed", "email", email, "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if emailExists {
-		log.Printf("email %q already exists", email)
+		slog.Warn("email exists", "email", email)
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
 				Title:   app.Config.Title,
 				Message: MsgEmailExists,
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to execute template", "err", err)
 			return
 		}
 		return
@@ -149,7 +155,8 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	// Register User
 	err = RegisterUser(app.DB, userName, fullName, email, password1)
 	if err != nil {
-		log.Printf("register %q error: %v", userName, err)
+		slog.Error("RegisterUser failed",
+			"userName", userName, "err", err)
 		WriteEvent(app.DB, Event{UserName: userName, Action: ActionRegister, Result: false, Message: err.Error()})
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
@@ -157,14 +164,14 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 				Message: "Unable to Register User",
 			})
 		if err != nil {
-			log.Printf("error executing template: %v", err)
+			slog.Error("unable to execute template", "err", err)
 			return
 		}
 		return
 	}
 
 	// registration successful
-	log.Printf("register %q success", userName)
+	slog.Info("registered user", "userName", userName)
 	WriteEvent(app.DB, Event{UserName: userName, Action: ActionRegister, Result: true})
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

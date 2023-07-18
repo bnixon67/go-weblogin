@@ -84,7 +84,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 
 	// if error msg, display and return
 	if msg != "" {
-		slog.Info("error", "msg", msg)
+		slog.Warn("error", "display", msg)
 		pageData := ForgotPageData{
 			Title: app.Config.Title, Message: msg,
 		}

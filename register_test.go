@@ -196,6 +196,44 @@ func TestRegisterHandlerPostMismatchedPassword(t *testing.T) {
 	}
 }
 
+func TestRegisterHandlerPostMissingPassword1(t *testing.T) {
+	randomUserName, err := weblogin.GenerateRandomString(8)
+	if err != nil {
+		t.Errorf("could not GenerateRandomString")
+	}
+	data := url.Values{
+		"userName":  {randomUserName},
+		"fullName":  {"full name"},
+		"email":     {randomUserName + "@email"},
+		"password1": {""},
+		"password2": {"password two"},
+	}
+
+	app := AppForTest(t)
+
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest(http.MethodPost, "/register", strings.NewReader(data.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	app.RegisterHandler(w, r)
+
+	expectedStatus := http.StatusOK
+	if w.Code != expectedStatus {
+		t.Errorf("got status %d %q, expected %d %q", w.Code, http.StatusText(w.Code), expectedStatus, http.StatusText(expectedStatus))
+	}
+
+	expectedInBody := weblogin.MsgMissingRequired
+	if !strings.Contains(w.Body.String(), expectedInBody) {
+		t.Errorf("got body %q, expected %q in body", w.Body, expectedInBody)
+	}
+
+	got := w.Header().Get("Location")
+	expected := ""
+	if got != expected {
+		t.Errorf("got location %q, expected %q", got, expected)
+	}
+}
+
 func TestRegisterHandlerPostValid(t *testing.T) {
 	randomUserName, err := weblogin.GenerateRandomString(8)
 	if err != nil {
