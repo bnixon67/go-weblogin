@@ -48,7 +48,7 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 		}
 	}
 
-	logger := slog.New(slog.NewTextHandler(w, opts))
+	logger := slog.New(slog.NewJSONHandler(w, opts))
 	slog.SetDefault(logger)
 	/*
 		err = InitLog(logFileName)
