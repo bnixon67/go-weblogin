@@ -21,37 +21,46 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-// StringContains reports whether val is within arr.
-func StringContains(arr []string, val string) bool {
-	for _, e := range arr {
-		if e == val {
+// StringContains reports if slice contain value.
+func StringContains(slice []string, value string) bool {
+	for _, e := range slice {
+		if e == value {
 			return true
 		}
 	}
 	return false
 }
 
-// ValidMethod reports if r.Method is within allowed. If r.Method is not allowed or is OPTIONS, then w is updated with an appropriate response, false is returned, and any Handler using this function should return.
+// ValidMethod checks if the given HTTP request method is allowed based on the provided list of allowed methods. It returns true if the method is allowed, and false otherwise. If the method is not allowed or is OPTIONS, the function updates the response writer appropriately and returns false.  The calling handler should return without further processing.
 func ValidMethod(w http.ResponseWriter, r *http.Request, allowed []string) bool {
+	// if method is in allowed list, then return
 	if StringContains(allowed, r.Method) {
 		return true
 	}
 
+	// add OPTIONS if method is not allowed
 	allowed = append(allowed, http.MethodOptions)
+
+	// set the "Allow" header to allowed methods
 	w.Header().Set("Allow", strings.Join(allowed, ", "))
 
+	// if method is OPTIONS
 	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusNoContent) // no content returned
 		return false
 	}
 
-	http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+	// method is not allowed and not OPTIONS
+	txt := r.Method + " " + http.StatusText(http.StatusMethodNotAllowed)
+	http.Error(w, txt, http.StatusMethodNotAllowed)
 	return false
 }
 
 const MsgTemplateError = "Sorry, the server was unable to display this page. Please contact the administrator."
 
-// RenderTemplate is a helper to call template.ExecuteTemplate and returns a http.Error unpon failure. Like http.Error, it does not otherwise end the request, so the caller must ensure no further writes are done to w if non-nil is returned.
+// RenderTemplate executes the named template with given data to the writer.
+// If an error occurs, writer is updated to indicate a Internal Server Error.
+// The caller must ensure no further writes are done for a non-nil error.
 func RenderTemplate(t *template.Template, w http.ResponseWriter, name string, data interface{}) error {
 	err := t.ExecuteTemplate(w, name, data)
 	if err != nil {
@@ -61,8 +70,9 @@ func RenderTemplate(t *template.Template, w http.ResponseWriter, name string, da
 	return err
 }
 
-// ServeFileHandler is a simple http.ServeFile wrapper.
+// ServeFileHandler returns a HandlerFunc to serve the specified file.
 func ServeFileHandler(file string) http.HandlerFunc {
+	// check if file exists and is accessible
 	_, err := os.Stat(file)
 	if err != nil {
 		slog.Error("does not exist", "file", file)

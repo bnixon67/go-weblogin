@@ -31,7 +31,7 @@ type ForgotPageData struct {
 func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 	// only allow valid methods
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		slog.Warn("invalid", "method", r.Method)
+		slog.Error("invalid HTTP method", "method", r.Method)
 		return
 	}
 

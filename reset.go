@@ -30,7 +30,7 @@ type ResetPageData struct {
 // ResetHandler handles /reset requests.
 func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		slog.Warn("invalid", "method", r.Method)
+		slog.Error("invalid HTTP method", "method", r.Method)
 		return
 	}
 

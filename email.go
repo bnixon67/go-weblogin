@@ -14,6 +14,7 @@ package weblogin
 
 import (
 	"bytes"
+	"fmt"
 	"net/smtp"
 	"text/template"
 
@@ -47,16 +48,14 @@ func SendEmail(smtpUser, smtpPassword, smtpHost, smtpPort, to, subject, body str
 	// TODO: cache template
 	t, err := template.New("email").Parse(emailTmpl)
 	if err != nil {
-		slog.Error("unable to parse template", "err", err)
-		return err
+		return fmt.Errorf("SendEmail: failed to parse template: %w", err)
 	}
 
 	// fill message template
 	message := &bytes.Buffer{}
 	err = t.Execute(message, mailMessage)
 	if err != nil {
-		slog.Error("unable to execute template", "err", err)
-		return err
+		return fmt.Errorf("SendEmail: failed to execute template: %w", err)
 	}
 
 	// authenticate to SMTP server
@@ -65,8 +64,7 @@ func SendEmail(smtpUser, smtpPassword, smtpHost, smtpPort, to, subject, body str
 	// send email
 	err = smtp.SendMail(smtpHost+":"+smtpPort, auth, mailMessage.From, []string{mailMessage.To}, message.Bytes())
 	if err != nil {
-		slog.Error("failed to SendMail", "err", err)
-		return err
+		return fmt.Errorf("SendEmail: failed to send mail: %w", err)
 	}
 
 	slog.Info("sent email")

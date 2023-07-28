@@ -29,7 +29,7 @@ type LoginPageData struct {
 // LoginHandler handles /login requests.
 func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		slog.Warn("invalid", "method", r.Method)
+		slog.Error("invalid HTTP method", "method", r.Method)
 		return
 	}
 
