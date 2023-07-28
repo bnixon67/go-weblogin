@@ -27,7 +27,7 @@ type LogoutPageData struct {
 // LogoutHandler handles /logout requests.
 func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
-		slog.Warn("invalid", "method", r.Method)
+		slog.Error("invalid HTTP method", "method", r.Method)
 		return
 	}
 

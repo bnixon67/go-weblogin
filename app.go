@@ -44,7 +44,7 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	} else {
 		w, err = os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("NewApp: unable to open log file: %w", err)
 		}
 	}
 
@@ -60,14 +60,13 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	// read config file
 	app.Config, err = NewConfigFromFile(configFileName)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: %w", err)
+		return nil, fmt.Errorf("NewApp: failed to read config file: %w", err)
 	}
 
 	// ensure required config values have been provided
 	isValid, missing := app.Config.IsValid()
 	if !isValid {
-		return nil,
-			fmt.Errorf("NewApp: invalid config: missing %s", strings.Join(missing, ", ")) //nolint
+		return nil, fmt.Errorf("NewApp: invalid config: missing %s", strings.Join(missing, ", ")) //nolint
 	}
 
 	// TODO: handle this default value
@@ -79,13 +78,13 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	app.DB, err = InitDB(app.Config.SQLDriverName,
 		app.Config.SQLDataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: %w", err)
+		return nil, fmt.Errorf("NewApp: failed to initialize database: %w", err)
 	}
 
 	// init HTML templates
 	app.Tmpls, err = InitTemplates(app.Config.ParseGlobPattern)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: %w", err)
+		return nil, fmt.Errorf("NewApp: failed to initialize templates: %w", err)
 	}
 
 	return &app, err

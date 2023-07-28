@@ -36,30 +36,31 @@ type Config struct {
 
 // NewConfigFromFile returns a Config from the given fileName.
 func NewConfigFromFile(fileName string) (Config, error) {
+	var config Config
+
 	// open config file
 	configFile, err := os.Open(fileName)
 	if err != nil {
-		return Config{}, fmt.Errorf("NewConfigFromFile: %w", err)
+		return config, fmt.Errorf("NewConfigFromFile: failed to open: %w", err)
 	}
 	defer configFile.Close()
 
 	// decode json from config
-	var config Config
 	err = json.NewDecoder(configFile).Decode(&config)
 	if err != nil {
-		return Config{}, fmt.Errorf("NewConfigFromFile: %w", err)
+		return config, fmt.Errorf("NewConfigFromFile: failed to decode: %w", err)
 	}
 
 	return config, nil
 }
 
-// appendIfEmpty appends msg to missing if str is empty.
-func appendIfEmpty(missing []string, str, msg string) []string {
+// appendIfEmpty appends msg to target if str is empty and returns target.
+func appendIfEmpty(target []string, str, msg string) []string {
 	if str == "" {
-		missing = append(missing, msg)
+		target = append(target, msg)
 	}
 
-	return missing
+	return target
 }
 
 // IsValid returns true if the config has all the required values.
@@ -78,5 +79,5 @@ func (c *Config) IsValid() (bool, []string) {
 	missing = appendIfEmpty(missing, c.SMTPUser, "SMTPUser")
 	missing = appendIfEmpty(missing, c.SMTPPassword, "SMTPPassword")
 
-	return missing == nil, missing
+	return len(missing) == 0, missing
 }

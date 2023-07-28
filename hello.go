@@ -28,7 +28,7 @@ type HelloPageData struct {
 // HelloHandler prints a simple hello message.
 func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
-		slog.Warn("invalid", "method", r.Method)
+		slog.Error("invalid HTTP method", "method", r.Method)
 		return
 	}
 

@@ -31,7 +31,7 @@ type UsersPageData struct {
 // UsersHandler prints a simple hello message.
 func (app *App) UsersHandler(w http.ResponseWriter, r *http.Request) {
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
-		slog.Warn("invalid", "method", r.Method)
+		slog.Error("invalid HTTP method", "method", r.Method)
 		return
 	}
 
