@@ -1,0 +1,19 @@
+{
+  "Title": "Go Weblogin",
+
+  "ServerHost": "192.168.1.111",
+  "ServerPort": "8443",
+
+  "BaseURL": "https://192.168.1.111:8443",
+
+  "SqlDriverName": "mysql",
+  "SqlDataSourceName": "gologin_test:test@/gologin_test?parseTime=true",
+  "ParseGlobPattern": "invalid",
+
+  "SessionExpiresHours": 720,
+
+  "SmtpHost": "smtp.gmail.com",
+  "SmtpPort": "587",
+  "SmtpUser": "bnixon67@gmail.com",
+  "SmtpPassword": "wgijaoqxpicllrmc"
+}

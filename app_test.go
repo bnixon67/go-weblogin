@@ -13,6 +13,7 @@ specific language governing permissions and limitations under the License.
 package weblogin_test
 
 import (
+	"errors"
 	"testing"
 
 	weblogin "github.com/bnixon67/go-weblogin"
@@ -28,7 +29,7 @@ const TestLogFile = "test.log"
 func AppForTest(t *testing.T) *weblogin.App {
 	if app == nil {
 		var err error
-		app, err = weblogin.NewApp("test_config.json", TestLogFile)
+		app, err = weblogin.NewApp("testdata/test_config.json", TestLogFile)
 		if err != nil {
 			app = nil
 
@@ -41,57 +42,67 @@ func AppForTest(t *testing.T) *weblogin.App {
 
 // TestNewApp provides tests for the NewApp function.
 func TestNewApp(t *testing.T) {
-	cases := []struct {
+	testCases := []struct {
 		name           string
 		configFileName string
 		logFileName    string
-		errExpected    bool
-		appExpected    bool
+		wantErr        error
+		isAppExpected  bool
 	}{
+		{
+			name:           "validConfigAndLog",
+			configFileName: "testdata/test_config.json",
+			logFileName:    "test.log",
+			wantErr:        nil,
+			isAppExpected:  true,
+		},
 		{
 			name:           "emptyConfigFileName",
 			configFileName: "",
 			logFileName:    "test.log",
-			errExpected:    true,
-			appExpected:    false,
+			wantErr:        weblogin.ErrOpenConfig,
+			isAppExpected:  false,
 		},
 		{
 			name:           "badLogFileName",
 			configFileName: "",
 			logFileName:    "/foo/bar",
-			errExpected:    true,
-			appExpected:    false,
+			wantErr:        weblogin.ErrInitLog,
+			isAppExpected:  false,
 		},
 		{
 			name:           "emptyConfig",
 			configFileName: "testdata/empty.json",
 			logFileName:    "test.log",
-			errExpected:    true,
-			appExpected:    false,
+			wantErr:        weblogin.ErrInvalidConfig,
+			isAppExpected:  false,
 		},
 		{
-			name:           "validConfigAndLog",
-			configFileName: "test_config.json",
+			name:           "invalidDB",
+			configFileName: "testdata/invalid_db.json",
 			logFileName:    "test.log",
-			errExpected:    false,
-			appExpected:    true,
+			wantErr:        weblogin.ErrInitDB,
+			isAppExpected:  false,
+		},
+		{
+			name:           "invalidTemplates",
+			configFileName: "testdata/invalid_tmpl.json",
+			logFileName:    "test.log",
+			wantErr:        weblogin.ErrInitTemplates,
+			isAppExpected:  false,
 		},
 	}
 
-	for _, c := range cases {
-		t.Run(c.name, func(*testing.T) {
-			app, err := weblogin.NewApp(c.configFileName, c.logFileName)
-			if c.errExpected && err == nil {
-				t.Errorf("expected error, got err==nil for NewApp(%q, %q)", c.configFileName, c.logFileName)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(*testing.T) {
+			app, err := weblogin.NewApp(tc.configFileName, tc.logFileName)
+			if !errors.Is(err, tc.wantErr) {
+				t.Errorf("got err %q, want %q for NewApp(%q, %q)", err, tc.wantErr, tc.configFileName, tc.logFileName)
 			}
-			if !c.errExpected && err != nil {
-				t.Errorf("expected no error, got err=%q for NewApp(%q, %q)", err, c.configFileName, c.logFileName)
-			}
-			if c.appExpected && app == nil {
-				t.Errorf("expected app, got app=nil for NewApp(%q, %q)", c.configFileName, c.logFileName)
-			}
-			if !c.appExpected && app != nil {
-				t.Errorf("expected app==nil, got app=%v for NewApp(%q, %q)", app, c.configFileName, c.logFileName)
+
+			gotApp := app != nil
+			if gotApp != tc.isAppExpected {
+				t.Errorf("gotApp is %t, want %t for NewApp(%q, %q)", gotApp, tc.isAppExpected, tc.configFileName, tc.logFileName)
 			}
 		})
 	}

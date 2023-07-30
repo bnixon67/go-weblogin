@@ -13,55 +13,72 @@ specific language governing permissions and limitations under the License.
 package weblogin_test
 
 import (
+	"errors"
 	"math"
 	"reflect"
 	"testing"
 
 	weblogin "github.com/bnixon67/go-weblogin"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestNewConfigFromFile(t *testing.T) {
-	// test empty (invaild) file name
-	_, err := weblogin.NewConfigFromFile("")
-	if err == nil {
-		t.Errorf("NewConfigFromFile for empty filename is nil")
+	testCases := []struct {
+		name           string
+		configFileName string
+		wantErr        error
+		wantConfig     weblogin.Config
+	}{
+		{
+			name:           "emptyFileName",
+			configFileName: "",
+			wantErr:        weblogin.ErrConfigOpen,
+			wantConfig:     weblogin.Config{},
+		},
+		{
+			name:           "emptyJSON",
+			configFileName: "testdata/empty.json",
+			wantErr:        nil,
+			wantConfig:     weblogin.Config{},
+		},
+		{
+			name:           "invalidJSON",
+			configFileName: "testdata/invalid.json",
+			wantErr:        weblogin.ErrConfigDecode,
+			wantConfig:     weblogin.Config{},
+		},
+		{
+			name:           "validJSON",
+			configFileName: "testdata/valid.json",
+			wantErr:        nil,
+			wantConfig: weblogin.Config{
+				Title:               "Test Title",
+				ServerHost:          "test host",
+				ServerPort:          "test port",
+				BaseURL:             "test URL",
+				SQLDriverName:       "testSQLDriverName",
+				SQLDataSourceName:   "testSQLDataSourceName",
+				ParseGlobPattern:    "testParseGlobPattern",
+				SessionExpiresHours: 42,
+				SMTPHost:            "test SMTP host",
+				SMTPPort:            "test SMTP port",
+				SMTPUser:            "test SMTP user",
+				SMTPPassword:        "test SMTP password",
+			},
+		},
 	}
 
-	var fileName string
+	for _, tc := range testCases {
+		t.Run(tc.name, func(*testing.T) {
+			config, err := weblogin.NewConfigFromFile(tc.configFileName)
+			if !errors.Is(err, tc.wantErr) {
+				t.Errorf("got err %q, want %q for NewConfigFromFile(%q)", err, tc.wantErr, tc.configFileName)
+			}
 
-	// test with a valid filename and file with empty json
-	fileName = "testdata/empty.json"
-	config, err := weblogin.NewConfigFromFile(fileName)
-	if err != nil {
-		t.Errorf("NewConfigFromFile(%q) failed: %v", fileName, err)
-	}
-	if config != (weblogin.Config{}) {
-		t.Errorf("got %+v, expected %+v", config, weblogin.Config{})
-	}
-
-	// test with a valid filename and file with invalid json
-	fileName = "testdata/invalid.json"
-	config, err = weblogin.NewConfigFromFile(fileName)
-	if err == nil {
-		t.Errorf("expected NewConfigFromFile(%q) to fail", fileName)
-	}
-	if config != (weblogin.Config{}) {
-		t.Errorf("got %+v, expected %+v", config, weblogin.Config{})
-	}
-
-	// test with a valid filename and file with valid json
-	fileName = "testdata/valid.json"
-	config, err = weblogin.NewConfigFromFile(fileName)
-	if err != nil {
-		t.Errorf("NewConfigFromFile(%q) failed: %v", fileName, err)
-	}
-	expectedConfig := weblogin.Config{
-		SQLDriverName:     "testSQLDriverName",
-		SQLDataSourceName: "testSQLDataSourceName",
-		ParseGlobPattern:  "testParseGlobPattern",
-	}
-	if config != expectedConfig {
-		t.Errorf("got %+v, expected %+v", config, expectedConfig)
+			if diff := cmp.Diff(config, tc.wantConfig); diff != "" {
+				t.Errorf("config did not match (-got +want):\n%s", diff)
+			}
+		})
 	}
 }
 
@@ -113,5 +130,64 @@ func TestConfigIsValid(t *testing.T) {
 		if got != testCase.expected {
 			t.Errorf("c.IsValid(%+v) = %v; expected %v", testCase.config, got, testCase.expected)
 		}
+	}
+}
+
+func TestConfigMarshalJSON(t *testing.T) {
+	testCases := []struct {
+		name  string
+		input weblogin.Config
+		want  string
+	}{
+		{
+			name: "test",
+			input: weblogin.Config{
+				Title:             "AppConfig",
+				SQLDataSourceName: "user:password@localhost/db",
+				SMTPPassword:      "supersecret",
+			},
+			want: `{"Title":"AppConfig","ServerHost":"","ServerPort":"","BaseURL":"","SQLDriverName":"","SQLDataSourceName":"[REDACTED]","ParseGlobPattern":"","SessionExpiresHours":0,"SMTPHost":"","SMTPPort":"","SMTPUser":"","SMTPPassword":"[REDACTED]"}`,
+		},
+	}
+
+	// Run tests
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := tc.input.MarshalJSON()
+			if err != nil {
+				t.Fatalf("Error during MarshalJSON: %v", err)
+			}
+			if string(got) != tc.want {
+				t.Errorf("got\n%s\n, want\n%s\n", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestConfigString(t *testing.T) {
+	testCases := []struct {
+		name  string
+		input weblogin.Config
+		want  string
+	}{
+		{
+			name: "test",
+			input: weblogin.Config{
+				Title:             "AppConfig",
+				SQLDataSourceName: "user:password@localhost/db",
+				SMTPPassword:      "supersecret",
+			},
+			want: `{Title:AppConfig ServerHost: ServerPort: BaseURL: SQLDriverName: SQLDataSourceName:[REDACTED] ParseGlobPattern: SessionExpiresHours:0 SMTPHost: SMTPPort: SMTPUser: SMTPPassword:[REDACTED]}`,
+		},
+	}
+
+	// Run tests
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := tc.input.String()
+			if got != tc.want {
+				t.Errorf("got\n%s\n, want\n%s\n", got, tc.want)
+			}
+		})
 	}
 }
