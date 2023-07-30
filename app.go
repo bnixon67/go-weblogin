@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -16,11 +16,7 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
-	"io"
-	"os"
 	"strings"
-
-	"golang.org/x/exp/slog"
 )
 
 // App contains common variables to avoid using global variables.
@@ -35,27 +31,10 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	var app App
 	var err error
 
-	// configure logger
-	opts := &slog.HandlerOptions{AddSource: true}
-
-	var w io.Writer
-	if logFileName == "" {
-		w = os.Stderr
-	} else {
-		w, err = os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600)
-		if err != nil {
-			return nil, fmt.Errorf("NewApp: unable to open log file: %w", err)
-		}
+	err = InitLog(logFileName)
+	if err != nil {
+		return nil, fmt.Errorf("NewApp: failed to init log: %w", err)
 	}
-
-	logger := slog.New(slog.NewJSONHandler(w, opts))
-	slog.SetDefault(logger)
-	/*
-		err = InitLog(logFileName)
-		if err != nil {
-			return nil, fmt.Errorf("NewApp: %w", err)
-		}
-	*/
 
 	// read config file
 	app.Config, err = NewConfigFromFile(configFileName)
