@@ -81,3 +81,35 @@ func (c *Config) IsValid() (bool, []string) {
 
 	return len(missing) == 0, missing
 }
+
+// RedactedConfig is a copy of Config used to redact values on output.
+type RedactedConfig struct {
+	Title               string // title of the application
+	ServerHost          string // host to listen on
+	ServerPort          string // port to listen on
+	BaseURL             string // URL for password reset, e.g., https://host:port
+	SQLDriverName       string // driverName for sql.Open
+	SQLDataSourceName   string // dataSourceName for sql.Open
+	ParseGlobPattern    string // pattern to use with template.ParseGlob
+	SessionExpiresHours int    // number of hours session is valid
+	SMTPHost            string // SMTP host to send email
+	SMTPPort            string // SMTP port to send email
+	SMTPUser            string // SMTP user to send email
+	SMTPPassword        string // SMTP password to send email
+}
+
+// MarshalJSON is a custom Marshaler to redact some fields.
+func (c Config) MarshalJSON() ([]byte, error) {
+	r := RedactedConfig(c)
+	r.SQLDataSourceName = "[REDACTED]"
+	r.SMTPPassword = "[REDACTED]"
+	return json.Marshal(r)
+}
+
+// String is a custom Stringer to redact some fields.
+func (c Config) String() string {
+	r := RedactedConfig(c)
+	r.SQLDataSourceName = "[REDACTED]"
+	r.SMTPPassword = "[REDACTED]"
+	return fmt.Sprintf("%+v", r)
+}

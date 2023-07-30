@@ -41,7 +41,7 @@ func main() {
 		slog.Error("failed to create app", "err", err)
 		return
 	}
-	slog.Info("created app", "config", configFileName, "log", logFileName)
+	slog.Info("created app", "app", app)
 
 	mux := http.NewServeMux()
 
@@ -77,11 +77,20 @@ func main() {
 
 	// start the server in a goroutine
 	go func() {
-		slog.Info("server", "addr", srv.Addr)
+		slog.Info("starting server",
+			slog.Group("srv",
+				"Addr", srv.Addr,
+				"ReadTimeout (s)", srv.ReadTimeout/time.Second,
+				"WriteTimeout (s)", srv.WriteTimeout/time.Second,
+				"IdleTimeout (s)", srv.IdleTimeout/time.Second,
+				"ReadHeaderTimeout (s)", srv.ReadHeaderTimeout/time.Second,
+				"MaxHeaderBytes (kb)", srv.MaxHeaderBytes/1024,
+			),
+		)
 		// TODO: move cert locations to config file
 		err = srv.ListenAndServeTLS("cert/cert.pem", "cert/key.pem")
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			slog.Error("server failed", "err", err)
+			slog.Error("failed to start server", "err", err)
 			os.Exit(1)
 		}
 	}()
