@@ -14,6 +14,7 @@ package weblogin
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -34,6 +35,11 @@ type Config struct {
 	SMTPPassword        string // SMTP password to send email
 }
 
+var (
+	ErrConfigOpen   = errors.New("failed to open")
+	ErrConfigDecode = errors.New("failed to decode")
+)
+
 // NewConfigFromFile returns a Config from the given fileName.
 func NewConfigFromFile(fileName string) (Config, error) {
 	var config Config
@@ -41,14 +47,14 @@ func NewConfigFromFile(fileName string) (Config, error) {
 	// open config file
 	configFile, err := os.Open(fileName)
 	if err != nil {
-		return config, fmt.Errorf("NewConfigFromFile: failed to open: %w", err)
+		return config, fmt.Errorf("NewConfigFromFile: %w: %v", ErrConfigOpen, err)
 	}
 	defer configFile.Close()
 
 	// decode json from config
 	err = json.NewDecoder(configFile).Decode(&config)
 	if err != nil {
-		return config, fmt.Errorf("NewConfigFromFile: failed to decode: %w", err)
+		return config, fmt.Errorf("NewConfigFromFile: %w: %v", ErrConfigDecode, err)
 	}
 
 	return config, nil
@@ -83,20 +89,7 @@ func (c *Config) IsValid() (bool, []string) {
 }
 
 // RedactedConfig is a copy of Config used to redact values on output.
-type RedactedConfig struct {
-	Title               string // title of the application
-	ServerHost          string // host to listen on
-	ServerPort          string // port to listen on
-	BaseURL             string // URL for password reset, e.g., https://host:port
-	SQLDriverName       string // driverName for sql.Open
-	SQLDataSourceName   string // dataSourceName for sql.Open
-	ParseGlobPattern    string // pattern to use with template.ParseGlob
-	SessionExpiresHours int    // number of hours session is valid
-	SMTPHost            string // SMTP host to send email
-	SMTPPort            string // SMTP port to send email
-	SMTPUser            string // SMTP user to send email
-	SMTPPassword        string // SMTP password to send email
-}
+type RedactedConfig Config
 
 // MarshalJSON is a custom Marshaler to redact some fields.
 func (c Config) MarshalJSON() ([]byte, error) {

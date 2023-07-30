@@ -1,5 +1,19 @@
 {
-	"SQLDriverName": "testSQLDriverName",
-	"SQLDataSourceName": "testSQLDataSourceName",
-	"ParseGlobPattern": "testParseGlobPattern"
+  "Title": "Test Title",
+
+  "ServerHost": "test host",
+  "ServerPort": "test port",
+
+  "BaseURL": "test URL",
+
+  "SqlDriverName": "testSQLDriverName",
+  "SqlDataSourceName": "testSQLDataSourceName",
+  "ParseGlobPattern": "testParseGlobPattern",
+
+  "SessionExpiresHours": 42,
+
+  "SMTPHost": "test SMTP host",
+  "SMTPPort": "test SMTP port",
+  "SMTPUser": "test SMTP user",
+  "SMTPPassword": "test SMTP password"
 }

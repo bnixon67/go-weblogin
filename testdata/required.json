@@ -1,8 +1,0 @@
-{
-	"ServerHost": "host",
-	"ServerPost": "port",
-
-	"SqlDriverName": "mysql",
-	"SqlDataSourceName": "user:password@/gologin?parseTime=true",
-	"ParseGlobPattern": "html/*.html",
-}

@@ -31,15 +31,15 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentUser, err := GetUser(w, r, app.DB)
+	user, err := GetUser(w, r, app.DB)
 	if err != nil {
 		slog.Error("failed to GetUser", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	slog.Info("logout", "UserName", currentUser.UserName)
-	if currentUser.UserName != "" {
-		WriteEvent(app.DB, Event{UserName: currentUser.UserName, Action: ActionLogout, Result: true})
+	slog.Info("logout", "user", user)
+	if user.UserName != "" {
+		WriteEvent(app.DB, Event{UserName: user.UserName, Action: ActionLogout, Result: true})
 	}
 
 	sessionTokenValue, err := GetCookieValue(r, SessionTokenCookieName)

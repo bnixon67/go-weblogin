@@ -14,6 +14,7 @@ package weblogin
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"html/template"
 	"strings"
@@ -26,26 +27,35 @@ type App struct {
 	Config Config
 }
 
+var (
+	ErrInitLog       = errors.New("failed to init log")
+	ErrOpenConfig    = errors.New("failed to open config")
+	ErrInvalidConfig = errors.New("invalid config")
+	ErrInitDB        = errors.New("failed to init db")
+	ErrInitTemplates = errors.New("failed to init templates")
+)
+
 // NewApp returns a new App based on the config and log filenames provided.
 func NewApp(configFileName, logFileName string) (*App, error) {
 	var app App
 	var err error
 
+	// init log
 	err = InitLog(logFileName)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: failed to init log: %w", err)
+		return nil, fmt.Errorf("NewApp: %w: %v", ErrInitLog, err)
 	}
 
 	// read config file
 	app.Config, err = NewConfigFromFile(configFileName)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: failed to read config file: %w", err)
+		return nil, fmt.Errorf("NewApp: %w: %v", ErrOpenConfig, err)
 	}
 
 	// ensure required config values have been provided
 	isValid, missing := app.Config.IsValid()
 	if !isValid {
-		return nil, fmt.Errorf("NewApp: invalid config: missing %s", strings.Join(missing, ", ")) //nolint
+		return nil, fmt.Errorf("NewApp: %w: missing %s", ErrInvalidConfig, strings.Join(missing, ", "))
 	}
 
 	// TODO: handle this default value
@@ -54,16 +64,15 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	}
 
 	// init database connection
-	app.DB, err = InitDB(app.Config.SQLDriverName,
-		app.Config.SQLDataSourceName)
+	app.DB, err = InitDB(app.Config.SQLDriverName, app.Config.SQLDataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: failed to initialize database: %w", err)
+		return nil, fmt.Errorf("NewApp: %w: %v", ErrInitDB, err)
 	}
 
 	// init HTML templates
 	app.Tmpls, err = InitTemplates(app.Config.ParseGlobPattern)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: failed to initialize templates: %w", err)
+		return nil, fmt.Errorf("NewApp: %w: %v", ErrInitTemplates, err)
 	}
 
 	return &app, err
