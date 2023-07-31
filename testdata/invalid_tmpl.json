@@ -12,8 +12,8 @@
 
   "SessionExpiresHours": 720,
 
-  "SmtpHost": "smtp.gmail.com",
-  "SmtpPort": "587",
-  "SmtpUser": "bnixon67@gmail.com",
-  "SmtpPassword": "wgijaoqxpicllrmc"
+  "SmtpHost": "host",
+  "SmtpPort": "port",
+  "SmtpUser": "user",
+  "SmtpPassword": "password"
 }
