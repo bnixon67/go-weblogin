@@ -24,7 +24,7 @@ type Config struct {
 	Title               string // title of the application
 	ServerHost          string // host to listen on
 	ServerPort          string // port to listen on
-	BaseURL             string // URL for password reset, e.g., https://host:port
+	BaseURL             string // base URL, e.g., https://host:port
 	SQLDriverName       string // driverName for sql.Open
 	SQLDataSourceName   string // dataSourceName for sql.Open
 	ParseGlobPattern    string // pattern to use with template.ParseGlob
