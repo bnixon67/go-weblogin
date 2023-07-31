@@ -17,8 +17,6 @@ import (
 	"fmt"
 	"net/smtp"
 	"text/template"
-
-	"golang.org/x/exp/slog"
 )
 
 const emailTmpl = `From: {{ .From }}
@@ -67,6 +65,5 @@ func SendEmail(smtpUser, smtpPassword, smtpHost, smtpPort, to, subject, body str
 		return fmt.Errorf("SendEmail: failed to send mail: %w", err)
 	}
 
-	slog.Info("sent email")
 	return err
 }

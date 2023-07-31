@@ -65,6 +65,8 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(r.PostFormValue("email"))
 	action := strings.TrimSpace(r.PostFormValue("action"))
 
+	slog.Info("forgotPost", "email", email, "action", action)
+
 	// check for missing values
 	var msg string
 	switch {
@@ -129,9 +131,8 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		emailText = fmt.Sprintf("Your User Name is %s for %s", userName, app.Config.Title)
 	}
 
-	err := SendEmail(app.Config.SMTPUser, app.Config.SMTPPassword,
-		app.Config.SMTPHost, app.Config.SMTPPort, email,
-		app.Config.Title, emailText)
+	subj := app.Config.Title + " " + action
+	err := SendEmail(app.Config.SMTPUser, app.Config.SMTPPassword, app.Config.SMTPHost, app.Config.SMTPPort, email, subj, emailText)
 	if err != nil {
 		slog.Error("unable to SendEmail", "err", err)
 		http.Error(w,
@@ -139,6 +140,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
+	slog.Info("sent email", "to", email, "subject", subj)
 
 	err = RenderTemplate(app.Tmpls, w, "forgot_sent.html",
 		ForgotPageData{
