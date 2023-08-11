@@ -13,9 +13,8 @@ specific language governing permissions and limitations under the License.
 package weblogin
 
 import (
+	"log/slog"
 	"net/http"
-
-	"golang.org/x/exp/slog"
 )
 
 // HelloPageData contains data passed to the HTML template.

@@ -2,9 +2,8 @@ package weblogin
 
 import (
 	"database/sql"
+	"log/slog"
 	"time"
-
-	"golang.org/x/exp/slog"
 )
 
 const (

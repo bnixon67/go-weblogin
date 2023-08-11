@@ -15,9 +15,8 @@ package weblogin
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"net/http"
-
-	"golang.org/x/exp/slog"
 )
 
 // UsersPageData contains data passed to the HTML template.

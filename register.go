@@ -13,10 +13,9 @@ specific language governing permissions and limitations under the License.
 package weblogin
 
 import (
+	"log/slog"
 	"net/http"
 	"strings"
-
-	"golang.org/x/exp/slog"
 )
 
 const (

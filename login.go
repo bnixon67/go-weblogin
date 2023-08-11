@@ -14,10 +14,9 @@ package weblogin
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
-
-	"golang.org/x/exp/slog"
 )
 
 // LoginPageData contains data passed to the HTML template.

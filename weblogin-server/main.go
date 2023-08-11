@@ -16,6 +16,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -23,7 +24,6 @@ import (
 
 	weblogin "github.com/bnixon67/go-weblogin"
 	_ "github.com/go-sql-driver/mysql"
-	"golang.org/x/exp/slog"
 )
 
 func main() {

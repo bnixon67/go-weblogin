@@ -15,9 +15,8 @@ package weblogin
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
-
-	"golang.org/x/exp/slog"
 )
 
 // LogWriter is a custom io.Writer to output log entries prefixed with date/time and the function name of the caller to log.

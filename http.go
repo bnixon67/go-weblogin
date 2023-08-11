@@ -14,11 +14,10 @@ package weblogin
 
 import (
 	"html/template"
+	"log/slog"
 	"net/http"
 	"os"
 	"strings"
-
-	"golang.org/x/exp/slog"
 )
 
 // StringContains reports if slice contain value.
