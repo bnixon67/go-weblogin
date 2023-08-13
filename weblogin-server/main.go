@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	weblogin "github.com/bnixon67/go-weblogin"
@@ -126,9 +127,9 @@ func main() {
 	mux.Handle("/",
 		http.RedirectHandler("/hello", http.StatusMovedPermanently))
 
-	// create a channel to receive interrupt signals
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
+	// create a channel to receive sigChan signals
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 
 	// start the server in a goroutine
 	go func() {
@@ -150,8 +151,8 @@ func main() {
 		}
 	}()
 
-	// wait for an interrupt signal
-	<-interrupt
+	// wait for an signal
+	<-sigChan
 
 	// create a context with a timeout for shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
