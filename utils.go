@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -14,14 +14,19 @@ package weblogin
 
 import (
 	"crypto/rand"
-	"database/sql"
 	"encoding/base64"
 	"errors"
 	"net/http"
 )
 
-// GenerateRandomString returns n bytes encoded in URL friendly base64.
+var ErrInvalidLength = errors.New("invalid length")
+
+// GenerateRandomString returns a URL safe base64 encoded string of n random bytes.
 func GenerateRandomString(n int) (string, error) {
+	if n < 0 {
+		return "", ErrInvalidLength
+	}
+
 	// buffer to store n bytes
 	b := make([]byte, n)
 
@@ -31,17 +36,17 @@ func GenerateRandomString(n int) (string, error) {
 		return "", err
 	}
 
-	// convert to URL friendly base64
+	// convert to URL safe base64 encoded string
 	return base64.URLEncoding.EncodeToString(b), err
 }
 
-var ErrNoRequest = errors.New("request is nil")
+var ErrRequestNil = errors.New("request is nil")
 
-// GetCookieValue returns the Value for the named cookie or empty string if not found or other error.
+// GetCookieValue returns the Value for the named cookie or an empty string if not found or an error occurs.
 func GetCookieValue(r *http.Request, name string) (string, error) {
 	var value string
 	if r == nil {
-		return value, ErrNoRequest
+		return value, ErrRequestNil
 	}
 
 	cookie, err := r.Cookie(name)
@@ -55,37 +60,4 @@ func GetCookieValue(r *http.Request, name string) (string, error) {
 	}
 
 	return value, nil
-}
-
-const SessionTokenCookieName = "session"
-
-// GetUser returns the current User or empty User if the session is not found.
-func GetUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (User, error) {
-	var user User
-
-	// get sessionToken from cookie, if it exists
-	sessionToken, err := GetCookieValue(r, SessionTokenCookieName)
-	if err != nil {
-		return user, err
-	}
-
-	// get user if there is a sessionToken
-	if sessionToken != "" {
-		user, err = GetUserForSessionToken(db, sessionToken)
-		if err != nil {
-			// delete invalid token to prevent session fixation
-			http.SetCookie(w,
-				&http.Cookie{
-					Name:   SessionTokenCookieName,
-					Value:  "",
-					MaxAge: -1,
-				})
-		}
-		// ignore session not found errors
-		if errors.Is(err, ErrSessionNotFound) {
-			err = nil
-		}
-	}
-
-	return user, err
 }

@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -16,6 +16,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -26,19 +27,18 @@ type User struct {
 	UserName        string
 	FullName        string
 	Email           string
-	Admin           bool
+	IsAdmin         bool
 	Created         time.Time
 	LastLoginTime   time.Time
 	LastLoginResult string
 }
 
+// Define command error values.
 var (
-	ErrSessionNotFound     = errors.New("session not found")
-	ErrUserNotFound        = errors.New("user not found")
-	ErrNoUserForEmail      = errors.New("no username for email")
-	ErrNoUserForResetToken = errors.New("no username for resetToken")
-	ErrSessionExpired      = errors.New("session expired")
-	ErrGetLastLoginFailed  = errors.New("failed to get last login")
+	ErrUserSessionNotFound    = errors.New("user session not found")
+	ErrUserNotFound           = errors.New("user not found")
+	ErrUserSessionExpired     = errors.New("user session expired")
+	ErrUserGetLastLoginFailed = errors.New("user failed to get last login")
 )
 
 // GetUserForSessionToken returns a user for the given sessionToken.
@@ -52,21 +52,21 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 
 	qry := `SELECT users.userName, fullName, email, expires, admin FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND hashedValue=? LIMIT 1`
 	result := db.QueryRow(qry, hashedValue)
-	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &expires, &user.Admin)
+	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &expires, &user.IsAdmin)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return User{}, ErrSessionNotFound
+			return User{}, ErrUserSessionNotFound
 		}
 		return User{}, err
 	}
 
 	if expires.Before(time.Now()) {
-		return User{}, ErrSessionExpired
+		return User{}, ErrUserSessionExpired
 	}
 
 	user.LastLoginTime, user.LastLoginResult, err = LastLoginForUser(db, user.UserName)
 	if err != nil {
-		return user, fmt.Errorf("%w: %v", ErrGetLastLoginFailed, err)
+		return user, fmt.Errorf("%w: %v", ErrUserGetLastLoginFailed, err)
 	}
 
 	return user, err
@@ -78,7 +78,7 @@ func GetUserForName(db *sql.DB, userName string) (User, error) {
 
 	qry := `SELECT userName, fullName, email, admin FROM users WHERE userName=? LIMIT 1`
 	result := db.QueryRow(qry, userName)
-	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &user.Admin)
+	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &user.IsAdmin)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return User{}, ErrUserNotFound
@@ -123,7 +123,7 @@ func GetUserNameForEmail(db *sql.DB, email string) (string, error) {
 	err := row.Scan(&userName)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", ErrNoUserForEmail
+			return "", ErrUserNotFound
 		}
 		return "", err
 	}
@@ -141,15 +141,13 @@ func GetUserNameForResetToken(db *sql.DB, tokenValue string) (string, error) {
 	err := row.Scan(&userName)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return "", ErrNoUserForResetToken
+			return "", ErrUserNotFound
 		}
 		return "", err
 	}
 
 	return userName, err
 }
-
-var ErrNoSuchUser = errors.New("no such user")
 
 // CompareUserPassword compares the password and hashed password for the user.
 // Returns nil on success or an error on failure.
@@ -162,7 +160,7 @@ func CompareUserPassword(db *sql.DB, userName, password string) error {
 	err := result.Scan(&hashedPassword)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return ErrNoSuchUser
+			return ErrUserNotFound
 		}
 		return err
 	}
@@ -195,22 +193,54 @@ func RegisterUser(db *sql.DB, userName, fullName, email, password string) error 
 	return nil
 }
 
+// LastLoginForUser retrieves the last login time and result for a given userName.  It returns zero values in case of no previous login.
 func LastLoginForUser(db *sql.DB, userName string) (time.Time, string, error) {
 	var lastLogin time.Time
 	var result string
 
 	// get the second row, if it exists, since first row is current login
-	qry := `SELECT created, result FROM events WHERE userName = ? AND action = ? ORDER BY created DESC LIMIT 1,1`
-
+	qry := `SELECT created, result FROM events WHERE userName = ? AND action = ? ORDER BY created DESC LIMIT 1 OFFSET 1`
 	row := db.QueryRow(qry, userName, ActionLogin)
 	err := row.Scan(&lastLogin, &result)
 	if err != nil {
 		// ignore ErrNoRows since there may not be a last login
-		if errors.Is(err, sql.ErrNoRows) {
+		if !errors.Is(err, sql.ErrNoRows) {
 			return lastLogin, result, nil
 		}
-		return lastLogin, result, err
 	}
 
-	return lastLogin, result, err
+	return lastLogin, result, nil
+}
+
+const SessionTokenCookieName = "session"
+
+// GetUser returns the current User or empty User if the session is not found.
+func GetUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (User, error) {
+	var user User
+
+	// get sessionToken from cookie, if it exists
+	sessionToken, err := GetCookieValue(r, SessionTokenCookieName)
+	if err != nil {
+		return user, err
+	}
+
+	// get user if there is a sessionToken
+	if sessionToken != "" {
+		user, err = GetUserForSessionToken(db, sessionToken)
+		if err != nil {
+			// delete invalid token to prevent session fixation
+			http.SetCookie(w,
+				&http.Cookie{
+					Name:   SessionTokenCookieName,
+					Value:  "",
+					MaxAge: -1,
+				})
+		}
+		// ignore session not found errors
+		if errors.Is(err, ErrUserSessionNotFound) {
+			err = nil
+		}
+	}
+
+	return user, err
 }

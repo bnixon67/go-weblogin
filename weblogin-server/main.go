@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -15,6 +15,7 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -27,16 +28,37 @@ import (
 )
 
 func main() {
-	// config file must be passed as argument and not empty
-	if len(os.Args) != 2 || os.Args[1] == "" {
-		fmt.Printf("%s [CONFIG FILE]\n", os.Args[0])
-		return
+	// define command-line flags
+	configFilename := flag.String("config", "", "config filename")
+	logFilename := flag.String("log", "", "log filename")
+	logLevel := flag.Int("logLevel", 0, "log level")
+	logAddSource := flag.Bool("logAddSource", false, "log add sourc")
+
+	// define custom usage message
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		flag.PrintDefaults()
 	}
 
-	// TODO: allow logfile to specified in config file
-	configFileName := os.Args[1]
-	logFileName := ""
-	app, err := weblogin.NewApp(configFileName, logFileName)
+	// parse command-line flags
+	flag.Parse()
+
+	// configFilename is required
+	if *configFilename == "" {
+		flag.Usage()
+		os.Exit(2)
+	}
+
+	// check for additional command-line arguments
+	if flag.NArg() > 0 {
+		flag.Usage()
+		os.Exit(3)
+	}
+
+	weblogin.InitLog(*logFilename, slog.Level(*logLevel), *logAddSource)
+
+	app, err := weblogin.NewApp(*configFilename)
 	if err != nil {
 		slog.Error("failed to create app", "err", err)
 		return
@@ -48,7 +70,7 @@ func main() {
 	// define HTTP server
 	// TODO: add values to config file
 	srv := &http.Server{
-		Addr:              ":" + app.Config.ServerPort,
+		Addr:              ":" + app.Config.Server.Port,
 		Handler:           &weblogin.LogRequestHandler{Next: mux},
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,

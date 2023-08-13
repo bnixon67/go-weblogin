@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -78,7 +78,7 @@ func GetUsers(db *sql.DB) ([]User, error) {
 	for rows.Next() {
 		var user User
 
-		err = rows.Scan(&user.UserName, &user.FullName, &user.Email, &user.Admin, &user.Created)
+		err = rows.Scan(&user.UserName, &user.FullName, &user.Email, &user.IsAdmin, &user.Created)
 		if err != nil {
 			slog.Error("failed rows.Scan", "err", err)
 		}

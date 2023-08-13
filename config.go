@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -19,20 +19,32 @@ import (
 	"os"
 )
 
+type ConfigSQL struct {
+	DriverName     string // driverName for sql.Open
+	DataSourceName string // dataSourceName for sql.Open
+}
+
+type ConfigSMTP struct {
+	Host     string // SMTP host to send email
+	Port     string // SMTP port to send email
+	User     string // SMTP user to send email
+	Password string // SMTP password to send email
+}
+
+type ConfigServer struct {
+	Host string // host to listen on
+	Port string // port to listen on
+}
+
 // Config represents the configuration values.
 type Config struct {
 	Title               string // title of the application
-	ServerHost          string // host to listen on
-	ServerPort          string // port to listen on
 	BaseURL             string // base URL, e.g., https://host:port
-	SQLDriverName       string // driverName for sql.Open
-	SQLDataSourceName   string // dataSourceName for sql.Open
 	ParseGlobPattern    string // pattern to use with template.ParseGlob
 	SessionExpiresHours int    // number of hours session is valid
-	SMTPHost            string // SMTP host to send email
-	SMTPPort            string // SMTP port to send email
-	SMTPUser            string // SMTP user to send email
-	SMTPPassword        string // SMTP password to send email
+	Server              ConfigServer
+	SQL                 ConfigSQL
+	SMTP                ConfigSMTP
 }
 
 var (
@@ -74,16 +86,16 @@ func (c *Config) IsValid() (bool, []string) {
 	var missing []string
 
 	missing = appendIfEmpty(missing, c.Title, "Title")
-	missing = appendIfEmpty(missing, c.ServerHost, "ServerHost")
-	missing = appendIfEmpty(missing, c.ServerPort, "ServerPort")
 	missing = appendIfEmpty(missing, c.BaseURL, "BaseURL")
-	missing = appendIfEmpty(missing, c.SQLDriverName, "SQLDriverName")
-	missing = appendIfEmpty(missing, c.SQLDataSourceName, "DataSourceName")
 	missing = appendIfEmpty(missing, c.ParseGlobPattern, "ParseGlobPattern")
-	missing = appendIfEmpty(missing, c.SMTPHost, "SMTPHost")
-	missing = appendIfEmpty(missing, c.SMTPPort, "SMTPPort")
-	missing = appendIfEmpty(missing, c.SMTPUser, "SMTPUser")
-	missing = appendIfEmpty(missing, c.SMTPPassword, "SMTPPassword")
+	missing = appendIfEmpty(missing, c.Server.Host, "Server.Host")
+	missing = appendIfEmpty(missing, c.Server.Port, "Server.Port")
+	missing = appendIfEmpty(missing, c.SQL.DriverName, "SQL.DriverName")
+	missing = appendIfEmpty(missing, c.SQL.DataSourceName, "SQL.DataSourceName")
+	missing = appendIfEmpty(missing, c.SMTP.Host, "SMTP.Host")
+	missing = appendIfEmpty(missing, c.SMTP.Port, "SMTP.Port")
+	missing = appendIfEmpty(missing, c.SMTP.User, "SMTP.User")
+	missing = appendIfEmpty(missing, c.SMTP.Password, "SMTP.Password")
 
 	return len(missing) == 0, missing
 }
@@ -94,15 +106,15 @@ type RedactedConfig Config
 // MarshalJSON is a custom Marshaler to redact some fields.
 func (c Config) MarshalJSON() ([]byte, error) {
 	r := RedactedConfig(c)
-	r.SQLDataSourceName = "[REDACTED]"
-	r.SMTPPassword = "[REDACTED]"
+	r.SQL.DataSourceName = "[REDACTED]"
+	r.SMTP.Password = "[REDACTED]"
 	return json.Marshal(r)
 }
 
 // String is a custom Stringer to redact some fields.
 func (c Config) String() string {
 	r := RedactedConfig(c)
-	r.SQLDataSourceName = "[REDACTED]"
-	r.SMTPPassword = "[REDACTED]"
+	r.SQL.DataSourceName = "[REDACTED]"
+	r.SMTP.Password = "[REDACTED]"
 	return fmt.Sprintf("%+v", r)
 }

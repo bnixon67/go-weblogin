@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -31,7 +31,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentUser, err := GetUser(w, r, app.DB)
+	user, err := GetUser(w, r, app.DB)
 	if err != nil {
 		slog.Error("failed to GetUser", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -39,9 +39,15 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// display page
-	err = RenderTemplate(app.Tmpls, w, "hello.html", HelloPageData{Message: "", User: currentUser})
+	err = RenderTemplate(app.Tmpls, w, "hello.html", HelloPageData{Message: "", User: user})
 	if err != nil {
 		slog.Error("unable to RenderTemplate", "err", err)
 		return
 	}
+
+	slog.Info("HelloHandler",
+		slog.String("method", r.Method),
+		slog.String("url", r.URL.String()),
+		"user", user,
+	)
 }

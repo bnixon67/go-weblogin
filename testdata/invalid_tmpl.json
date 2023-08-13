@@ -1,19 +1,23 @@
 {
   "Title": "Go Weblogin",
-
-  "ServerHost": "192.168.1.111",
-  "ServerPort": "8443",
-
   "BaseURL": "https://192.168.1.111:8443",
-
-  "SqlDriverName": "mysql",
-  "SqlDataSourceName": "gologin_test:test@/gologin_test?parseTime=true",
   "ParseGlobPattern": "invalid",
-
   "SessionExpiresHours": 720,
 
-  "SmtpHost": "host",
-  "SmtpPort": "port",
-  "SmtpUser": "user",
-  "SmtpPassword": "password"
+  "Server": {
+    "Host": "192.168.1.111",
+    "Port": "8443"
+  },
+
+  "SQL": {
+    "DriverName": "mysql",
+    "DataSourceName": "gologin_test:test@/gologin_test?parseTime=true"
+  },
+
+  "SMTP": {
+    "Host": "host",
+    "Port": "port",
+    "User": "user",
+    "Password": "password"
+  }
 }

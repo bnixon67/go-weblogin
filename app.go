@@ -28,7 +28,6 @@ type App struct {
 }
 
 var (
-	ErrInitLog       = errors.New("failed to init log")
 	ErrOpenConfig    = errors.New("failed to open config")
 	ErrInvalidConfig = errors.New("invalid config")
 	ErrInitDB        = errors.New("failed to init db")
@@ -36,15 +35,9 @@ var (
 )
 
 // NewApp returns a new App based on the config and log filenames provided.
-func NewApp(configFileName, logFileName string) (*App, error) {
+func NewApp(configFileName string) (*App, error) {
 	var app App
 	var err error
-
-	// init log
-	err = InitLog(logFileName)
-	if err != nil {
-		return nil, fmt.Errorf("NewApp: %w: %v", ErrInitLog, err)
-	}
 
 	// read config file
 	app.Config, err = NewConfigFromFile(configFileName)
@@ -64,7 +57,7 @@ func NewApp(configFileName, logFileName string) (*App, error) {
 	}
 
 	// init database connection
-	app.DB, err = InitDB(app.Config.SQLDriverName, app.Config.SQLDataSourceName)
+	app.DB, err = InitDB(app.Config.SQL.DriverName, app.Config.SQL.DataSourceName)
 	if err != nil {
 		return nil, fmt.Errorf("NewApp: %w: %v", ErrInitDB, err)
 	}

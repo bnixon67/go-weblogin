@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -14,6 +14,7 @@ package weblogin_test
 
 import (
 	"errors"
+	"log/slog"
 	"testing"
 
 	weblogin "github.com/bnixon67/go-weblogin"
@@ -29,7 +30,8 @@ const TestLogFile = "test.log"
 func AppForTest(t *testing.T) *weblogin.App {
 	if app == nil {
 		var err error
-		app, err = weblogin.NewApp("testdata/test_config.json", TestLogFile)
+		weblogin.InitLog(TestLogFile, slog.LevelDebug, true)
+		app, err = weblogin.NewApp("testdata/test_config.json")
 		if err != nil {
 			app = nil
 
@@ -45,49 +47,36 @@ func TestNewApp(t *testing.T) {
 	testCases := []struct {
 		name           string
 		configFileName string
-		logFileName    string
 		wantErr        error
 		isAppExpected  bool
 	}{
 		{
 			name:           "validConfigAndLog",
 			configFileName: "testdata/test_config.json",
-			logFileName:    "test.log",
 			wantErr:        nil,
 			isAppExpected:  true,
 		},
 		{
 			name:           "emptyConfigFileName",
 			configFileName: "",
-			logFileName:    "test.log",
 			wantErr:        weblogin.ErrOpenConfig,
-			isAppExpected:  false,
-		},
-		{
-			name:           "badLogFileName",
-			configFileName: "",
-			logFileName:    "/foo/bar",
-			wantErr:        weblogin.ErrInitLog,
 			isAppExpected:  false,
 		},
 		{
 			name:           "emptyConfig",
 			configFileName: "testdata/empty.json",
-			logFileName:    "test.log",
 			wantErr:        weblogin.ErrInvalidConfig,
 			isAppExpected:  false,
 		},
 		{
 			name:           "invalidDB",
 			configFileName: "testdata/invalid_db.json",
-			logFileName:    "test.log",
 			wantErr:        weblogin.ErrInitDB,
 			isAppExpected:  false,
 		},
 		{
 			name:           "invalidTemplates",
 			configFileName: "testdata/invalid_tmpl.json",
-			logFileName:    "test.log",
 			wantErr:        weblogin.ErrInitTemplates,
 			isAppExpected:  false,
 		},
@@ -95,14 +84,14 @@ func TestNewApp(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(*testing.T) {
-			app, err := weblogin.NewApp(tc.configFileName, tc.logFileName)
+			app, err := weblogin.NewApp(tc.configFileName)
 			if !errors.Is(err, tc.wantErr) {
-				t.Errorf("got err %q, want %q for NewApp(%q, %q)", err, tc.wantErr, tc.configFileName, tc.logFileName)
+				t.Errorf("got err %q, want %q for NewApp(%q)", err, tc.wantErr, tc.configFileName)
 			}
 
 			gotApp := app != nil
 			if gotApp != tc.isAppExpected {
-				t.Errorf("gotApp is %t, want %t for NewApp(%q, %q)", gotApp, tc.isAppExpected, tc.configFileName, tc.logFileName)
+				t.Errorf("gotApp is %t, want %t for NewApp(%q)", gotApp, tc.isAppExpected, tc.configFileName)
 			}
 		})
 	}

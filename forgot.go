@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -131,7 +131,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	subj := app.Config.Title + " " + action
-	err := SendEmail(app.Config.SMTPUser, app.Config.SMTPPassword, app.Config.SMTPHost, app.Config.SMTPPort, email, subj, emailText)
+	err := SendEmail(app.Config.SMTP.User, app.Config.SMTP.Password, app.Config.SMTP.Host, app.Config.SMTP.Port, email, subj, emailText)
 	if err != nil {
 		slog.Error("unable to SendEmail", "err", err)
 		http.Error(w,
@@ -144,7 +144,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	err = RenderTemplate(app.Tmpls, w, "forgot_sent.html",
 		ForgotPageData{
 			Title:     app.Config.Title,
-			EmailFrom: app.Config.SMTPUser,
+			EmailFrom: app.Config.SMTP.User,
 		})
 	if err != nil {
 		slog.Error("unable to RenderTemplate", "err", err)

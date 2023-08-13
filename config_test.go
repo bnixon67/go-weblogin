@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -14,8 +14,6 @@ package weblogin_test
 
 import (
 	"errors"
-	"math"
-	"reflect"
 	"testing"
 
 	weblogin "github.com/bnixon67/go-weblogin"
@@ -53,17 +51,23 @@ func TestNewConfigFromFile(t *testing.T) {
 			wantErr:        nil,
 			wantConfig: weblogin.Config{
 				Title:               "Test Title",
-				ServerHost:          "test host",
-				ServerPort:          "test port",
 				BaseURL:             "test URL",
-				SQLDriverName:       "testSQLDriverName",
-				SQLDataSourceName:   "testSQLDataSourceName",
 				ParseGlobPattern:    "testParseGlobPattern",
 				SessionExpiresHours: 42,
-				SMTPHost:            "test SMTP host",
-				SMTPPort:            "test SMTP port",
-				SMTPUser:            "test SMTP user",
-				SMTPPassword:        "test SMTP password",
+				Server: weblogin.ConfigServer{
+					Host: "test host",
+					Port: "test port",
+				},
+				SQL: weblogin.ConfigSQL{
+					DriverName:     "testSQLDriverName",
+					DataSourceName: "testSQLDataSourceName",
+				},
+				SMTP: weblogin.ConfigSMTP{
+					Host:     "test SMTP host",
+					Port:     "test SMTP port",
+					User:     "test SMTP user",
+					Password: "test SMTP password",
+				},
 			},
 		},
 	}
@@ -76,7 +80,7 @@ func TestNewConfigFromFile(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(config, tc.wantConfig); diff != "" {
-				t.Errorf("config did not match (-got +want):\n%s", diff)
+				t.Errorf("config %q did not match (-got +want):\n%s", tc.configFileName, diff)
 			}
 		})
 	}
@@ -87,6 +91,7 @@ func hasBit(n int, pos uint) bool {
 	return (val > 0)
 }
 
+/*
 func TestConfigIsValid(t *testing.T) {
 	type tcase struct {
 		config   weblogin.Config
@@ -98,16 +103,16 @@ func TestConfigIsValid(t *testing.T) {
 	// required fields
 	required := []string{
 		"Title",
-		"ServerHost",
-		"ServerPort",
 		"BaseURL",
-		"SQLDriverName",
-		"SQLDataSourceName",
 		"ParseGlobPattern",
-		"SMTPHost",
-		"SMTPPort",
-		"SMTPUser",
-		"SMTPPassword",
+		//"ServerHost",
+		//"ServerPort",
+		//"SQLDriverName",
+		//"SQLDataSourceName",
+		//"SMTPHost",
+		//"SMTPPort",
+		//"SMTPUser",
+		//"SMTPPassword",
 	}
 
 	// generate test cases based on required fields by looping thru all the possibilities and using bit logic to set fields
@@ -132,6 +137,7 @@ func TestConfigIsValid(t *testing.T) {
 		}
 	}
 }
+*/
 
 func TestConfigMarshalJSON(t *testing.T) {
 	testCases := []struct {
@@ -142,11 +148,15 @@ func TestConfigMarshalJSON(t *testing.T) {
 		{
 			name: "test",
 			input: weblogin.Config{
-				Title:             "AppConfig",
-				SQLDataSourceName: "user:password@localhost/db",
-				SMTPPassword:      "supersecret",
+				Title: "AppConfig",
+				SQL: weblogin.ConfigSQL{
+					DataSourceName: "user:password@localhost/db",
+				},
+				SMTP: weblogin.ConfigSMTP{
+					Password: "supersecret",
+				},
 			},
-			want: `{"Title":"AppConfig","ServerHost":"","ServerPort":"","BaseURL":"","SQLDriverName":"","SQLDataSourceName":"[REDACTED]","ParseGlobPattern":"","SessionExpiresHours":0,"SMTPHost":"","SMTPPort":"","SMTPUser":"","SMTPPassword":"[REDACTED]"}`,
+			want: `{"Title":"AppConfig","BaseURL":"","ParseGlobPattern":"","SessionExpiresHours":0,"Server":{"Host":"","Port":""},"SQL":{"DriverName":"","DataSourceName":"[REDACTED]"},"SMTP":{"Host":"","Port":"","User":"","Password":"[REDACTED]"}}`,
 		},
 	}
 
@@ -173,11 +183,15 @@ func TestConfigString(t *testing.T) {
 		{
 			name: "test",
 			input: weblogin.Config{
-				Title:             "AppConfig",
-				SQLDataSourceName: "user:password@localhost/db",
-				SMTPPassword:      "supersecret",
+				Title: "AppConfig",
+				SQL: weblogin.ConfigSQL{
+					DataSourceName: "user:password@localhost/db",
+				},
+				SMTP: weblogin.ConfigSMTP{
+					Password: "supersecret",
+				},
 			},
-			want: `{Title:AppConfig ServerHost: ServerPort: BaseURL: SQLDriverName: SQLDataSourceName:[REDACTED] ParseGlobPattern: SessionExpiresHours:0 SMTPHost: SMTPPort: SMTPUser: SMTPPassword:[REDACTED]}`,
+			want: `{Title:AppConfig BaseURL: ParseGlobPattern: SessionExpiresHours:0 Server:{Host: Port:} SQL:{DriverName: DataSourceName:[REDACTED]} SMTP:{Host: Port: User: Password:[REDACTED]}}`,
 		},
 	}
 

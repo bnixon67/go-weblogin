@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Bill Nixon
+Copyright 2023 Bill Nixon
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this file except in compliance with the License.  You may obtain a copy of the
@@ -13,6 +13,7 @@ specific language governing permissions and limitations under the License.
 package weblogin_test
 
 import (
+	"log/slog"
 	"testing"
 
 	weblogin "github.com/bnixon67/go-weblogin"
@@ -20,7 +21,7 @@ import (
 
 func TestInitLogging(t *testing.T) {
 	// invalid file name
-	err := weblogin.InitLog("/foo/bar")
+	err := weblogin.InitLog("/foo/bar", slog.Level(0), false)
 	if err == nil {
 		t.Errorf("got nil, expected non-nil for InitLogging with invalid file name")
 	}
