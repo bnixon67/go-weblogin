@@ -37,19 +37,9 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := GetUser(w, r, app.DB)
+	user, err := GetUserFromRequest(w, r, app.DB)
 	if err != nil {
 		logger.Error("failed to GetUser", "err", err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-	if user.UserName != "" {
-		WriteEvent(app.DB, EventLogout, true, user.UserName, "")
-	}
-
-	sessionTokenValue, err := GetCookieValue(r, SessionTokenCookieName)
-	if err != nil {
-		logger.Error("failed to GetCookieValue", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -59,6 +49,14 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		&http.Cookie{
 			Name: SessionTokenCookieName, Value: "", MaxAge: -1,
 		})
+
+	// get sessionToken to remove
+	sessionTokenValue, err := GetCookieValue(r, SessionTokenCookieName)
+	if err != nil {
+		logger.Error("failed to GetCookieValue", "err", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
 
 	// remove session from database
 	// TODO: consider removing all sessions for user
@@ -83,4 +81,5 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Info("logged out", "user", user)
+	WriteEvent(app.DB, EventLogout, true, user.UserName, "success")
 }

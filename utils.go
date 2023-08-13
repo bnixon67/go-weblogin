@@ -61,3 +61,14 @@ func GetCookieValue(r *http.Request, name string) (string, error) {
 
 	return value, nil
 }
+
+// IsEmpty returns true if any of the strings are empty, otherwise false.
+func IsEmpty(strs ...string) bool {
+	for _, s := range strs {
+		if s == "" {
+			return true
+		}
+	}
+
+	return false
+}

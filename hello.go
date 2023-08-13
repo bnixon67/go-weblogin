@@ -38,7 +38,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := GetUser(w, r, app.DB)
+	user, err := GetUserFromRequest(w, r, app.DB)
 	if err != nil {
 		logger.Error("failed to GetUser", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -46,7 +46,8 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// display page
-	err = RenderTemplate(app.Tmpls, w, "hello.html", HelloPageData{Message: "", User: user})
+	err = RenderTemplate(app.Tmpls, w, "hello.html",
+		HelloPageData{Message: "", User: user, Title: app.Config.Title})
 	if err != nil {
 		logger.Error("unable to RenderTemplate", "err", err)
 		return

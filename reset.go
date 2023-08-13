@@ -29,8 +29,15 @@ type ResetPageData struct {
 
 // ResetHandler handles /reset requests.
 func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(slog.Group("request",
+		slog.String("id", GetReqID(r.Context())),
+		slog.String("remoteAddr", GetRealRemoteAddr(r)),
+		slog.String("method", r.Method),
+		slog.String("url", r.RequestURI),
+	))
+
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		slog.Error("invalid HTTP method", "method", r.Method)
+		logger.Error("invalid HTTP method", "method", r.Method)
 		return
 	}
 
@@ -42,9 +49,10 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
 		if err != nil {
-			slog.Error("unable to RenderTemplate", "err", err)
+			logger.Error("unable to RenderTemplate", "err", err)
 			return
 		}
+		logger.Info("ResetHandler")
 
 	case http.MethodPost:
 		app.resetPost(w, r, "reset.html")
@@ -58,11 +66,26 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	password1 := strings.TrimSpace(r.PostFormValue("password1"))
 	password2 := strings.TrimSpace(r.PostFormValue("password2"))
 
+	logger := slog.With(
+		slog.Group("request",
+			slog.String("id", GetReqID(r.Context())),
+			slog.String("remoteAddr", GetRealRemoteAddr(r)),
+			slog.String("method", r.Method),
+			slog.String("url", r.RequestURI),
+		),
+	)
+
 	// check for missing values
 	// redundant given client side required fields, but good practice
 	if resetToken == "" || password1 == "" || password2 == "" {
 		msg := MsgMissingRequired
-		slog.Warn("resetPost", "display", msg)
+		logger.Warn("missing field(s)",
+			slog.Group("form",
+				"rtoken empty", resetToken == "",
+				"password1 empty", password1 == "",
+				"password2 empty", password2 == "",
+			),
+		)
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{
 				Title:      app.Config.Title,
@@ -70,7 +93,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
 		if err != nil {
-			slog.Error("unable to RenderTemplate", "err", err)
+			logger.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -80,7 +103,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	// may be redundant if done client side, but good practice
 	if password1 != password2 {
 		msg := MsgPasswordsDifferent
-		slog.Warn("resetPost", "display", msg)
+		logger.Warn("passwords don't match")
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{
 				Title:      app.Config.Title,
@@ -88,7 +111,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
 		if err != nil {
-			slog.Error("unable to RenderTemplate", "err", err)
+			logger.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -96,7 +119,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 
 	userName, err := GetUserNameForResetToken(app.DB, resetToken)
 	if err != nil {
-		slog.Error("failed GetUserNameForResetToken",
+		logger.Error("failed GetUserNameForResetToken",
 			"resetToken", resetToken,
 			"err", err)
 		msg := "Please provide a valid Reset Token"
@@ -107,7 +130,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
 		if err != nil {
-			slog.Error("failed to RenderTemplate", "err", err)
+			logger.Error("failed to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -117,12 +140,12 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password1), bcrypt.DefaultCost)
 	if err != nil {
 		msg := "Cannot hash password"
-		slog.Error("failed bcrypt.GenerateFromPassword",
+		logger.Error("failed bcrypt.GenerateFromPassword",
 			"userName", userName, "err", err)
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{Title: app.Config.Title, Message: msg})
 		if err != nil {
-			slog.Error("unable to RenderTemplate", "err", err)
+			logger.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -131,13 +154,16 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 	// store the user and hashed password
 	_, err = app.DB.Exec("UPDATE users SET hashedPassword = ? WHERE username = ?", string(hashedPassword), userName)
 	if err != nil {
-		slog.Error("update password failed",
+		logger.Error("update password failed",
 			"userName", userName, "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
+	// TODO: don't allow reuse of the reset token if successful
+
 	// register successful
-	slog.Info("successful password reset", "userName", userName)
+	logger.Info("successful password reset", "userName", userName)
+	WriteEvent(app.DB, EventReset, true, userName, "success")
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

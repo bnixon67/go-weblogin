@@ -34,7 +34,7 @@ func (app *App) UsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentUser, err := GetUser(w, r, app.DB)
+	currentUser, err := GetUserFromRequest(w, r, app.DB)
 	if err != nil {
 		slog.Error("failed GetUser", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

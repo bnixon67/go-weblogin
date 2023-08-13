@@ -48,6 +48,7 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		logger.Info("LoginHandler")
+
 	case http.MethodPost:
 		app.loginPost(w, r)
 	}
@@ -62,16 +63,22 @@ const (
 
 // loginPost is called for the POST method of the LoginHandler.
 func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
-	logger := slog.With(slog.Group("request",
-		slog.String("id", GetReqID(r.Context())),
-		slog.String("remoteAddr", GetRealRemoteAddr(r)),
-		slog.String("method", r.Method),
-		slog.String("url", r.RequestURI),
-	))
-
 	// get form values
 	userName := strings.TrimSpace(r.PostFormValue("username"))
 	password := strings.TrimSpace(r.PostFormValue("password"))
+
+	logger := slog.With(
+		slog.Group("request",
+			slog.String("id", GetReqID(r.Context())),
+			slog.String("remoteAddr", GetRealRemoteAddr(r)),
+			slog.String("method", r.Method),
+			slog.String("url", r.RequestURI),
+		),
+		slog.Group("form",
+			"userName", userName,
+			"password empty", password == "",
+		),
+	)
 
 	// check for missing values
 	var msg string
@@ -97,7 +104,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// attempt to login the given userName with the given password
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
-		logger.Error("failed to LoginUser", "userName", userName, "err", err)
+		logger.Error("failed to LoginUser", "err", err)
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{
 				Title:   app.Config.Title,
@@ -111,7 +118,6 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// login successful, so create a cookie for the session Token
-	logger.Info("successful login", "userName", userName)
 	http.SetCookie(w, &http.Cookie{
 		Name:     SessionTokenCookieName,
 		Value:    token.Value,
@@ -128,6 +134,8 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 
 	// redirect from login page
 	http.Redirect(w, r, redirect, http.StatusSeeOther)
+
+	logger.Info("login successful")
 }
 
 // LoginUser returns a session Token if userName and password is correct.

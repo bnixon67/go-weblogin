@@ -16,6 +16,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -50,17 +51,26 @@ func GetUserForSessionToken(db *sql.DB, sessionToken string) (User, error) {
 
 	hashedValue := hash(sessionToken)
 
-	qry := `SELECT users.userName, fullName, email, expires, admin FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND hashedValue=? LIMIT 1`
+	qry := `SELECT users.userName, fullName, email, expires, admin, users.created FROM users INNER JOIN tokens ON users.userName=tokens.userName WHERE tokens.type = "session" AND hashedValue=? LIMIT 1`
 	result := db.QueryRow(qry, hashedValue)
-	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &expires, &user.IsAdmin)
+	err := result.Scan(&user.UserName, &user.FullName, &user.Email, &expires, &user.IsAdmin, &user.Created)
 	if err != nil {
+		// return custom error and empty user if session not found
 		if errors.Is(err, sql.ErrNoRows) {
+			slog.Warn("unexpected",
+				"err", ErrUserSessionNotFound,
+				"sessionToken", sessionToken)
 			return User{}, ErrUserSessionNotFound
 		}
 		return User{}, err
 	}
 
+	// return empty user if session is expired
 	if expires.Before(time.Now()) {
+		slog.Warn("unexpected",
+			"err", ErrUserSessionExpired,
+			"expires", expires,
+			"user", user)
 		return User{}, ErrUserSessionExpired
 	}
 
@@ -87,22 +97,6 @@ func GetUserForName(db *sql.DB, userName string) (User, error) {
 	}
 
 	return user, err
-}
-
-// RowExists return true if the given query returns at least one row.
-func RowExists(db *sql.DB, qry string, args ...interface{}) (bool, error) {
-	var num int
-
-	row := db.QueryRow(qry, args...)
-	err := row.Scan(&num)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return true, err
 }
 
 // UserExists returns true if the given userName already exists in db.
@@ -214,8 +208,8 @@ func LastLoginForUser(db *sql.DB, userName string) (time.Time, string, error) {
 
 const SessionTokenCookieName = "session"
 
-// GetUser returns the current User or empty User if the session is not found.
-func GetUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (User, error) {
+// GetUserFromRequest returns the current User or empty User if the session is not found.
+func GetUserFromRequest(w http.ResponseWriter, r *http.Request, db *sql.DB) (User, error) {
 	var user User
 
 	// get sessionToken from cookie, if it exists
@@ -236,8 +230,8 @@ func GetUser(w http.ResponseWriter, r *http.Request, db *sql.DB) (User, error) {
 					MaxAge: -1,
 				})
 		}
-		// ignore session not found errors
-		if errors.Is(err, ErrUserSessionNotFound) {
+		// ignore session not found or expired errors
+		if errors.Is(err, ErrUserSessionNotFound) || errors.Is(err, ErrUserSessionExpired) {
 			err = nil
 		}
 	}

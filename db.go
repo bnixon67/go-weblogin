@@ -48,3 +48,19 @@ func InitDB(driverName, dataSourceName string) (*sql.DB, error) {
 
 	return db, err
 }
+
+// RowExists return true if the given query returns at least one row.
+func RowExists(db *sql.DB, qry string, args ...interface{}) (bool, error) {
+	var num int
+
+	row := db.QueryRow(qry, args...)
+	err := row.Scan(&num)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, err
+}
