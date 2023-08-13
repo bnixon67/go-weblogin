@@ -38,7 +38,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	slog.Info("logout", "user", user)
 	if user.UserName != "" {
-		WriteEvent(app.DB, Event{UserName: user.UserName, Action: ActionLogout, Result: true})
+		WriteEvent(app.DB, EventLogout, true, user.UserName, "")
 	}
 
 	sessionTokenValue, err := GetCookieValue(r, SessionTokenCookieName)

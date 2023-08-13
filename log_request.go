@@ -20,7 +20,7 @@ import (
 // LogRequestHandler is middleware that logs all HTTP requests.
 func LogRequestHandler(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
-		slog.Debug("LogRequest",
+		slog.Debug("LogRequestHandler",
 			slog.Group("request",
 				slog.String("id", GetReqID(r.Context())),
 				slog.String("remoteAddr", GetRealRemoteAddr(r)),

@@ -28,9 +28,16 @@ type ForgotPageData struct {
 
 // ForgotHandler handles /forgot requests.
 func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(slog.Group("request",
+		slog.String("id", GetReqID(r.Context())),
+		slog.String("remoteAddr", GetRealRemoteAddr(r)),
+		slog.String("method", r.Method),
+		slog.String("url", r.RequestURI),
+	))
+
 	// only allow valid methods
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		slog.Error("invalid HTTP method", "method", r.Method)
+		logger.Error("invalid HTTP method")
 		return
 	}
 
@@ -41,9 +48,10 @@ func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 		err := RenderTemplate(app.Tmpls, w, "forgot.html",
 			ForgotPageData{Title: app.Config.Title})
 		if err != nil {
-			slog.Error("unable to execute template", "err", err)
+			logger.Error("unable to execute template", "err", err)
 			return
 		}
+		logger.Info("ForgotHandler")
 
 	case http.MethodPost:
 		app.forgotPost(w, r)
@@ -60,11 +68,18 @@ const (
 
 // forgotPost is called for the POST method of the ForgotHandler.
 func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(slog.Group("request",
+		slog.String("id", GetReqID(r.Context())),
+		slog.String("remoteAddr", GetRealRemoteAddr(r)),
+		slog.String("method", r.Method),
+		slog.String("url", r.RequestURI),
+	))
+
 	// get form values
 	email := strings.TrimSpace(r.PostFormValue("email"))
 	action := strings.TrimSpace(r.PostFormValue("action"))
 
-	slog.Info("forgotPost", "email", email, "action", action)
+	logger.Info("forgotPost", "email", email, "action", action)
 
 	// check for missing values
 	var msg string
@@ -85,13 +100,13 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 
 	// if error msg, display and return
 	if msg != "" {
-		slog.Warn("error", "display", msg)
+		logger.Warn("error", "display", msg)
 		pageData := ForgotPageData{
 			Title: app.Config.Title, Message: msg,
 		}
 		err := RenderTemplate(app.Tmpls, w, "forgot.html", pageData)
 		if err != nil {
-			slog.Error("unable to RenderTemplate", "err", err)
+			logger.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -103,7 +118,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		var err error
 		userName, err = GetUserNameForEmail(app.DB, email)
 		if err != nil || userName == "" {
-			slog.Error("failed to GetUserNameForEmail",
+			logger.Error("failed to GetUserNameForEmail",
 				"email", email,
 				"err", err)
 			msg = MsgNoSuchUser
@@ -120,7 +135,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 		// TODO: use config value for ResetExpiresHours
 		resetToken, err := SaveNewToken(app.DB, "reset", userName, 12, 1)
 		if err != nil {
-			slog.Error("unable to save reset token", "err", err)
+			logger.Error("unable to save reset token", "err", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -133,13 +148,19 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	subj := app.Config.Title + " " + action
 	err := SendEmail(app.Config.SMTP.User, app.Config.SMTP.Password, app.Config.SMTP.Host, app.Config.SMTP.Port, email, subj, emailText)
 	if err != nil {
-		slog.Error("unable to SendEmail", "err", err)
+		logger.Error("unable to SendEmail", "err", err)
 		http.Error(w,
 			http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
-	slog.Info("sent email", "to", email, "subject", subj)
+	logger.Info("sent email",
+		slog.Group("email",
+			slog.String("to", email),
+			slog.String("subject", subj),
+			slog.String("emailText", emailText),
+		),
+	)
 
 	err = RenderTemplate(app.Tmpls, w, "forgot_sent.html",
 		ForgotPageData{
@@ -147,7 +168,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 			EmailFrom: app.Config.SMTP.User,
 		})
 	if err != nil {
-		slog.Error("unable to RenderTemplate", "err", err)
+		logger.Error("unable to RenderTemplate", "err", err)
 		return
 	}
 }

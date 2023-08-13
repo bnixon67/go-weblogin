@@ -27,8 +27,15 @@ type LoginPageData struct {
 
 // LoginHandler handles /login requests.
 func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(slog.Group("request",
+		slog.String("id", GetReqID(r.Context())),
+		slog.String("remoteAddr", GetRealRemoteAddr(r)),
+		slog.String("method", r.Method),
+		slog.String("url", r.RequestURI),
+	))
+
 	if !ValidMethod(w, r, []string{http.MethodGet, http.MethodPost}) {
-		slog.Error("invalid HTTP method", "method", r.Method)
+		logger.Error("invalid HTTP method")
 		return
 	}
 
@@ -37,9 +44,10 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{Title: app.Config.Title})
 		if err != nil {
-			slog.Error("unabel to RenderTemplate", "err", err)
+			logger.Error("unable to RenderTemplate", "err", err)
 			return
 		}
+		logger.Info("LoginHandler")
 	case http.MethodPost:
 		app.loginPost(w, r)
 	}
@@ -54,6 +62,13 @@ const (
 
 // loginPost is called for the POST method of the LoginHandler.
 func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(slog.Group("request",
+		slog.String("id", GetReqID(r.Context())),
+		slog.String("remoteAddr", GetRealRemoteAddr(r)),
+		slog.String("method", r.Method),
+		slog.String("url", r.RequestURI),
+	))
+
 	// get form values
 	userName := strings.TrimSpace(r.PostFormValue("username"))
 	password := strings.TrimSpace(r.PostFormValue("password"))
@@ -69,11 +84,11 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 		msg = MsgMissingPassword
 	}
 	if msg != "" {
-		slog.Info("error", "display", msg)
+		logger.Info("error", "display", msg)
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{Title: app.Config.Title, Message: msg})
 		if err != nil {
-			slog.Error("uanble to RenderTemplate", "err", err)
+			logger.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
@@ -82,21 +97,21 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	// attempt to login the given userName with the given password
 	token, err := app.LoginUser(userName, password)
 	if err != nil {
-		slog.Error("failed to LoginUser", "userName", userName, "err", err)
+		logger.Error("failed to LoginUser", "userName", userName, "err", err)
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{
 				Title:   app.Config.Title,
 				Message: MsgLoginFailed,
 			})
 		if err != nil {
-			slog.Error("unable to RenderTemplate", "err", err)
+			logger.Error("unable to RenderTemplate", "err", err)
 			return
 		}
 		return
 	}
 
 	// login successful, so create a cookie for the session Token
-	slog.Info("successful login", "userName", userName)
+	logger.Info("successful login", "userName", userName)
 	http.SetCookie(w, &http.Cookie{
 		Name:     SessionTokenCookieName,
 		Value:    token.Value,
@@ -119,18 +134,20 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 func (app *App) LoginUser(userName, password string) (Token, error) {
 	err := CompareUserPassword(app.DB, userName, password)
 	if err != nil {
-		WriteEvent(app.DB, Event{UserName: userName, Action: ActionLogin, Result: false, Message: err.Error()})
+		WriteEvent(app.DB, EventLogin, false, userName, err.Error())
+
 		return Token{}, err
 	}
 
 	// create and save a new session token
 	token, err := SaveNewToken(app.DB, "session", userName, 32, app.Config.SessionExpiresHours)
 	if err != nil {
-		WriteEvent(app.DB, Event{UserName: userName, Action: ActionSaveToken, Result: false})
-		slog.Error("unable to SaveNewToken", "err", err)
+		WriteEvent(app.DB, EventSaveToken, false, userName, err.Error())
+		slog.Error("unable to SaveNewToken", "err", err, "userName", userName)
 		return Token{}, fmt.Errorf("unable to save token: %w", err)
 	}
 
-	WriteEvent(app.DB, Event{UserName: userName, Action: ActionLogin, Result: true})
+	WriteEvent(app.DB, EventLogin, true, userName, "success")
+
 	return token, nil
 }

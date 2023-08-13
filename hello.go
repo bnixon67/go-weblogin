@@ -26,7 +26,7 @@ type HelloPageData struct {
 
 // HelloHandler prints a simple hello and any user information.
 func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
-	slog := slog.With(slog.Group("request",
+	logger := slog.With(slog.Group("request",
 		slog.String("id", GetReqID(r.Context())),
 		slog.String("remoteAddr", GetRealRemoteAddr(r)),
 		slog.String("method", r.Method),
@@ -34,13 +34,13 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	))
 
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
-		slog.Error("invalid HTTP method")
+		logger.Error("invalid HTTP method")
 		return
 	}
 
 	user, err := GetUser(w, r, app.DB)
 	if err != nil {
-		slog.Error("failed to GetUser", "err", err)
+		logger.Error("failed to GetUser", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -48,9 +48,9 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 	// display page
 	err = RenderTemplate(app.Tmpls, w, "hello.html", HelloPageData{Message: "", User: user})
 	if err != nil {
-		slog.Error("unable to RenderTemplate", "err", err)
+		logger.Error("unable to RenderTemplate", "err", err)
 		return
 	}
 
-	slog.Info("HelloHandler", "user", user)
+	logger.Info("HelloHandler", "user", user)
 }

@@ -117,7 +117,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if userExists {
 		slog.Warn("user exists", "userName", userName)
-		WriteEvent(app.DB, Event{UserName: userName, Action: ActionRegister, Result: false, Message: "user exists"})
+		WriteEvent(app.DB, EventRegister, false, userName, "exists")
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
 				Title:   app.Config.Title,
@@ -156,7 +156,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error("RegisterUser failed",
 			"userName", userName, "err", err)
-		WriteEvent(app.DB, Event{UserName: userName, Action: ActionRegister, Result: false, Message: err.Error()})
+		WriteEvent(app.DB, EventRegister, false, userName, err.Error())
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
 				Title:   app.Config.Title,
@@ -171,6 +171,6 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 
 	// registration successful
 	slog.Info("registered user", "userName", userName)
-	WriteEvent(app.DB, Event{UserName: userName, Action: ActionRegister, Result: true})
+	WriteEvent(app.DB, EventRegister, true, userName, "success")
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
