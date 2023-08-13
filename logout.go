@@ -25,25 +25,31 @@ type LogoutPageData struct {
 
 // LogoutHandler handles /logout requests.
 func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(slog.Group("request",
+		slog.String("id", GetReqID(r.Context())),
+		slog.String("remoteAddr", GetRealRemoteAddr(r)),
+		slog.String("method", r.Method),
+		slog.String("url", r.RequestURI),
+	))
+
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
-		slog.Error("invalid HTTP method", "method", r.Method)
+		logger.Error("invalid HTTP method", "method", r.Method)
 		return
 	}
 
 	user, err := GetUser(w, r, app.DB)
 	if err != nil {
-		slog.Error("failed to GetUser", "err", err)
+		logger.Error("failed to GetUser", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
-	slog.Info("logout", "user", user)
 	if user.UserName != "" {
 		WriteEvent(app.DB, EventLogout, true, user.UserName, "")
 	}
 
 	sessionTokenValue, err := GetCookieValue(r, SessionTokenCookieName)
 	if err != nil {
-		slog.Error("failed to GetCookieValue", "err", err)
+		logger.Error("failed to GetCookieValue", "err", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -59,7 +65,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	if sessionTokenValue != "" {
 		err := RemoveToken(app.DB, "session", sessionTokenValue)
 		if err != nil {
-			slog.Error("filed to RemoveToken",
+			logger.Error("filed to RemoveToken",
 				"sessionTokenValue", sessionTokenValue,
 				"err", err)
 			// TODO: display error or just continue?
@@ -72,7 +78,9 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	err = RenderTemplate(app.Tmpls, w, "logout.html",
 		LogoutPageData{Title: app.Config.Title})
 	if err != nil {
-		slog.Error("failed to RenderTemplate", "err", err)
+		logger.Error("failed to RenderTemplate", "err", err)
 		return
 	}
+
+	logger.Info("logged out", "user", user)
 }

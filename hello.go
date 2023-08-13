@@ -52,5 +52,5 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Info("HelloHandler", "user", user)
+	logger.Info("hello", "user", user)
 }
