@@ -21,28 +21,59 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	weblogin "github.com/bnixon67/go-weblogin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
+// keys returns a slice of the keys in the map m.
+func keys[K comparable, V any](m map[K]V) []K {
+	keys := make([]K, 0, len(m))
+
+	for k := range m {
+		keys = append(keys, k)
+	}
+
+	return keys
+}
+
 func main() {
+	// map of log levels
+	logLevels := map[string]slog.Level{
+		"debug": slog.LevelDebug,
+		"info":  slog.LevelInfo,
+		"warn":  slog.LevelWarn,
+		"error": slog.LevelError,
+	}
+
+	logLevelMsg := fmt.Sprintf("log level [%s]",
+		strings.Join(keys(logLevels), "|"))
+
 	// define command-line flags
-	configFilename := flag.String("config", "", "config filename")
-	logFilename := flag.String("log", "", "log filename")
-	logLevel := flag.Int("logLevel", 0, "log level")
-	logAddSource := flag.Bool("logAddSource", false, "log add sourc")
+	configFilename := flag.String("config", "", "config file")
+	logFilename := flag.String("log", "", "log file")
+	logLevel := flag.String("logLevel", "Info", logLevelMsg)
+	logAddSource := flag.Bool("logAddSource", false, "add source code position to log")
 
 	// define custom usage message
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [OPTIONS]\n", os.Args[0])
-		fmt.Fprintf(os.Stderr, "Options:\n")
+		fmt.Fprintf(os.Stderr, "Usage: %s [flags]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "The flags are:\n")
 		flag.PrintDefaults()
 	}
 
 	// parse command-line flags
 	flag.Parse()
+
+	// get log level from map
+	level, ok := logLevels[strings.ToLower(*logLevel)]
+	if !ok {
+		flag.Usage()
+		fmt.Fprintf(os.Stderr, "logLevel %q is undefined.\n", *logLevel)
+		os.Exit(2)
+	}
 
 	// configFilename is required
 	if *configFilename == "" {
@@ -53,10 +84,10 @@ func main() {
 	// check for additional command-line arguments
 	if flag.NArg() > 0 {
 		flag.Usage()
-		os.Exit(3)
+		os.Exit(2)
 	}
 
-	weblogin.InitLog(*logFilename, slog.Level(*logLevel), *logAddSource)
+	weblogin.InitLog(*logFilename, level, *logAddSource)
 
 	app, err := weblogin.NewApp(*configFilename)
 	if err != nil {
@@ -70,8 +101,10 @@ func main() {
 	// define HTTP server
 	// TODO: add values to config file
 	srv := &http.Server{
-		Addr:              ":" + app.Config.Server.Port,
-		Handler:           &weblogin.LogRequestHandler{Next: mux},
+		Addr: ":" + app.Config.Server.Port,
+		Handler: weblogin.RequestIDHandler(
+			weblogin.LogRequestHandler(mux),
+		),
 		ReadTimeout:       10 * time.Second,
 		WriteTimeout:      10 * time.Second,
 		IdleTimeout:       30 * time.Second,

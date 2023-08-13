@@ -83,23 +83,13 @@ func ServeFileHandler(file string) http.HandlerFunc {
 	}
 }
 
-// LogRequestHandler is middleware that logs all HTTP requests and
-// then calls the next HTTP handler specified.
-type LogRequestHandler struct {
-	Next http.Handler
-}
-
-// ServerHTTP for logRequestHandler log the HTTP request and then
-// calls the next HTTP handler specified.
-func (l *LogRequestHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+// GetRealRemoteAddr returns X-Real-IP header or r.RemoteAddr.
+func GetRealRemoteAddr(r *http.Request) string {
 	// get real IP address if using Cloudflare or similar service
 	var ip string
 	ip = r.Header.Get("X-Real-IP")
 	if ip == "" {
 		ip = r.RemoteAddr
 	}
-
-	slog.Debug("request", "ip", ip, "method", r.Method, "url", r.RequestURI)
-
-	l.Next.ServeHTTP(w, r)
+	return ip
 }

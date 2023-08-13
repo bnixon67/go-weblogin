@@ -59,25 +59,25 @@ func TestNewApp(t *testing.T) {
 		{
 			name:           "emptyConfigFileName",
 			configFileName: "",
-			wantErr:        weblogin.ErrOpenConfig,
+			wantErr:        weblogin.ErrAppGetConfig,
 			isAppExpected:  false,
 		},
 		{
 			name:           "emptyConfig",
 			configFileName: "testdata/empty.json",
-			wantErr:        weblogin.ErrInvalidConfig,
+			wantErr:        weblogin.ErrAppInvalidConfig,
 			isAppExpected:  false,
 		},
 		{
 			name:           "invalidDB",
 			configFileName: "testdata/invalid_db.json",
-			wantErr:        weblogin.ErrInitDB,
+			wantErr:        weblogin.ErrAppInitDB,
 			isAppExpected:  false,
 		},
 		{
 			name:           "invalidTemplates",
 			configFileName: "testdata/invalid_tmpl.json",
-			wantErr:        weblogin.ErrInitTemplates,
+			wantErr:        weblogin.ErrAppInitTemplates,
 			isAppExpected:  false,
 		},
 	}

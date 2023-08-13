@@ -24,10 +24,17 @@ type HelloPageData struct {
 	User    User
 }
 
-// HelloHandler prints a simple hello message.
+// HelloHandler prints a simple hello and any user information.
 func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
+	slog := slog.With(slog.Group("request",
+		slog.String("id", GetReqID(r.Context())),
+		slog.String("remoteAddr", GetRealRemoteAddr(r)),
+		slog.String("method", r.Method),
+		slog.String("url", r.RequestURI),
+	))
+
 	if !ValidMethod(w, r, []string{http.MethodGet}) {
-		slog.Error("invalid HTTP method", "method", r.Method)
+		slog.Error("invalid HTTP method")
 		return
 	}
 
@@ -45,9 +52,5 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	slog.Info("HelloHandler",
-		slog.String("method", r.Method),
-		slog.String("url", r.URL.String()),
-		"user", user,
-	)
+	slog.Info("HelloHandler", "user", user)
 }

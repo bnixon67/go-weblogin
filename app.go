@@ -20,6 +20,13 @@ import (
 	"strings"
 )
 
+var (
+	ErrAppGetConfig     = errors.New("failed")
+	ErrAppInvalidConfig = errors.New("invalid config")
+	ErrAppInitDB        = errors.New("failed")
+	ErrAppInitTemplates = errors.New("failed")
+)
+
 // App contains common variables to avoid using global variables.
 type App struct {
 	DB     *sql.DB
@@ -27,31 +34,26 @@ type App struct {
 	Config Config
 }
 
-var (
-	ErrOpenConfig    = errors.New("failed to open config")
-	ErrInvalidConfig = errors.New("invalid config")
-	ErrInitDB        = errors.New("failed to init db")
-	ErrInitTemplates = errors.New("failed to init templates")
-)
+// NewApp returns a new App based on the config filenames provided.
+func NewApp(configFilename string) (*App, error) {
+	fn := "NewApp"
 
-// NewApp returns a new App based on the config and log filenames provided.
-func NewApp(configFileName string) (*App, error) {
 	var app App
 	var err error
 
 	// read config file
-	app.Config, err = NewConfigFromFile(configFileName)
+	app.Config, err = GetConfigFromFile(configFilename)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: %w: %v", ErrOpenConfig, err)
+		return nil, fmt.Errorf("%s: %w: %v", fn, ErrAppGetConfig, err)
 	}
 
 	// ensure required config values have been provided
 	isValid, missing := app.Config.IsValid()
 	if !isValid {
-		return nil, fmt.Errorf("NewApp: %w: missing %s", ErrInvalidConfig, strings.Join(missing, ", "))
+		return nil, fmt.Errorf("%s: %w: missing %s", fn, ErrAppInvalidConfig, strings.Join(missing, ", "))
 	}
 
-	// TODO: handle this default value
+	// default to 24 hours if no session expiration
 	if app.Config.SessionExpiresHours == 0 {
 		app.Config.SessionExpiresHours = 24
 	}
@@ -59,13 +61,13 @@ func NewApp(configFileName string) (*App, error) {
 	// init database connection
 	app.DB, err = InitDB(app.Config.SQL.DriverName, app.Config.SQL.DataSourceName)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: %w: %v", ErrInitDB, err)
+		return nil, fmt.Errorf("%s: %w: %v", fn, ErrAppInitDB, err)
 	}
 
 	// init HTML templates
 	app.Tmpls, err = InitTemplates(app.Config.ParseGlobPattern)
 	if err != nil {
-		return nil, fmt.Errorf("NewApp: %w: %v", ErrInitTemplates, err)
+		return nil, fmt.Errorf("%s: %w: %v", fn, ErrAppInitTemplates, err)
 	}
 
 	return &app, err

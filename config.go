@@ -19,21 +19,29 @@ import (
 	"os"
 )
 
+var (
+	ErrConfigOpen   = errors.New("failed")
+	ErrConfigDecode = errors.New("failed to decode")
+)
+
+// ConfigSQL contains SQL related configuration values.
 type ConfigSQL struct {
-	DriverName     string // driverName for sql.Open
-	DataSourceName string // dataSourceName for sql.Open
+	DriverName     string
+	DataSourceName string
 }
 
+// ConfigSMTP contains SMTP related configuration values.
 type ConfigSMTP struct {
-	Host     string // SMTP host to send email
-	Port     string // SMTP port to send email
-	User     string // SMTP user to send email
-	Password string // SMTP password to send email
+	Host     string
+	Port     string
+	User     string
+	Password string
 }
 
+// ConfigServer contains Server related configuration values.
 type ConfigServer struct {
-	Host string // host to listen on
-	Port string // port to listen on
+	Host string
+	Port string
 }
 
 // Config represents the configuration values.
@@ -41,32 +49,29 @@ type Config struct {
 	Title               string // title of the application
 	BaseURL             string // base URL, e.g., https://host:port
 	ParseGlobPattern    string // pattern to use with template.ParseGlob
-	SessionExpiresHours int    // number of hours session is valid
+	SessionExpiresHours int    // number of hours user session is valid
 	Server              ConfigServer
 	SQL                 ConfigSQL
 	SMTP                ConfigSMTP
 }
 
-var (
-	ErrConfigOpen   = errors.New("failed to open")
-	ErrConfigDecode = errors.New("failed to decode")
-)
+// GetConfigFromFile returns the Config from filename.
+func GetConfigFromFile(filename string) (Config, error) {
+	fn := "GetConfigFromFile"
 
-// NewConfigFromFile returns a Config from the given fileName.
-func NewConfigFromFile(fileName string) (Config, error) {
 	var config Config
 
 	// open config file
-	configFile, err := os.Open(fileName)
+	configFile, err := os.Open(filename)
 	if err != nil {
-		return config, fmt.Errorf("NewConfigFromFile: %w: %v", ErrConfigOpen, err)
+		return config, fmt.Errorf("%s: %w: %v", fn, ErrConfigOpen, err)
 	}
 	defer configFile.Close()
 
 	// decode json from config
 	err = json.NewDecoder(configFile).Decode(&config)
 	if err != nil {
-		return config, fmt.Errorf("NewConfigFromFile: %w: %v", ErrConfigDecode, err)
+		return config, fmt.Errorf("%s: %w: %v", fn, ErrConfigDecode, err)
 	}
 
 	return config, nil

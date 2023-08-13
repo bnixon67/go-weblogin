@@ -19,6 +19,7 @@ import (
 	"text/template"
 )
 
+// TODO: move template to file
 const emailTmpl = `From: {{ .From }}
 To: {{ .To }}
 Subject: {{ .Subject }}

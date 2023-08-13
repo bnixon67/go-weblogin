@@ -74,7 +74,7 @@ func TestNewConfigFromFile(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(*testing.T) {
-			config, err := weblogin.NewConfigFromFile(tc.configFileName)
+			config, err := weblogin.GetConfigFromFile(tc.configFileName)
 			if !errors.Is(err, tc.wantErr) {
 				t.Errorf("got err %q, want %q for NewConfigFromFile(%q)", err, tc.wantErr, tc.configFileName)
 			}

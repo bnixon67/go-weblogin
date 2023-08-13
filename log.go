@@ -44,5 +44,13 @@ func InitLog(logFileName string, logLevel slog.Level, addSource bool) error {
 	logger := slog.New(slog.NewJSONHandler(w, opts))
 	slog.SetDefault(logger)
 
+	slog.Info("InitLog",
+		slog.Group("log",
+			slog.String("Filename", logFileName),
+			slog.String("Level", logLevel.String()),
+			slog.Bool("AddSource", addSource),
+		),
+	)
+
 	return nil
 }
