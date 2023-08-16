@@ -45,7 +45,7 @@ func (app *App) ResetHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		err := RenderTemplate(app.Tmpls, w, "reset.html",
 			ResetPageData{
-				Title:      app.Config.Title,
+				Title:      app.Cfg.Title,
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
 		if err != nil {
@@ -88,7 +88,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 		)
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{
-				Title:      app.Config.Title,
+				Title:      app.Cfg.Title,
 				Message:    msg,
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
@@ -106,7 +106,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 		logger.Warn("passwords don't match")
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{
-				Title:      app.Config.Title,
+				Title:      app.Cfg.Title,
 				Message:    msg,
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
@@ -125,7 +125,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 		msg := "Please provide a valid Reset Token"
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
 			ResetPageData{
-				Title:      app.Config.Title,
+				Title:      app.Cfg.Title,
 				Message:    msg,
 				ResetToken: r.URL.Query().Get("rtoken"),
 			})
@@ -143,7 +143,7 @@ func (app *App) resetPost(w http.ResponseWriter, r *http.Request, tmplFileName s
 		logger.Error("failed bcrypt.GenerateFromPassword",
 			"userName", userName, "err", err)
 		err := RenderTemplate(app.Tmpls, w, tmplFileName,
-			ResetPageData{Title: app.Config.Title, Message: msg})
+			ResetPageData{Title: app.Cfg.Title, Message: msg})
 		if err != nil {
 			logger.Error("unable to RenderTemplate", "err", err)
 			return

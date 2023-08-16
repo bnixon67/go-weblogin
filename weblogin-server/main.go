@@ -102,7 +102,7 @@ func main() {
 	// define HTTP server
 	// TODO: add values to config file
 	srv := &http.Server{
-		Addr: ":" + app.Config.Server.Port,
+		Addr: ":" + app.Cfg.Server.Port,
 		Handler: weblogin.RequestIDHandler(
 			weblogin.LogRequestHandler(mux),
 		),

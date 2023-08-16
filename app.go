@@ -29,12 +29,12 @@ var (
 
 // App contains common variables to avoid using global variables.
 type App struct {
-	DB     *sql.DB
-	Tmpls  *template.Template
-	Config Config
+	DB    *sql.DB
+	Tmpls *template.Template
+	Cfg   Config
 }
 
-// NewApp returns a new App based on the config filenames provided.
+// NewApp returns a new App based on the config filename provided.
 func NewApp(configFilename string) (*App, error) {
 	fn := "NewApp"
 
@@ -42,30 +42,30 @@ func NewApp(configFilename string) (*App, error) {
 	var err error
 
 	// read config file
-	app.Config, err = GetConfigFromFile(configFilename)
+	app.Cfg, err = GetConfigFromFile(configFilename)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w: %v", fn, ErrAppGetConfig, err)
 	}
 
 	// ensure required config values have been provided
-	isValid, missing := app.Config.IsValid()
+	isValid, missing := app.Cfg.IsValid()
 	if !isValid {
 		return nil, fmt.Errorf("%s: %w: missing %s", fn, ErrAppInvalidConfig, strings.Join(missing, ", "))
 	}
 
 	// default to 24 hours if no session expiration
-	if app.Config.SessionExpiresHours == 0 {
-		app.Config.SessionExpiresHours = 24
+	if app.Cfg.SessionExpiresHours == 0 {
+		app.Cfg.SessionExpiresHours = 24
 	}
 
 	// init database connection
-	app.DB, err = InitDB(app.Config.SQL.DriverName, app.Config.SQL.DataSourceName)
+	app.DB, err = InitDB(app.Cfg.SQL.DriverName, app.Cfg.SQL.DataSourceName)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w: %v", fn, ErrAppInitDB, err)
 	}
 
 	// init HTML templates
-	app.Tmpls, err = InitTemplates(app.Config.ParseGlobPattern)
+	app.Tmpls, err = InitTemplates(app.Cfg.ParseGlobPattern)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w: %v", fn, ErrAppInitTemplates, err)
 	}

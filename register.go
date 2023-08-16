@@ -48,7 +48,7 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		err := RenderTemplate(app.Tmpls, w, "register.html",
-			RegisterPageData{Title: app.Config.Title})
+			RegisterPageData{Title: app.Cfg.Title})
 		if err != nil {
 			logger.Error("unable to parse template", "err", err)
 			return
@@ -91,7 +91,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		logger.Warn("missing values")
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
-				Title: app.Config.Title, Message: msg,
+				Title: app.Cfg.Title, Message: msg,
 			})
 		if err != nil {
 			logger.Error("unable to execute template", "err", err)
@@ -106,7 +106,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		logger.Warn("passwords do not match")
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
-				Title: app.Config.Title, Message: msg,
+				Title: app.Cfg.Title, Message: msg,
 			})
 		if err != nil {
 			logger.Error("unable to execute template", "err", err)
@@ -127,7 +127,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		WriteEvent(app.DB, EventRegister, false, userName, "user already exists")
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
-				Title:   app.Config.Title,
+				Title:   app.Cfg.Title,
 				Message: MsgUserNameExists,
 			})
 		if err != nil {
@@ -149,7 +149,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		WriteEvent(app.DB, EventRegister, false, userName, "email already exists")
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
-				Title:   app.Config.Title,
+				Title:   app.Cfg.Title,
 				Message: MsgEmailExists,
 			})
 		if err != nil {
@@ -166,7 +166,7 @@ func (app *App) registerPost(w http.ResponseWriter, r *http.Request) {
 		WriteEvent(app.DB, EventRegister, false, userName, err.Error())
 		err := RenderTemplate(app.Tmpls, w, "register.html",
 			RegisterPageData{
-				Title:   app.Config.Title,
+				Title:   app.Cfg.Title,
 				Message: "Unable to Register User",
 			})
 		if err != nil {

@@ -14,6 +14,9 @@ package weblogin_test
 
 import (
 	"errors"
+	"math"
+	"reflect"
+	"strings"
 	"testing"
 
 	weblogin "github.com/bnixon67/go-weblogin"
@@ -91,7 +94,6 @@ func hasBit(n int, pos uint) bool {
 	return (val > 0)
 }
 
-/*
 func TestConfigIsValid(t *testing.T) {
 	type tcase struct {
 		config   weblogin.Config
@@ -105,14 +107,14 @@ func TestConfigIsValid(t *testing.T) {
 		"Title",
 		"BaseURL",
 		"ParseGlobPattern",
-		//"ServerHost",
-		//"ServerPort",
-		//"SQLDriverName",
-		//"SQLDataSourceName",
-		//"SMTPHost",
-		//"SMTPPort",
-		//"SMTPUser",
-		//"SMTPPassword",
+		"Server.Host",
+		"Server.Port",
+		"SQL.DriverName",
+		"SQL.DataSourceName",
+		"SMTP.Host",
+		"SMTP.Port",
+		"SMTP.User",
+		"SMTP.Password",
 	}
 
 	// generate test cases based on required fields by looping thru all the possibilities and using bit logic to set fields
@@ -121,7 +123,15 @@ func TestConfigIsValid(t *testing.T) {
 
 		for n := len(required) - 1; n >= 0; n-- {
 			if hasBit(a, uint(n)) {
-				reflect.ValueOf(&config).Elem().FieldByName(required[n]).SetString("x")
+				f := strings.Split(required[n], ".")
+
+				switch len(f) {
+				case 1:
+					reflect.ValueOf(&config).Elem().FieldByName(required[n]).SetString("x")
+				case 2:
+					v := "x"
+					reflect.ValueOf(&config).Elem().FieldByName(f[0]).FieldByName(f[1]).SetString(v)
+				}
 			}
 		}
 
@@ -137,7 +147,6 @@ func TestConfigIsValid(t *testing.T) {
 		}
 	}
 }
-*/
 
 func TestConfigMarshalJSON(t *testing.T) {
 	testCases := []struct {

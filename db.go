@@ -50,6 +50,7 @@ func InitDB(driverName, dataSourceName string) (*sql.DB, error) {
 }
 
 // RowExists return true if the given query returns at least one row.
+// qry should be of the form "SELECT 1 ..."
 func RowExists(db *sql.DB, qry string, args ...interface{}) (bool, error) {
 	var num int
 

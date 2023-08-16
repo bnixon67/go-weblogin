@@ -46,7 +46,7 @@ func (app *App) ForgotHandler(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodGet:
 		err := RenderTemplate(app.Tmpls, w, "forgot.html",
-			ForgotPageData{Title: app.Config.Title})
+			ForgotPageData{Title: app.Cfg.Title})
 		if err != nil {
 			logger.Error("unable to execute template", "err", err)
 			return
@@ -102,7 +102,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	if msg != "" {
 		logger.Warn("error", "display", msg)
 		pageData := ForgotPageData{
-			Title: app.Config.Title, Message: msg,
+			Title: app.Cfg.Title, Message: msg,
 		}
 		err := RenderTemplate(app.Tmpls, w, "forgot.html", pageData)
 		if err != nil {
@@ -128,7 +128,7 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 	var emailText string
 	switch {
 	case userName == "":
-		emailText = fmt.Sprintf("This email address is not registered for %s.", app.Config.Title)
+		emailText = fmt.Sprintf("This email address is not registered for %s.", app.Cfg.Title)
 
 	case action == "password":
 		// create and save a new session token
@@ -139,14 +139,14 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		emailText = fmt.Sprintf("Please vist %s/reset?rtoken=%s to reset your password for %s", app.Config.BaseURL, resetToken.Value, app.Config.Title)
+		emailText = fmt.Sprintf("Please vist %s/reset?rtoken=%s to reset your password for %s", app.Cfg.BaseURL, resetToken.Value, app.Cfg.Title)
 
 	case action == "user":
-		emailText = fmt.Sprintf("Your User Name is %s for %s", userName, app.Config.Title)
+		emailText = fmt.Sprintf("Your User Name is %s for %s", userName, app.Cfg.Title)
 	}
 
-	subj := app.Config.Title + " " + action
-	err := SendEmail(app.Config.SMTP.User, app.Config.SMTP.Password, app.Config.SMTP.Host, app.Config.SMTP.Port, email, subj, emailText)
+	subj := app.Cfg.Title + " " + action
+	err := SendEmail(app.Cfg.SMTP.User, app.Cfg.SMTP.Password, app.Cfg.SMTP.Host, app.Cfg.SMTP.Port, email, subj, emailText)
 	if err != nil {
 		logger.Error("unable to SendEmail", "err", err)
 		http.Error(w,
@@ -164,8 +164,8 @@ func (app *App) forgotPost(w http.ResponseWriter, r *http.Request) {
 
 	err = RenderTemplate(app.Tmpls, w, "forgot_sent.html",
 		ForgotPageData{
-			Title:     app.Config.Title,
-			EmailFrom: app.Config.SMTP.User,
+			Title:     app.Cfg.Title,
+			EmailFrom: app.Cfg.SMTP.User,
 		})
 	if err != nil {
 		logger.Error("unable to RenderTemplate", "err", err)

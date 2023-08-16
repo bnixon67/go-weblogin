@@ -47,7 +47,7 @@ func (app *App) HelloHandler(w http.ResponseWriter, r *http.Request) {
 
 	// display page
 	err = RenderTemplate(app.Tmpls, w, "hello.html",
-		HelloPageData{Message: "", User: user, Title: app.Config.Title})
+		HelloPageData{Message: "", User: user, Title: app.Cfg.Title})
 	if err != nil {
 		logger.Error("unable to RenderTemplate", "err", err)
 		return

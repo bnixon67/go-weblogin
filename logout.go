@@ -74,7 +74,7 @@ func (app *App) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 	// display page
 	err = RenderTemplate(app.Tmpls, w, "logout.html",
-		LogoutPageData{Title: app.Config.Title})
+		LogoutPageData{Title: app.Cfg.Title})
 	if err != nil {
 		logger.Error("failed to RenderTemplate", "err", err)
 		return

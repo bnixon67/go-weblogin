@@ -42,7 +42,7 @@ func (app *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		err := RenderTemplate(app.Tmpls, w, "login.html",
-			LoginPageData{Title: app.Config.Title})
+			LoginPageData{Title: app.Cfg.Title})
 		if err != nil {
 			logger.Error("unable to RenderTemplate", "err", err)
 			return
@@ -93,7 +93,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 	if msg != "" {
 		logger.Info("error", "display", msg)
 		err := RenderTemplate(app.Tmpls, w, "login.html",
-			LoginPageData{Title: app.Config.Title, Message: msg})
+			LoginPageData{Title: app.Cfg.Title, Message: msg})
 		if err != nil {
 			logger.Error("unable to RenderTemplate", "err", err)
 			return
@@ -107,7 +107,7 @@ func (app *App) loginPost(w http.ResponseWriter, r *http.Request) {
 		logger.Error("failed to LoginUser", "err", err)
 		err := RenderTemplate(app.Tmpls, w, "login.html",
 			LoginPageData{
-				Title:   app.Config.Title,
+				Title:   app.Cfg.Title,
 				Message: MsgLoginFailed,
 			})
 		if err != nil {
@@ -148,7 +148,7 @@ func (app *App) LoginUser(userName, password string) (Token, error) {
 	}
 
 	// create and save a new session token
-	token, err := SaveNewToken(app.DB, "session", userName, 32, app.Config.SessionExpiresHours)
+	token, err := SaveNewToken(app.DB, "session", userName, 32, app.Cfg.SessionExpiresHours)
 	if err != nil {
 		WriteEvent(app.DB, EventSaveToken, false, userName, err.Error())
 		slog.Error("unable to SaveNewToken", "err", err, "userName", userName)
