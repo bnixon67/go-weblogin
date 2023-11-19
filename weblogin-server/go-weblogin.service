@@ -1,0 +1,13 @@
+[Unit]
+Description=Go WebLogin Server
+Requires=mariadb.service
+After=mariadb.service
+
+[Service]
+WorkingDirectory=/home/ec2-user/src/go-weblogin/weblogin-server
+ExecStart=/home/ec2-user/src/go-weblogin/weblogin-server/weblogin-server -config /home/ec2-user/src/go-weblogin/weblogin-server/config.json -log /home/ec2-user/src/go-weblogin/weblogin-server/weblogin-server.log
+User=ec2-user
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

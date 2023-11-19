@@ -1,19 +1,23 @@
 {
   "Title": "Go Weblogin",
-
-  "ServerHost": "host",
-  "ServerPort": "port",
-
   "BaseURL": "https://host:port",
-
-  "SqlDriverName": "mysql",
-  "SqlDataSourceName": "user:password@/gologin?parseTime=true",
   "ParseGlobPattern": "html/*.html",
-
   "SessionExpiresHours": 48,
 
-  "SmtpHost": "smtp.gmail.com",
-  "SmtpPort": "587",
-  "SmtpUser": "user@gmail.com",
-  "SmtpPassword": "password"
+  "Server": {
+    "Host": "host",
+    "Port": "port"
+  },
+
+  "SQL": {
+    "DriverName": "mysql",
+    "DataSourceName": "user:password@/weblogin_test?parseTime=true"
+  },
+
+  "SMTP": {
+    "Host": "smtp.gmail.com",
+    "Port": "587",
+    "User": "user@gmail.com",
+    "Password": "password"
+  }
 }
